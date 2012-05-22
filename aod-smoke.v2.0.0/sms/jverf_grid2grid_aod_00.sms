@@ -1,0 +1,50 @@
+# @ job_name = jverf_grid2grid_aod_00
+# @ output = /ptmp/wx22yz/output/verf_grid2grid_aod_00.o$(jobid)
+# @ error = /ptmp/wx22yz/output/verf_grid2grid_aod_00.o$(jobid)
+# @ shell = /bin/sh
+# @ job_type = parallel
+# @ class = dev
+# @ node = 1
+# @ total_tasks = 1
+# @ initialdir = /ptmp/wx22yz
+# @ notification = never
+# @ wall_clock_limit = 00:30:00
+# @ resources = ConsumableCpus(1) ConsumableMemory(2500 MB)
+# @ account_no = NAM-MTN
+# @ group = devonprod
+# @ queue
+
+export MP_SHARED_MEMORY=yes
+export MEMORY_AFFINITY=MCM
+
+set -x
+export envir=dev
+export RUN_ENVIR=dev
+export cyc=00
+export job=verf_grid2grid_aod_00
+
+SMSNAME=%SMSNAME% export SMSNAME
+SMSNODE=%SMSNODE% export SMSNODE
+SMSPASS=%SMSPASS% export SMSPASS
+SMS_PROG=%SMS_PROG% export SMS_PROG
+
+SMSBIN=/meso/save/wx22yz/sms/bin export SMSBIN
+
+/meso/save/wx22yz/g2g/nwprod/jobs/JVERF_GRID2GRID_AOD.sms.$envir
+
+%manual
+#################################################################################
+#TASKSCRIPT DOCUMENTATION BLOCK
+#
+#PURPOSE:  To execute the job that creates the ncepdate on IBMSP
+#######################################################################
+
+#######################################################################
+## Job specific troubleshooting instructions:
+#  see generic troubleshoot manual page
+#
+######################################################################
+
+%include /home/sms/smsnets/include/smsDevelopment.man
+%end
+
