@@ -1,0 +1,59 @@
+#!/bin/ksh 
+#
+#BSUB -J jverf_gridtobs_getdust
+#BSUB -o /ptmp/Perry.Shafran/output/verf_gridtobs_getdust.o%J
+#BSUB -e /ptmp/Perry.Shafran/output/verf_gridtobs_getdust.o%J
+#BSUB -q "transfer"
+#BSUB -R "rusage[mem=3000]"
+#BSUB -n 1
+#BSUB -W 01:00
+#
+set -ax
+
+export MP_SHARED_MEMORY=yes
+export MEMORY_AFFINITY=MCM
+
+rm -f -r /ptmp/$LOGNAME/tmpnwprd/getdust
+mkdir /ptmp/$LOGNAME/tmpnwprd/getdust
+cd /ptmp/$LOGNAME/tmpnwprd/getdust
+
+export cyc=12
+export cycle="t12z"
+
+sh /nwprod/util/ush/setup.sh
+sh /nwprod/util/ush/setpdy.sh
+
+. /ptmp/$LOGNAME/tmpnwprd/getdust/PDY
+export vday=$PDYm2
+
+export filehd=MYDdust.aod_conc
+export version=v6.3.4
+export nesdis=dust
+ftpdir=/DUST/output
+export  datadir=/meso/noscrub/$LOGNAME/aod-dust/conc
+
+cd $datadir
+
+export TODAY=$vday
+
+export  data=$datadir/$nesdis.$TODAY
+
+mkdir $data
+cd $data
+
+wget --user=anonymous --password='perry.shafran@noaa.gov' ftp://satepsanone.nesdis.noaa.gov/DUST/output/${filehd}.${version}.${TODAY}.hr11.grib
+wget --user=anonymous --password='perry.shafran@noaa.gov' ftp://satepsanone.nesdis.noaa.gov/DUST/output/${filehd}.${version}.${TODAY}.hr12.grib
+wget --user=anonymous --password='perry.shafran@noaa.gov' ftp://satepsanone.nesdis.noaa.gov/DUST/output/${filehd}.${version}.${TODAY}.hr13.grib
+wget --user=anonymous --password='perry.shafran@noaa.gov' ftp://satepsanone.nesdis.noaa.gov/DUST/output/${filehd}.${version}.${TODAY}.hr14.grib
+wget --user=anonymous --password='perry.shafran@noaa.gov' ftp://satepsanone.nesdis.noaa.gov/DUST/output/${filehd}.${version}.${TODAY}.hr15.grib
+wget --user=anonymous --password='perry.shafran@noaa.gov' ftp://satepsanone.nesdis.noaa.gov/DUST/output/${filehd}.${version}.${TODAY}.hr16.grib
+wget --user=anonymous --password='perry.shafran@noaa.gov' ftp://satepsanone.nesdis.noaa.gov/DUST/output/${filehd}.${version}.${TODAY}.hr17.grib
+wget --user=anonymous --password='perry.shafran@noaa.gov' ftp://satepsanone.nesdis.noaa.gov/DUST/output/${filehd}.${version}.${TODAY}.hr18.grib
+wget --user=anonymous --password='perry.shafran@noaa.gov' ftp://satepsanone.nesdis.noaa.gov/DUST/output/${filehd}.${version}.${TODAY}.hr19.grib
+wget --user=anonymous --password='perry.shafran@noaa.gov' ftp://satepsanone.nesdis.noaa.gov/DUST/output/${filehd}.${version}.${TODAY}.hr20.grib
+wget --user=anonymous --password='perry.shafran@noaa.gov' ftp://satepsanone.nesdis.noaa.gov/DUST/output/${filehd}.${version}.${TODAY}.hr21.grib
+wget --user=anonymous --password='perry.shafran@noaa.gov' ftp://satepsanone.nesdis.noaa.gov/DUST/output/${filehd}.${version}.${TODAY}.hr22.grib
+wget --user=anonymous --password='perry.shafran@noaa.gov' ftp://satepsanone.nesdis.noaa.gov/DUST/output/${filehd}.${version}.${TODAY}.hr23.grib
+
+exit
+
