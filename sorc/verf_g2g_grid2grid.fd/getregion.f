@@ -28,7 +28,8 @@ c
 c  Mar. 10, 2005   Original, Binbin Zhou, SAIC@EMC/NCEP/NOAA
 c  Oct. 12, 2006   Modification: Add 255 grid, Binbin Zhou 
 c  Set. 15, 2012   Modification: add aditional model/obstype name to id NX, NY
-c
+c  2014-5-6        Binbin Z. Add Firewx grid reading
+
 c  INPUT: gribid, integer, requested grib id number, such as 212, 223
 c  OUTPUT: region_id(Ngrid), integer, region id for each grid point
 c          in reference of grib104 
@@ -47,19 +48,25 @@ c
 
         integer ig104(147,110)
         character*3 regions
-        character*24 model, obstype
+        character*24 model, obstype, ens
+        integer dumy(20)                 !for reading firewx griddef file
 
         COMMON /for255/Ngrid
 
 
+        ens=model(1:7) 
+
         write(*,*)'In getregion: model, obstype=', 
-     +       trim(model),trim(obstype)
+     +       trim(model),' ',trim(obstype),' ',trim(ens)
         ! get kgds array with requested gribid as input
-        if(gribid.lt.255.and.gribid.ne.189) then         !189 is defined by Matt Pyle       
-          call makgds(gribid, kgds212, gds, lengds, ier)
-        else if(gribid.eq.255) then
-         kgds212(1)=3      !specific for MATT's Hiresolution WRF   selfdefined 255 grid
-          if (trim(obstype).eq.'RTMA2') then 
+        if(gribid.eq.255) then
+
+          if (trim(model).eq.'HRRR'.and.
+     +        trim(obstype).ne.'FIREWX' ) then          
+            kgds212(2)=1799
+            kgds212(3)=1059
+          else if (trim(obstype).eq.'RTMA2'.or.
+     +        trim(obstype).eq.'URMA' ) then 
             kgds212(2)=2145   !2.5km RTMA
             kgds212(3)=1377   
             kgds212(4)=20192
@@ -110,143 +117,37 @@ c
             kgds212(24)=-1
             kgds212(25)=-1
 
-           else if (trim(obstype).eq.'MOSAIC') then  !for hirew WRF's east/west region
-            kgds212(2)=884   
-            kgds212(3)=614 
-            kgds212(4)=24500
-            kgds212(5)=-129200
-            kgds212(6)=8
-            kgds212(7)=-108000
-            kgds212(8)=5000
-            kgds212(9)=5000
-            kgds212(10)=0
-            kgds212(11)=64
-            kgds212(12)=40500
-            kgds212(13)=40500
-            kgds212(14)=0
-            kgds212(15)=0
-            kgds212(16)=0
-            kgds212(17)=-1
-            kgds212(18)=-1
-            kgds212(19)=0
-            kgds212(20)=255
-            kgds212(21)=-1
-            kgds212(22)=-1
-            kgds212(23)=-1
-            kgds212(24)=-1
-            kgds212(25)=-1
+          else if (trim(obstype).eq.'FIREWX') then   !For firewx, kgds212(2),kgds212(3) are dynamic, read fort.15 to get NX,NY
+            read(15,*) (dumy(i),i=1,8),kgds212(2),kgds212(3)
 
+
+           else if (trim(obstype).eq.'NDAS'.or.
+     +              trim(obstype).eq.'LAPS') then   !Isidora: Suppose first 7 chars for  exp sref
+                                                    !name is 'expsref'
+            kgds212(2)=801
+            kgds212(3)=581
+ 
+
+           else if (trim(obstype).eq.'SMOKE' ) then
+            kgds212(2)=801
+            kgds212(3)=581
+
+           else if (trim(obstype).eq.'DUST' ) then
+            kgds212(2)=601
+            kgds212(3)=251
+
+                     
           end if  
             
-        else if(gribid.eq.256) then
-         kgds212(1)=3      !specific for AWC ADDS 
-         kgds212(2)=1073   
-         kgds212(3)=689 
-         kgds212(4)=20192
-         kgds212(5)=238446
-         kgds212(6)=128
-         kgds212(7)=265000
-         kgds212(8)=5079
-         kgds212(9)=5079
-         kgds212(10)=0
-         kgds212(11)=64
-         kgds212(12)=25000
-         kgds212(13)=25000
-         kgds212(14)=0
-         kgds212(15)=0
-         kgds212(16)=0
-         kgds212(17)=-1
-         kgds212(18)=-1
-         kgds212(19)=0
-         kgds212(20)=255
-         kgds212(21)=-1
-         kgds212(22)=-1
-         kgds212(23)=-1
-         kgds212(24)=-1
-         kgds212(25)=-1
+          !even if model is HRRR, but if verif is on MOSAIC grid,overwite 
+          if(trim(obstype).eq.'ONMOSAIC') then
+            kgds212(2)=1401
+            kgds212(3)=701
+          end if
 
-        else if(gribid.eq.258) then
-         kgds212(1)=3      !specific for reflectivity on Hi-res WRF (5km) west region  
-         kgds212(2)=884
-         kgds212(3)=614
-         kgds212(4)=24500
-         kgds212(5)=-129200
-         kgds212(6)=8
-         kgds212(7)=-108000
-         kgds212(8)=5000
-         kgds212(9)=5000
-         kgds212(10)=0
-         kgds212(11)=64
-         kgds212(12)=40500
-         kgds212(13)=40500
-         kgds212(14)=0
-         kgds212(15)=0
-         kgds212(16)=0
-         kgds212(17)=-1
-         kgds212(18)=-1
-         kgds212(19)=0
-         kgds212(20)=255
-         kgds212(21)=-1
-         kgds212(22)=-1
-         kgds212(23)=-1
-         kgds212(24)=-1
-         kgds212(25)=-1
+        else
 
-        else if(gribid.eq.257) then
-         kgds212(1)=3      !specific for reflectivity on Hi-res WRF (5km) east region
-         kgds212(2)=884
-         kgds212(3)=614
-         kgds212(4)=22100
-         kgds212(5)=-109800
-         kgds212(6)=8
-         kgds212(7)=-89000
-         kgds212(8)=5000
-         kgds212(9)=5000
-         kgds212(10)=0
-         kgds212(11)=64
-         kgds212(12)=38000
-         kgds212(13)=38000
-         kgds212(14)=0
-         kgds212(15)=0
-         kgds212(16)=0
-         kgds212(17)=-1
-         kgds212(18)=-1
-         kgds212(19)=0
-         kgds212(20)=255
-         kgds212(21)=-1
-         kgds212(22)=-1
-         kgds212(23)=-1
-         kgds212(24)=-1
-         kgds212(25)=-1
-
-        else if(gribid.eq.189) then
-
-         kgds212(1)=3      !specific for reflectivity on Hi-res WRF (5km) central region (CONUS) defined by Matt Pyle
-         kgds212(2)=1295
-         kgds212(3)=854
-         kgds212(4)=20800
-         kgds212(5)=-122000
-         kgds212(6)=8
-         kgds212(7)=-98000
-         kgds212(8)=4000
-         kgds212(9)=4000
-         kgds212(10)=0
-         kgds212(11)=64
-         kgds212(12)=39000
-         kgds212(13)=39000
-         kgds212(14)=0
-         kgds212(15)=0
-         kgds212(16)=0
-         kgds212(17)=-1
-         kgds212(18)=-1
-         kgds212(19)=0
-         kgds212(20)=255
-         kgds212(21)=-1
-         kgds212(22)=-1
-         kgds212(23)=-1
-         kgds212(24)=-1
-         kgds212(25)=-1
-
+          call makgds(gribid, kgds212, gds, lengds, ier)
 
         end if
 

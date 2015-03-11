@@ -1,0 +1,21 @@
+#!/bin/ksh
+#BSUB -J jverf_grid2grid_cloud_00
+#BSUB -oo /ptmpp1/Binbin.Zhou/g2g/RFC2/com/verf/dev/vsdb/grid2grid/verf_grid2grid_cloud_00.%J
+#BSUB -eo /ptmpp1/Binbin.Zhou/g2g/RFC2/com/verf/dev/vsdb/grid2grid/verf_grid2grid_cloud_00.%J
+#BSUB -n 1
+#BSUB -q "transfer"
+#BSUB -W 01:45
+#BSUB -R "span[ptile=1]" -R "rusage[mem=1000]"  -R "affinity[core]"
+#BSUB -cwd /ptmpp1/Binbin.Zhou/g2g/RFC/com/verf/dev/vsdb/grid2grid/tmpnwprd
+
+###For HRRR original mem=500 is not enough for HRRR's run cnvgrib -g21
+
+export MP_TASK_AFFINITY=cpu
+export envir=dev
+export RUN_ENVIR=dev
+export cyc=00
+export job=jverf_grid2grid_cloud_00
+
+# CALL executable job script here
+/u/Binbin.Zhou/work/grid2grid/verf_g2g.v3.0.0/jobs/JVERF_GRID2GRID_CLOUD
+

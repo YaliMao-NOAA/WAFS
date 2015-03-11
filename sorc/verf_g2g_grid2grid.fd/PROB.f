@@ -3,6 +3,8 @@ c+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 c  Subroutine      PROB(fcst,fanl,clim,wght,len,ib,im,cscrf)
 c  Prgmmr: Yuejian Zhu           Org: np23          Date: 2004-08-01
 c          Y. Zhu adding CRPS decomposition - 2008-02-15
+c          B. Zhou adding specified a set of fixed thresholds to
+c              compute reliability diagram  - 2014-01-09
 c
 c This is main ensemble based probabilistic verification sub-program
 c         for NAEFS project on IBM-SP
@@ -23,13 +25,24 @@ c      len   -- total grid points/observations
 c      im    -- ensemble members
 c      ib    -- ib>=2: climatologically equally-a-likely-bin 
 c               ib=1: climatological based, specified range consideration
+c                 Binbin add: specified a set of fixed thresholds to compute
+c                             reliability plot with (FHO> or FHO<) 
 c               ib=-1: no climatology, specified value consideration
 c      scrf  -- sample climatological relative frequence
 c
+c  1/10/2014, B.Zhou add: specified thresholds: 
+c     op -- FHO operator (FHO>, FHO<, FHO=, FHO~
+c     thrs -- thresholds array
+c     nthrs -- number of thresholds:
+c              1: for one specfied threshold (FHO>, FH<, FHO=)
+c              3 and larger: range (bin) of threshold, number of bins is number thresholds + 1  
+c              nthrs can not be 2 
+c             
 c   Fortran 77 on IBMSP
 c
 C--------+---------+---------+---------+---------+----------+---------+--
-      subroutine prob(fcst,fanl,clim,wght,len,ib,im,cscrf)
+      subroutine prob(fcst,fanl,clim,wght,len,ib,im,cscrf,
+     +   op, thrs, nthrs)
 c      parameter (mxlen=10512)
 c      parameter  (mxlen=70000)
       dimension fcst(len,im),fanl(len),clim(len,ib+1),wght(len)
@@ -46,10 +59,16 @@ c      parameter  (mxlen=70000)
       dimension af(0:im),bt(0:im)
       dimension aaf(0:im),abt(0:im)
       dimension ag(0:im),ao(0:im),pp(0:im)
-      
+      character*10 op
+      real thrs(20),pt(ib+1)   !Added by B.Zhou 
+      integer nthrs      
+
       common /vscore/ infow(500),probs(500),dists(500)             
 
       Write(*,*) 'In PROB:',len,ib,im
+      write(*,*) 'op ', op
+      write(*,*) 'thrs', (thrs(i),i=1,nthrs)
+      write(*,*) 'nthrs', nthrs
 CCCCCC test print out
       write(*,444) fanl(720),(fcst(720,n),n=1,im)
       write(*,444) (clim(720,n),n=1,ib+1)
@@ -86,16 +105,39 @@ c     print *, 'bspec=',bspec
        enddo
        fa=fanl(nxy)
        if (fa.eq.-9999.99) go to 999
+
        do i = 1, ib+1
-        cl(i) = clim(nxy,i)
+         cl(i) = clim(nxy,i)
        enddo
+
+       if(nthrs.le.0) then
+        do i = 1, ib+1
+         pt(i) = clim(nxy,i)
+        enddo
+       else
+        do i = 1,nthrs then
+            pt(i) = thrs(i)
+         end do
+       end if
+
        wfac = wght(nxy)
 
 c      print *, '++++++++++++++++++++++++++++++++++++'
 c       print *, '        RELIABILITY DIAGRAM '
+c B.Zhou: for non-climatology data reference case, use specified thresholds pt()
+c         for climatology data as reference case, use climatology 10 bins  
 c      print *, '++++++++++++++++++++++++++++++++++++'
 
-       call reli(fs,im,fa,cl,ib,rp,irt)
+       if(nthrs.ge.3) then                     !threshold range case (FHO~),at least 2 bins t1~t2~t3 (3 thresholds)
+         call reli(fs,im,fa,pt,nthrs-1,rp,irt,nthrs,op)
+       elseif (nthrs.eq.1) then                !0ne threshold (FHO> or FHO< or FHO=)case
+          call reli(fs,im,fa,pt,1,rp,irt,nthrs,op)
+       elseif (nthrs.le.0) then                !climatology data as ref case
+         call reli(fs,im,fa,cl,ib,rp,irt,nthrs,op)
+       else
+         write(*,*) 'Number of thresholds is wrong, 1 or  at least 3'
+         stop 1001
+       end if
 
        do np = 1, imp1
         sanp(np) = sanp(np) + rp(np,2)*wfac
@@ -106,18 +148,35 @@ c      print *, '++++++++++++++++++++++++++++++++++++'
 c       print *, '        BRIER SCORE        '
 c      print *, '++++++++++++++++++++++++++++++++++++'
 
-       call brsc(fs,im,fa,cl,ib,bspec,sp,irt)
+c       if(nthrs.ge.3) then 
+c         call brsc(fs,im,fa,pt,nthrs-1,bspec,sp,irt,nthrs,op)
+c         do nb = 1, nthrs-1
+c          bsf(nb) = bsf(nb) + sp(nb,1)*wfac
+c          bsc(nb) = bsc(nb) + sp(nb,2)*wfac
+c         enddo
 
-       do nb = 1, ib
-        bsf(nb) = bsf(nb) + sp(nb,1)*wfac
-        bsc(nb) = bsc(nb) + sp(nb,2)*wfac
-       enddo
+c       elseif (nthrs.eq.1) then
+c         call brsc(fs,im,fa,pt,1,bspec,sp,irt,nthrs,op)
+c         bsf(1) = bsf(1)+sp(1,1)*wfac
+c         bsc(1) = bsc(1)+sp(1,2)*wfac
+c       elseif(nthrs.le.0) then
+
+        call brsc(fs,im,fa,cl,ib,bspec,sp,irt)
+        do nb = 1, ib
+         bsf(nb) = bsf(nb) + sp(nb,1)*wfac
+         bsc(nb) = bsc(nb) + sp(nb,2)*wfac
+        enddo
+
+c       else
+c        write(*,*) 'Number of thresholds is wrong, at least 3'
+c        stop 1002
+c       end if
 
 c      print *, '++++++++++++++++++++++++++++++++++++'
 c       print *, '       RANKED PROBABILITY SCORE    '
 c      print *, '++++++++++++++++++++++++++++++++++++'
 
-       call rrps(fs,im,fa,cl,ib,bspec,rpsf,rpsc,irt)
+       call rrps(fs,im,fa,cl,ib,bspec,rpsf,rpsc,irt,nthrs,op)
 
        rpfs = rpfs + rpsf*wfac
        rpfc = rpfc + rpsc*wfac
@@ -160,7 +219,17 @@ c      print *, '++++++++++++++++++++++++++++++++++++'
 c      print *, '  HIT RATE AND FALSE ALARM RATE     '
 c      print *, '++++++++++++++++++++++++++++++++++++'
 
-       call hrfa(fs,im,fa,cl,ib,yy,yn,irt)
+       
+       if(nthrs.ge.3) then
+         call hrfa(fs,im,fa,pt,nthrs-1,yy,yn,irt)
+       elseif(nthrs.eq.1) then
+         call hrfa(fs,im,fa,pt,1,yy,yn,irt)
+       elseif (nthrs.le.0) then
+         call hrfa(fs,im,fa,pt,ib,yy,yn,irt)
+       else
+         write(*,*) 'Number of thresholds is wrong, at least 3'
+         stop 1003
+       end if 
 
        do np = 1, imp1
         fyy(np) = fyy(np) + yy(np)*wfac
@@ -173,6 +242,7 @@ c     print *, '++++++++++++++++++++++++++++++++++++'
  
        if (ib.eq.3) then
         call fapb(fst,m,obs,clm,ib,fcp,anp,irt)
+
         ftl = ftl + im*wfac
         do nb = 1, ib
          do np = 1, imp1
@@ -290,7 +360,7 @@ c     therefore, BSS (from decomposition) is the right one.
 c        --- Yuejian Zhu (08/31/2004)
 
 c     print *, '++++++++++++++++++++++++++++++++++++'
-      print *, '        BRIER SCORES OUTPUT         '
+c      print *, '        BRIER SCORES OUTPUT         '
 c     print *, '++++++++++++++++++++++++++++++++++++'
 
       bsfa = 0.0
@@ -329,7 +399,7 @@ c     print *, 'BSc         =',bsca
 c     print *, 'BSS         =',bssa  
 
 c     print *, '++++++++++++++++++++++++++++++++++++'
-      print *, ' RANKED PROBABILITY SCORES OUTPUT   '
+c      print *, ' RANKED PROBABILITY SCORES OUTPUT   '
 c     print *, '++++++++++++++++++++++++++++++++++++'
 
       rpfs = rpfs/float(len)
@@ -343,7 +413,7 @@ c     print *, '++++++++++++++++++++++++++++++++++++'
 c     write (*,802) rpfs,rpfc,rpss             
 
 c     print *, '++++++++++++++++++++++++++++++++++++'
-c     print *, ' Continuous Ranked Probability Score'
+c      print *, ' Continuous Ranked Probability Score'
 c     print *, '++++++++++++++++++++++++++++++++++++'
 
       crpsf = crpsf/float(len)
@@ -362,7 +432,7 @@ c     probs(5+4*imp1) = crpss
 c     write (*,802) crpsf,crpsc,crpss             
 
 c     print *, '++++++++++++++++++++++++++++++++++++'
-c     print *, ' CRPS decomposition if m >= 1       '
+c      print *, ' CRPS decomposition if m >= 1       '
 c     print *, '++++++++++++++++++++++++++++++++++++'
 
       do n = 0, im
@@ -417,7 +487,7 @@ c     enddo
       write (*,802) crprel,crpres,crpunc
 
 c     print *, '++++++++++++++++++++++++++++++++++++'
-c     print *, '    HIT RATE, FALSE ALARM OUTPUT    '
+c      print *, '    HIT RATE, FALSE ALARM OUTPUT    '
 c     print *, '++++++++++++++++++++++++++++++++++++'
 
       tnyy = .0
@@ -515,7 +585,13 @@ c     print "(' ',9f8.4)", (fv(kk),kk=10,18)
 c+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 c  Subroutine      RELI(fst,m,obs,clm,ib,rp,irt)
 c  Prgmmr: Yuejian Zhu           Org: np23          Date: 2006-12-26
-c
+c     1/10/2014   MODIFY: B. Zhou, added specified thresholds for ib=1 case
+c                   if nthrs=1, use specified one threshold 
+c                   if nthrs>=3, 
+c                         reliability is computed in different ranges
+c                         between these thresholds:
+c                         pt(1)~t(2), pt(2)~pt(3), ....,pt(nthrs-1)~pt(nthrs)
+c     
 c  This is the subroutine to calculete Contengent Rank Probability Scores
 c         for NAEFS project on IBM-SP
 c
@@ -529,27 +605,77 @@ c      rp    -- reliability (self-category: m+1)
 c      irt   -- 0-successful
 c               10-need to review ensemble forecast data
 c
+c    B.Zhou:
+c      op   -- operator (FHO> or FHO<, but it is not used), input
+c      thrs -- threshold array, input
+c      nthrs -- number of thresholds, input
+
 c   Fortran 77 on IBMSP
 c
 C--------+---------+---------+---------+---------+----------+---------+--
-      subroutine reli(fst,m,obs,clm,ib,rp,irt)
+      subroutine reli(fst,m,obs,clm,ib,rp,irt,nthrs,op)
       dimension fst(m),clm(ib+1),rp(m+1,2) 
-      
+
+      character*10 op
+      real thrs(20)
+      integer nthrs      
+
 c     print *, 'm=',m,' ib=',ib
 c     write (*,'(26f6.0)') (fst(i),i=1,m),obs,(clm(i),i=1,ib+1)
       irt=0
       rp=0.0
       icnt=0
+
       if (ib.eq.1) then
+       IF(nthrs.le.0) THEN
+         do n = 1, m
+          if (fst(n).gt.clm(1)) then
+           icnt=icnt+1          
+          endif
+         enddo
+         rp(icnt+1,1)=1.0
+         if (obs.gt.clm(1)) then
+          rp(icnt+1,2)=1.0
+         endif
+       ELSEIF(nthrs.eq.1) THEN                 !Added by B.Zhou 1/10/2014
+           do n = 1, m
+            if(trim(op).eq.'FHO>') then
+              if (fst(n).ge.clm(1)) icnt=icnt+1
+            elseif(trim(op).eq.'FHO=') then
+              if (fst(n).eq.clm(1)) icnt=icnt+1
+            elseif(trim(op).eq.'FHO<') then
+              if (fst(n).le.clm(1)) icnt=icnt+1
+            else
+              write(*,*) 'Wrong setting for FHO'
+              stop 222
+            end if
+           enddo
+           rp(icnt+1,1)=1.0
+           if(trim(op).eq.'FHO>') then
+              if (obs.ge.clm(1)) rp(icnt+1,2)=1.0
+           elseif(trim(op).eq.'FHO=') then
+              if (obs.eq.clm(1)) rp(icnt+1,2)=1.0
+           elseif (trim(op).eq.'FHO<') then
+              if (obs.le.clm(1)) rp(icnt+1,2)=1.0
+           else
+              write(*,*) 'Wrong setting for FHO'
+              stop 222
+           end if
+
+       ENDIF
+
+      elseif (ib.eq.0) then
+
        do n = 1, m
         if (fst(n).gt.clm(1)) then
-         icnt=icnt+1          
+         icnt=icnt+1
         endif
        enddo
        rp(icnt+1,1)=1.0
        if (obs.gt.clm(1)) then
         rp(icnt+1,2)=1.0
        endif
+
       elseif (ib.eq.-1) then
        do n = 1, m
         if (fst(n).le.clm(1)) then
@@ -560,17 +686,7 @@ c     write (*,'(26f6.0)') (fst(i),i=1,m),obs,(clm(i),i=1,ib+1)
        if (obs.gt.clm(1)) then
         rp(icnt+1,2)=1.0
        endif
-      elseif (ib.eq.0) then
-ccc if ib=0, clm(1) is the mean of climatology
-       do n = 1, m
-        if (fst(n).gt.clm(1)) then
-         icnt=icnt+1
-        endif
-       enddo
-       rp(icnt+1,1)=1.0
-       if (obs.gt.clm(1)) then
-        rp(icnt+1,2)=1.0
-       endif
+
       elseif (ib.ge.2) then
 ccc for example: ib=2 2 equally-a-likely-bin
        icnt=0
@@ -579,10 +695,8 @@ ccc for example: ib=2 2 equally-a-likely-bin
          icnt=icnt+1
         endif
        enddo
-c      rp(icnt+1,1)=rp(icnt+1,1)+1.0/float(ib+1)
        rp(icnt+1,1)=rp(icnt+1,1)+1.0
        if (obs.le.clm(2)) then
-c       rp(icnt+1,2)=rp(icnt+1,2)+1.0/float(ib+1)
         rp(icnt+1,2)=rp(icnt+1,2)+1.0
        endif
 
@@ -592,10 +706,8 @@ c       rp(icnt+1,2)=rp(icnt+1,2)+1.0/float(ib+1)
          icnt=icnt+1
         endif
        enddo
-c      rp(icnt+1,1)=rp(icnt+1,1)+1.0/float(ib+1)
        rp(icnt+1,1)=rp(icnt+1,1)+1.0
        if (obs.gt.clm(ib)) then
-c       rp(icnt+1,2)=rp(icnt+1,2)+1.0/float(ib+1)
         rp(icnt+1,2)=rp(icnt+1,2)+1.0
        endif
 
@@ -607,10 +719,8 @@ c       rp(icnt+1,2)=rp(icnt+1,2)+1.0/float(ib+1)
           icnt=icnt+1
          endif
         enddo
-c       rp(icnt+1,1)=rp(icnt+1,1)+1.0/float(ib+1)
         rp(icnt+1,1)=rp(icnt+1,1)+1.0
         if (obs.gt.clm(i).and.obs.le.clm(i+1)) then
-c        rp(icnt+1,2)=rp(icnt+1,2)+1.0/float(ib+1)
          rp(icnt+1,2)=rp(icnt+1,2)+1.0
         endif
        enddo
@@ -646,11 +756,13 @@ c   Called subroutine: fapb
 c
 C--------+---------+---------+---------+---------+----------+---------+--
       subroutine brsc(fst,m,obs,clm,ib,bspec,sp,irt)
+
       dimension fst(m),clm(ib+1) 
       dimension sp(ib,2),fcp(ib),anp(ib)
-      
+
       call fapb(fst,m,obs,clm,ib,fcp,anp,irt)
-c     print *, 'bspec=',bspec
+
+c      print *, 'bspec=',bspec
 c     write (*,'(20f3.0)') fcp,anp
 
       irt=0
@@ -704,7 +816,7 @@ C--------+---------+---------+---------+---------+----------+---------+--
       subroutine rrps(fst,m,obs,clm,ib,bspec,rpsf,rpsc,irt)
       dimension fst(m),clm(ib+1) 
       dimension fcp(ib),anp(ib)
-      
+
       call fapb(fst,m,obs,clm,ib,fcp,anp,irt)
 
       irt=0
@@ -1003,10 +1115,11 @@ c   Called subroutine: fapb
 c
 C--------+---------+---------+---------+---------+----------+---------+--
       subroutine hrfa(fst,m,obs,clm,ib,yy,yn,irt)
+
       dimension fst(m),clm(ib+1) 
       dimension yy(m+1),yn(m+1)
       dimension fcp(ib),anp(ib)
-      
+
       call fapb(fst,m,obs,clm,ib,fcp,anp,irt)
 
       irt=0
@@ -1041,6 +1154,11 @@ ccccc ......
 c+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 c  Subroutine      FAPB(fst,m,obs,clm,ib,fcp,anp,irt)
 c  Prgmmr: Yuejian Zhu           Org: np23          Date: 2006-12-26
+c    MODIFY: B.Zhou, added specified thresholds, prob are computed in
+c            these specified threholds (t(1),t92), ....,t(nthrs), 
+c            if FHO>, then probs of >t(1), >t(2), ...,>t(nthrs)
+c            if FHO<, then probs of <t(1), <t(2), ...,<t(nthrs)
+c       
 c
 c  This is the subroutine to calculete forecast and analysis probability 
 c  of special valus, or equally-a-likely-bin for NAEFS project on IBM-SP
@@ -1053,11 +1171,16 @@ c      clm   -- special values, or equally-a-likely-bin (ib+1)
 c      rp    -- probabilities of each special value, or equally-a-likely-bin
 c      irt   -- 0-successful
 c               10-need to review ensemble forecast data
-c
+c    B.Zhou:
+c      op   -- operator (FHO> or FHO<), input
+c      thrs -- threshold array, input
+c      nthrs -- number of thresholds, input
+c 
 c   Fortran 77 on IBMSP
 c
 C--------+---------+---------+---------+---------+----------+---------+--
       subroutine fapb(fst,m,obs,clm,ib,fcp,anp,irt)
+
       dimension fst(m),clm(ib+1),fcp(ib),anp(ib)
       
 c     write (*,'(26f6.0)') (fst(i),i=1,m),obs,(clm(i),i=1,ib+1)
@@ -1066,16 +1189,21 @@ c     write (*,'(26f6.0)') (fst(i),i=1,m),obs,(clm(i),i=1,ib+1)
       anp=0.0
       irt=0
       icnt=0
+
+
       if (ib.eq.1) then
-       do n = 1, m
-        if (fst(n).gt.clm(1)) then
-         icnt=icnt+1          
-        endif
-       enddo
-       fcp(1)=float(icnt)
-       if (obs.gt.clm(1)) then
-        anp(1)=1.0
-       endif
+
+         do n = 1, m
+          if (fst(n).gt.clm(1)) then
+           icnt=icnt+1          
+          endif
+         enddo
+         fcp(1)=float(icnt)
+         if (obs.gt.clm(1)) then
+          anp(1)=1.0
+         endif
+
+
 c     elseif (ib.eq.-1) then
 c      do n = 1, m
 c       if (fst(n).le.clm(1)) then
@@ -1272,9 +1400,9 @@ c        if(xme2.ge.xme1) print *,'never  protect'
          xmecl  = xme                                 ! min[o,r]
          xmepf  = clfr*xml(j)/xl(j)                   ! o.r 
 
-         write(*,12)'j,mxme1,xme2,clfr,xml,xl,xmecl,xmepf=',
-     +      j, xme1,xme2,clfr,xml(j),xl(j),xmecl,xmepf
-12       format(a30, i3,2x,7f6.3)    
+c         write(*,12)'j,mxme1,xme2,clfr,xml,xl,xmecl,xmepf=',
+c     +      j, xme1,xme2,clfr,xml(j),xl(j),xmecl,xmepf
+c12       format(a30, i3,2x,7f6.3)    
 c
 c     loop over ensemble probabilities
 c        if hr=1, far=0, perfect forecast, xmefc = xmepf, v = 1.0
@@ -1295,12 +1423,12 @@ c     +      ' fa=',far(i),' value=',v(i-1,2)
          call sortm(v,im1-1,2,2)
 
          fv(j) = v(im1-1,2)
-         write(6,66)  j,1./xl(j),np,v(im1-1,2),v(im1-1,1)
+c         write(6,66)  j,1./xl(j),np,v(im1-1,2),v(im1-1,1)
         enddo               ! do j = 1, 18
 
-        write(6,67)
- 66    format(1x,i4,f7.4,i4,2f8.3)
- 67    format(1x)
+c         write(6,67)
+c 66    format(1x,i4,f7.4,i4,2f8.3)
+c 67    format(1x)
 
        return
        end

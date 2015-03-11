@@ -38,7 +38,7 @@ C  For grid2grid
      +        ddfcst(mxfcst), hhfcst(mxfcst), fffcst(mxfcst),
      +        yyyyobsv(maxobs), mmobsv(maxobs),  
      +        ddobsv(maxobs), hhobsv(maxobs), ffobsv(maxobs)
-      integer k5(mxvrbl),k6(mxvrbl),k7(mxvrbl),
+      integer k5(mxvrbl),k6(mxvrbl),k7(mxvrbl),k4(mxvrbl),
      +        region_id(maxpts), igribid
       real region_latlon(2,maxpts), ptr1(2,mxarea), ptr2(2,mxarea)
       integer vectormrk(mxvrbl)
@@ -48,10 +48,14 @@ C  For grid2grid
       integer nchrlvl(mxvrbl,maxlvl) 
       CHARACTER*24 fho(mxvrbl),fhothr(mxvrbl,20)
       CHARACTER*24 afho(mxvrbl),afhothr(mxvrbl,20)
+      CHARACTER*24 sfho(mxvrbl),sfhothr(mxvrbl,20)                      !sfho() array will not be used, only fho() is used
+      CHARACTER*24 ffho(mxvrbl),ffhothr(mxvrbl,20)                      !ffho() array will not be used, only fho() is used
       integer  nchrfho(mxvrbl),nchrfhothr(mxvrbl,20),fhomrk(mxvrbl)
       integer  nchrafho(mxvrbl),nchrafhothr(mxvrbl,20),afhomrk(mxvrbl)
-       
-      real rfhothr(mxvrbl,20),rafhothr(mxvrbl,20)
+      integer  nchrsfho(mxvrbl),nchrsfhothr(mxvrbl,20),sfhomrk(mxvrbl) 
+      integer  nchrffho(mxvrbl),nchrffhothr(mxvrbl,20),ffhomrk(mxvrbl) 
+      real rfhothr(mxvrbl,20),rafhothr(mxvrbl,20),rsfhothr(mxvrbl,20),
+     +     rffhothr(mxvrbl,20)
       integer usrmrk(100), continue_mrk(mxvrbl)
       integer anomly_mrk(mxvrbl),anomlylev(mxvrbl,maxlvl)
 
@@ -59,10 +63,13 @@ C  For grid2grid
      +            cyyyyobsv,cmmobsv,cddobsv,chhobsv,cffobsv,
      +             yyyyfcst, mmfcst, ddfcst, hhfcst, fffcst,
      +             yyyyobsv, mmobsv, ddobsv, hhobsv, ffobsv,
-     +             k5,k6,k7,ck7,vectormrk,namlvl,nchrlvl,
+     +             k4,k5,k6,k7,ck7,vectormrk,namlvl,nchrlvl,
      +      fhomrk,fho,nchrfho,fhothr,nchrfhothr,rfhothr,
      +             continue_mrk,anomly_mrk,anomlylev,
      +     afhomrk,afho,nchrafho,afhothr,nchrafhothr,rafhothr
+      COMMON /FRC/
+     +     sfhomrk,sfho,nchrsfho,sfhothr,nchrsfhothr,rsfhothr,
+     +     ffhomrk,ffho,nchrffho,ffhothr,nchrffhothr,rffhothr
 
 C     for tendency:--------------------------------------------------
       DIMENSION  nchrfcst2(4,mxfcst), nchrvfdate2(4,mxdate)
@@ -102,6 +109,13 @@ c--------------------------------------------------------------------
 
       integer p, lens, nt
       character*24 nam24
+
+
+      CHARACTER*10 blocksize(mxvrbl)
+      CHARACTER*1 tag(mxvrbl)
+      integer nxy(mxvrbl) 
+
+      COMMON /fss/tag,nxy
 
       CHARACTER*1 blank
       DATA blank /' '/
@@ -239,8 +253,8 @@ CCzeus         CALL ST_RMBL ( substr (1), fcst_ymdhf(n), lng1, ier )
            CALL ST_NUMB (cfffcst(n),fffcst(n),iet)
          end if
           
-         write(*,*)n,' yyyyfcst,mmfcst,ddfcst,hhfcst=',
-     +    yyyyfcst(n),mmfcst(n),ddfcst(n),hhfcst(n)
+         write(*,*)n,' yyyyfcst,mmfcst,ddfcst,hhfcst,fffcst=',
+     +    yyyyfcst(n),mmfcst(n),ddfcst(n),hhfcst(n),fffcst(n)
                                                                                                                                    
 CCzeus         CALL ST_RMBL ( substr (2), obsv_ymdhf(n), lng2, ier )
          lng2 = len_trim(substr(2))
@@ -258,14 +272,14 @@ CCzeus         CALL ST_RMBL ( substr (2), obsv_ymdhf(n), lng2, ier )
          CALL ST_NUMB (cddobsv(n),ddobsv(n),iet)
          CALL ST_NUMB (chhobsv(n),hhobsv(n),iet)
 
-         write(*,*)n,'yyyyobsv,mmobsv,ddobsv,hhobsv=',
-     +     yyyyobsv(n),mmobsv(n),ddobsv(n),hhobsv(n)
-
          if(trim(cffobsv(n)).eq.'NN') then
             ffobsv(n)=999
          else
            CALL ST_NUMB (cffobsv(n),ffobsv(n),iet)
          end if
+
+         write(*,*)n,'yyyyobsv,mmobsv,ddobsv,hhobsv,ffobsv=',
+     +    yyyyobsv(n),mmobsv(n),ddobsv(n),hhobsv(n),ffobsv(n) 
 
          do nt=1,4
  
@@ -448,14 +462,15 @@ C  Modified as:
         READ (5, '(A)') input
         CALL ST_CLST( input, ' ', ' ', 26, substr, num, ier)
         CALL ST_NUMB( substr(1), numvarbl, ier)
-CCzeus        CALL ST_RMBL( substr(2), namvarbl(1), nchrvarbl(1), ier)
         nchrvarbl(1) = len_trim(substr(2))
         namvarbl(1) = substr(2)(1:nchrvarbl(1))
-        CALL ST_NUMB( substr(3), k5(1), ier)
-        CALL ST_NUMB( substr(4), k6(1), ier)
-        CALL ST_NUMB( substr(5), k7(1), ier)
-        ck7(1) = trim (substr(5))
-        write(*,*) numvarbl, namvarbl(1), nchrvarbl(1),k5(1),k6(1),k7(1)
+        CALL ST_NUMB( substr(3), k4(1), ier)
+        CALL ST_NUMB( substr(4), k5(1), ier)
+        CALL ST_NUMB( substr(5), k6(1), ier)
+        CALL ST_NUMB( substr(6), k7(1), ier)
+        ck7(1) = trim (substr(6))
+        write(*,*) numvarbl, namvarbl(1), nchrvarbl(1),
+     +     k4(1),k5(1),k6(1),k7(1)
 
         ntnd = index (namvarbl(1),'_TND')
         if (ntnd.gt.0) then
@@ -483,43 +498,89 @@ CCzeus        CALL ST_RMBL( substr(2), namvarbl(1), nchrvarbl(1), ier)
          end if
         end if
 
+        nM=-1
+        nA=-1
+        nF=-1
+        nM = index (namvarbl(1),'_MAX')
+        nA = index (namvarbl(1),'_AVG')
+        nF = index (namvarbl(1),'_FSS')
+        if(nM.gt.0 .or. nA.gt.0.or.nF.gt.0) then
+         if (nM.gt.0) tag(1)='M'
+         if (nA.gt.0) tag(1)='A'
+         if (nF.gt.0) tag(1)='F'
+         nslash=index(namvarbl(1),'/')
+         nlen=len_trim(namvarbl(1))
+         blocksize(1)=namvarbl(1)(nslash+1:nlen)        
+         CALL ST_NUMB(blocksize(1), nxy(1), ier)
 
-        if (num.gt.6) then        !has FHO or AFHO or EFHO
-CCzeus          CALL ST_RMBL( substr(6), fho(1), nchrfho(1), ier)
-          nchrfho(1) = len_trim(substr(6))
-          fho(1) = substr(6)(1:nchrfho(1))
+          write(*,*) 'nM, nA, nF, nxy(1)=', nM, nA,nF,nxy(1),tag(1)
+          
+
+        end if
+
+        if (num.gt.7) then        !has FHO or AFHO or EFHO or SFHO
+          nchrfho(1) = len_trim(substr(7))
+          fho(1) = substr(7)(1:nchrfho(1))
           
          if(fho(1)(1:1).eq.'F' .or.
-     +      fho(1)(1:1).eq.'E' ) then    !FHO or EFHO
-          fhomrk(1) = num - 6
-          do nx = 7, num 
-CCzeus            CALL ST_RMBL(substr(nx),fhothr(1,nx-6),
-CCzeus     +               nchrfhothr(1,nx-6),ier)
-            nchrfhothr(1,nx-6) = len_trim(substr(nx))
-            fhothr(1,nx-6) = substr(nx)(1:nchrfhothr(1,nx-6))
+     +      fho(1)(1:1).eq.'E' ) then      !FHO or EFHO
+          fhomrk(1) = num - 7
+          do nx = 8, num 
+            nchrfhothr(1,nx-7) = len_trim(substr(nx))
+            fhothr(1,nx-7) = substr(nx)(1:nchrfhothr(1,nx-7))
               if(tendencymrk(1).eq.0) then
-                rfhothr(1,nx-6) = ChartoReal(fhothr(1,nx-6))
+                rfhothr(1,nx-7) = ChartoReal(fhothr(1,nx-7))
               else
-                updown(1,nx-6)=fhothr(1,nx-6)
-     +           (nchrfhothr(1,nx-6):nchrfhothr(1,nx-6))
-                abc=fhothr(1,nx-6)(1:(nchrfhothr(1,nx-6)-1))
-                rfhothr(1,nx-6)=ChartoReal(abc)
+                updown(1,nx-7)=fhothr(1,nx-7)
+     +           (nchrfhothr(1,nx-7):nchrfhothr(1,nx-7))
+                abc=fhothr(1,nx-7)(1:(nchrfhothr(1,nx-7)-1))
+                rfhothr(1,nx-7)=ChartoReal(abc)
               end if
             end do
-         else                           !AFHO
-          afhomrk(1) = num - 6
-          do nx = 7, num
-CCzeus            CALL ST_RMBL(substr(nx),afhothr(1,nx-6),
-CCZeus     +               nchrafhothr(1,nx-6),ier)
-            nchrafhothr(1,nx-6) = len_trim(substr(nx))
-            afhothr(1,nx-6) = substr(nx)(1:nchrafhothr(1,nx-6))
+
+         else if (fho(1)(1:1).eq.'S'  ) then   !SFHO
+          sfhomrk(1) = num - 7
+          do nx = 8, num
+            nchrsfhothr(1,nx-7) = len_trim(substr(nx))
+            sfhothr(1,nx-7) = substr(nx)(1:nchrsfhothr(1,nx-7))
               if(tendencymrk(1).eq.0) then
-                rafhothr(1,nx-6) = ChartoReal(afhothr(1,nx-6))
+                rsfhothr(1,nx-7) = ChartoReal(sfhothr(1,nx-7))
               else
-                updown(1,nx-6)=afhothr(1,nx-6)
-     +           (nchrafhothr(1,nx-6):nchrafhothr(1,nx-6))
-                abc=afhothr(1,nx-6)(1:(nchrafhothr(1,nx-6)-1))
-                rafhothr(1,nx-6)=ChartoReal(abc)
+                updown(1,nx-7)=sfhothr(1,nx-7)
+     +           (nchrsfhothr(1,nx-7):nchrsfhothr(1,nx-7))
+                abc=sfhothr(1,nx-7)(1:(nchrsfhothr(1,nx-7)-1))
+                rsfhothr(1,nx-7)=ChartoReal(abc)
+              end if
+            end do
+
+         else if (fho(1)(1:1).eq.'P'  ) then   ! FSS (or PFHO)
+          ffhomrk(1) = num - 7
+          do nx = 8, num
+            nchrffhothr(1,nx-7) = len_trim(substr(nx))
+            ffhothr(1,nx-7) = substr(nx)(1:nchrffhothr(1,nx-7))
+              if(tendencymrk(1).eq.0) then
+                rffhothr(1,nx-7) = ChartoReal(ffhothr(1,nx-7))
+              else
+                updown(1,nx-7)=ffhothr(1,nx-7)
+     +           (nchrffhothr(1,nx-7):nchrffhothr(1,nx-7))
+                abc=ffhothr(1,nx-7)(1:(nchrffhothr(1,nx-7)-1))
+                rffhothr(1,nx-7)=ChartoReal(abc)
+              end if
+            end do
+ 
+
+         else                           !AFHO
+          afhomrk(1) = num - 7
+          do nx = 8, num
+            nchrafhothr(1,nx-7) = len_trim(substr(nx))
+            afhothr(1,nx-7) = substr(nx)(1:nchrafhothr(1,nx-7))
+              if(tendencymrk(1).eq.0) then
+                rafhothr(1,nx-7) = ChartoReal(afhothr(1,nx-7))
+              else
+                updown(1,nx-7)=afhothr(1,nx-7)
+     +           (nchrafhothr(1,nx-7):nchrafhothr(1,nx-7))
+                abc=afhothr(1,nx-7)(1:(nchrafhothr(1,nx-7)-1))
+                rafhothr(1,nx-7)=ChartoReal(abc)
               end if
             end do
           end if
@@ -529,15 +590,19 @@ CCZeus     +               nchrafhothr(1,nx-6),ier)
          DO n=2,numvarbl
            READ (5, '(A)') input
            CALL ST_CLST( input, ' ', ' ', 26, substr, num, ier)
-CCzeus           CALL ST_RMBL( substr(1), namvarbl(n), nchrvarbl(n), ier)
+           write(*,*) input
+           write(*,*)  substr(1)
            nchrvarbl(n) = len_trim(substr(1))
            namvarbl(n) = substr(1)(1:nchrvarbl(n))
-           CALL ST_NUMB( substr(2), k5(n), ier)
-           CALL ST_NUMB( substr(3), k6(n), ier)
-           CALL ST_NUMB( substr(4), k7(n), ier)
-           ck7(n) = trim (substr(4))
+           write(*,*) nchrvarbl(n), namvarbl(n)
 
-           write(*,*) namvarbl(n), nchrvarbl(n), k5(n),k6(n),k7(n)
+           CALL ST_NUMB( substr(2), k4(n), ier)
+           CALL ST_NUMB( substr(3), k5(n), ier)
+           CALL ST_NUMB( substr(4), k6(n), ier)
+           CALL ST_NUMB( substr(5), k7(n), ier)
+           ck7(n) = trim (substr(5))
+
+           write(*,*)namvarbl(n),nchrvarbl(n),k4(n),k5(n),k6(n),k7(n)
 
            ntnd = index (namvarbl(n),'_TND')
 
@@ -567,46 +632,94 @@ CCzeus           CALL ST_RMBL( substr(1), namvarbl(n), nchrvarbl(n), ier)
             end if
            end if
 
+           nM=-1
+           nA=-1
+           nF=-1
+           nM = index (namvarbl(n),'_MAX')
+           nA = index (namvarbl(n),'_AVG')
+           nF = index (namvarbl(n),'_FSS')
+           write(*,*) n, nM,nA,nF
+           if(nM.gt.0 .or. nA.gt.0.or.nF.gt.0) then
+             if (nM.gt.0) tag(n)='M'
+             if (nA.gt.0) tag(n)='A'
+             if (nF.gt.0) tag(n)='F'
+             nslash=index(namvarbl(n),'/')
+             nlen=len_trim(namvarbl(n))
+             blocksize(n)=namvarbl(n)(nslash+1:nlen)
+             CALL ST_NUMB(blocksize(n), nxy(n), ier)
+             write(*,*) 'tag(n),nxy(n)=',tag(n),nxy(n)
+           end if
 
-           if (num.gt.5) then
+           if (num.gt.6) then
 
-CCzeus             CALL ST_RMBL( substr(5), fho(n), nchrfho(n), ier)
-             nchrfho(n) = len_trim(substr(5))
-             fho(n) = substr(5)(1:nchrfho(n))
-            if(fho(n)(1:1).eq.'F') then       !for FHO
+             nchrfho(n) = len_trim(substr(6))
+             fho(n) = substr(6)(1:nchrfho(n))
+            if(fho(n)(1:1).eq.'F' .or.
+     +         fho(n)(1:1).eq.'E' ) then     !FHO or EFHO
             
-             fhomrk(n) =  num - 5
-             do nx = 6, num
-CCzeus              CALL ST_RMBL(substr(nx),fhothr(n,nx-5),
-CCzeus     +                     nchrfhothr(n,nx-5),ier)
-              nchrfhothr(n,nx-5) = len_trim(substr(nx))
-              fhothr(n,nx-5) = substr(nx)(1:nchrfhothr(n,nx-5))
+             fhomrk(n) =  num - 6
+             do nx = 7, num
+              nchrfhothr(n,nx-6) = len_trim(substr(nx))
+              fhothr(n,nx-6) = substr(nx)(1:nchrfhothr(n,nx-6))
 
               if(tendencymrk(n).eq.0) then
-                rfhothr(n,nx-5) = ChartoReal(fhothr(n,nx-5))
+                rfhothr(n,nx-6) = ChartoReal(fhothr(n,nx-6))
               else 
-                updown(n,nx-5)=fhothr(n,nx-5)
-     +           (nchrfhothr(n,nx-5):nchrfhothr(n,nx-5))
-                abc=fhothr(n,nx-5)(1:(nchrfhothr(n,nx-5)-1))
-                rfhothr(n,nx-5) = ChartoReal(abc)
+                updown(n,nx-6)=fhothr(n,nx-6)
+     +           (nchrfhothr(n,nx-6):nchrfhothr(n,nx-6))
+                abc=fhothr(n,nx-6)(1:(nchrfhothr(n,nx-6)-1))
+                rfhothr(n,nx-6) = ChartoReal(abc)
               end if
              end do
 
+            else if (fho(n)(1:1).eq.'S'  ) then    ! SFHO
+
+             sfhomrk(n) =  num - 6
+             do nx = 7, num
+              nchrsfhothr(n,nx-6) = len_trim(substr(nx))
+              sfhothr(n,nx-6) = substr(nx)(1:nchrsfhothr(n,nx-6))
+
+              if(tendencymrk(n).eq.0) then
+                rsfhothr(n,nx-6) = ChartoReal(sfhothr(n,nx-6))
+              else
+                updown(n,nx-6)=sfhothr(n,nx-6)
+     +           (nchrsfhothr(n,nx-6):nchrsfhothr(n,nx-6))
+                abc=sfhothr(n,nx-6)(1:(nchrsfhothr(n,nx-6)-1))
+                rsfhothr(n,nx-6) = ChartoReal(abc)
+              end if
+             end do
+
+           else if (fho(n)(1:1).eq.'P'  ) then    ! FSS (or PFHO)
+
+             ffhomrk(n) =  num - 6
+             do nx = 7, num
+              nchrffhothr(n,nx-6) = len_trim(substr(nx))
+              ffhothr(n,nx-6) = substr(nx)(1:nchrffhothr(n,nx-6))
+
+              if(tendencymrk(n).eq.0) then
+                rffhothr(n,nx-6) = ChartoReal(ffhothr(n,nx-6))
+              else
+                updown(n,nx-6)=ffhothr(n,nx-6)
+     +           (nchrffhothr(n,nx-6):nchrffhothr(n,nx-6))
+                abc=ffhothr(n,nx-6)(1:(nchrffhothr(n,nx-6)-1))
+                rffhothr(n,nx-6) = ChartoReal(abc)
+              end if
+             end do
+
+
             else                          !for AFHO
 
-             afhomrk(n) =  num - 5
-             do nx = 6, num
-CCzeus              CALL ST_RMBL(substr(nx),afhothr(n,nx-5),
-CCzeus     +                     nchrafhothr(n,nx-5),ier)
-              nchrafhothr(n,nx-5) = len_trim(substr(nx))
-              afhothr(n,nx-5) = substr(nx)(1:nchrfhothr(n,nx-5))
+             afhomrk(n) =  num - 6
+             do nx = 7, num
+              nchrafhothr(n,nx-6) = len_trim(substr(nx))
+              afhothr(n,nx-6) = substr(nx)(1:nchrafhothr(n,nx-6))
               if(tendencymrk(n).eq.0) then
-                rafhothr(n,nx-5) = ChartoReal(afhothr(n,nx-5))
+                rafhothr(n,nx-6) = ChartoReal(afhothr(n,nx-6))
               else
-                updown(n,nx-5)=afhothr(n,nx-5)
-     +           (nchrafhothr(n,nx-5):nchrafhothr(n,nx-5))
-                abc=afhothr(n,nx-5)(1:(nchrafhothr(n,nx-5)-1))
-                rafhothr(n,nx-5) = ChartoReal(abc)
+                updown(n,nx-6)=afhothr(n,nx-6)
+     +           (nchrafhothr(n,nx-6):nchrafhothr(n,nx-6))
+                abc=afhothr(n,nx-6)(1:(nchrafhothr(n,nx-6)-1))
+                rafhothr(n,nx-6) = ChartoReal(abc)
               end if
              end do
         
@@ -618,102 +731,105 @@ CCzeus     +                     nchrafhothr(n,nx-5),ier)
 
 
         !set mask to exclude undefined Soil values (0.0) over ocean points
-        do n = 1, numvarbl
-         if(k5(n).eq.11.and.k6(n).eq.112) continue_mrk(n)=9   !Soil Temperature
-         if(k5(n).eq.114.and.k6(n).eq.112) continue_mrk(n)=10  !Soil Moisture,  old 9 is wrong
-        enddo
+      do n = 1, numvarbl
+       if(k5(n).eq.11.and.k6(n).eq.112) continue_mrk(n)=9   !Soil Temperature
+       if(k5(n).eq.114.and.k6(n).eq.112) continue_mrk(n)=10  !Soil Moisture,  old 9 is wrong
+      enddo
 
-        !set continueing variable mark
-        do n = 1, numvarbl
-         if(k5(n).eq.7.and.k6(n).eq.2) continue_mrk(n)=1
-         if(k5(n).eq.7.and.k6(n).eq.3) continue_mrk(n)=1
-c         if(k6(n).eq.58) continue_mrk(n)=1
-c         if(k6(n).eq.64) continue_mrk(n)=1
-c         if(k6(n).eq.65) continue_mrk(n)=1
-c         if(k6(n).eq.66) continue_mrk(n)=1
-         if(k5(n).eq.71) continue_mrk(n)=1  !cloud
-         if(k5(n).eq.72) continue_mrk(n)=1
-         if(k5(n).eq.73) continue_mrk(n)=1
-         if(k5(n).eq.74) continue_mrk(n)=1
-         if(k5(n).eq.75) continue_mrk(n)=1
-         if(k5(n).eq.255) continue_mrk(n)=2  ! set for smoke/aod
-         if(k5(n).eq.89) continue_mrk(n)=2   ! set for smoke/aod
-c         if(k5(n).eq.76) continue_mrk(n)=1
-c         if(k5(n).eq.78) continue_mrk(n)=1
-c         if(k5(n).eq.79) continue_mrk(n)=1
-c         if(k6(n).eq.140) continue_mrk(n)=1
-c         if(k6(n).eq.141) continue_mrk(n)=1
-c         if(k6(n).eq.142) continue_mrk(n)=1
-c         if(k6(n).eq.142) continue_mrk(n)=1
-c         if(k6(n).eq.153) continue_mrk(n)=1
-         if(k6(n).eq.168) continue_mrk(n)=2  !for GFS, SADIS icing
-c         if(k6(n).eq.170) continue_mrk(n)=1
-c         if(k6(n).eq.171) continue_mrk(n)=1
-         if(k6(n).eq.172) continue_mrk(n)=2  !for GFS, SADIS CAT
-         if(k5(n).eq.144.and.k6(n).eq.112) continue_mrk(n)=9
+      !set continueing variable mark
+      do n = 1, numvarbl
+       if(k4(n).eq.3.and.k5(n).eq.5.and.k6(n).eq.2)continue_mrk(n)=1
+       if(k4(n).eq.3.and.k5(n).eq.5.and.k6(n).eq.3) continue_mrk(n)=1
+       if(k4(n).eq.6.and.k5(n).eq.1) continue_mrk(n)=1  !total cloud
+       if(k4(n).eq.6.and.k5(n).eq.2) continue_mrk(n)=1  !convective cloud
+       if(k4(n).eq.6.and.k5(n).eq.3) continue_mrk(n)=1  !hi cloud
+       if(k4(n).eq.6.and.k5(n).eq.4) continue_mrk(n)=1  !mid cloud
+       if(k4(n).eq.6.and.k5(n).eq.5) continue_mrk(n)=1  !low cloud
+       if(k4(n).eq.3.and.k5(n).eq.10) continue_mrk(n)=2   ! set for smoke/aod (density)
+
+       if(k4(n).eq.19.and.k5(n).eq.0.and.k6(n).eq.1)continue_mrk(n)=6   !for visibility 
+       !if(k4(n).eq.19.and.k5(n).eq.0.and.k6(n).eq.13)continue_mrk(n)=6   !for visibility prob < 400
+       !if(k4(n).eq.19.and.k5(n).eq.0.and.k6(n).eq.14)continue_mrk(n)=6  !for visibility prob < 800
+       !if(k4(n).eq.19.and.k5(n).eq.0.and.k6(n).eq.15)continue_mrk(n)=6  !for visibility prob < 1600
+       !if(k4(n).eq.19.and.k5(n).eq.0.and.k6(n).eq.16)continue_mrk(n)=6  !for visibility prob < 3200
+       !if(k4(n).eq.19.and.k5(n).eq.0.and.k6(n).eq.17)continue_mrk(n)=6  !for visibility prob < 6400
+       !if(k4(n).eq.19.and.k5(n).eq.0.and.k6(n).eq.18)continue_mrk(n)=4  !for vsref fog prob
+
+       if(k4(n).eq.19.and.k5(n).eq.0.and.k6(n).eq.13)continue_mrk(n)=4   !for visibility prob < 400
+       if(k4(n).eq.19.and.k5(n).eq.0.and.k6(n).eq.14)continue_mrk(n)=4  !for visibility prob < 800
+       if(k4(n).eq.19.and.k5(n).eq.0.and.k6(n).eq.15)continue_mrk(n)=4  !for visibility prob < 1600
+       if(k4(n).eq.19.and.k5(n).eq.0.and.k6(n).eq.16)continue_mrk(n)=4  !for visibility prob < 3200
+       if(k4(n).eq.19.and.k5(n).eq.0.and.k6(n).eq.17)continue_mrk(n)=4  !for visibility prob < 6400
+       if(k4(n).eq.19.and.k5(n).eq.0.and.k6(n).eq.18)continue_mrk(n)=4  !for vsref fog prob
+
+       if(k4(n).eq.3.and.k5(n).eq.5.and.k6(n).eq.215)continue_mrk(n)=5 !for ceiling
 
 
-         if(k5(n).eq.20.and.k6(n).eq.1 ) continue_mrk(n)=6    !for visibility 
-         if(k5(n).eq.201 .and. k6(n).eq.1 ) continue_mrk(n)=4 !for vsref visibility prob < 400
-         if(k5(n).eq.202 .and. k6(n).eq.1 ) continue_mrk(n)=4 !for vsref visibility prob < 800
-         if(k5(n).eq.203 .and. k6(n).eq.1 ) continue_mrk(n)=4 !for vsref visibility prob < 1600
-         if(k5(n).eq.204 .and. k6(n).eq.1 ) continue_mrk(n)=4 !for vsref visibility prob < 3200
-         if(k5(n).eq.205 .and. k6(n).eq.1 ) continue_mrk(n)=4 !for vsref visibility prob < 6400
-         if(k5(n).eq.206 .and. k6(n).eq.1 ) continue_mrk(n)=4 !for vsref fog prob 
 
-         if(k5(n).eq.212 .and. k6(n).eq.200) continue_mrk(n)=4  !for reflectivity
-         if(k5(n).eq.241 .and. k6(n).eq.200) continue_mrk(n)=4  !for ref > 10
-         if(k5(n).eq.242 .and. k6(n).eq.200) continue_mrk(n)=4  !for ref > 20
-         if(k5(n).eq.243 .and. k6(n).eq.200) continue_mrk(n)=4  !for ref > 30
-         if(k5(n).eq.244 .and. k6(n).eq.200) continue_mrk(n)=4  !for ref > 40
-         if(k5(n).eq.240 .and. k6(n).eq.200) continue_mrk(n)=4  !for echo top
-         if(k5(n).eq.245 .and. k6(n).eq.200) continue_mrk(n)=4  !for echo top>2000
-         if(k5(n).eq.246 .and. k6(n).eq.200) continue_mrk(n)=4  !for echo top>4000
-         if(k5(n).eq.247 .and. k6(n).eq.200) continue_mrk(n)=4  !for echo top>6000
-         if(k5(n).eq.248 .and. k6(n).eq.200) continue_mrk(n)=4  !for echo top>8000
-         if(k5(n).eq.249 .and. k6(n).eq.200) continue_mrk(n)=4  !for echo top>10000
+       if(k4(n).eq.16.and.k5(n).eq.196.and.k6(n).eq.200) 
+     +                             continue_mrk(n)=4          !for composite reflectivity
 
-c         if(k6(n).eq.178) continue_mrk(n)=1
-c         if(k6(n).eq.186) continue_mrk(n)=1
-c         if(k6(n).eq.193) continue_mrk(n)=1
-c         if(k6(n).eq.194) continue_mrk(n)=1
-c         if(k6(n).eq.195) continue_mrk(n)=1
-c         if(k6(n).eq.213) continue_mrk(n)=1
-c         if(k6(n).eq.214) continue_mrk(n)=1
-c         if(k6(n).eq.218) continue_mrk(n)=1
-c         if(k6(n).eq.232) continue_mrk(n)=1
-c         if(k6(n).eq.238) continue_mrk(n)=1
-        end do
+       if(k4(n).eq.16.and.k5(n).eq.196.and.k6(n).eq.241) 
+     +                             continue_mrk(n)=4          !for ref > 10
+       if(k4(n).eq.16.and.k5(n).eq.196.and.k6(n).eq.242) 
+     +                             continue_mrk(n)=4          !for ref > 20
+       if(k4(n).eq.16.and.k5(n).eq.196.and.k6(n).eq.243) 
+     +                             continue_mrk(n)=4          !for ref > 30
+       if(k4(n).eq.16.and.k5(n).eq.196.and.k6(n).eq.244) 
+     +                             continue_mrk(n)=4          !for ref > 40
+
+       if(k4(n).eq.16.and.k5(n).eq.195.and.k6(n).eq.103)
+     +                             continue_mrk(n)=4          !for hybrid scan reflectivity
+
+
+       if(k4(n).eq.16.and.k5(n).eq.197.and.k6(n).eq.200) 
+     +                                     continue_mrk(n)=4  !for echo top
+       !+                                     continue_mrk(n)=7  !for echo top
+
+       if(k4(n).eq.16.and.k5(n).eq.197.and.k6(n).eq.245) 
+     +                                     continue_mrk(n)=4  !for echo top>2000
+       !+                                     continue_mrk(n)=7  !for echo top>2000
+       if(k4(n).eq.16.and.k5(n).eq.197.and.k6(n).eq.246) 
+     +                                     continue_mrk(n)=4  !for echo top>4000
+       !+                                     continue_mrk(n)=7  !for echo top>4000
+       if(k4(n).eq.16.and.k5(n).eq.197.and.k6(n).eq.247) 
+     +                                     continue_mrk(n)=4  !for echo top>6000
+       !+                                     continue_mrk(n)=7  !for echo top>6000
+       if(k4(n).eq.16.and.k5(n).eq.197.and.k6(n).eq.248) 
+     +                                     continue_mrk(n)=4  !for echo top>8000
+       !+                                     continue_mrk(n)=7  !for echo top>8000
+       if(k4(n).eq.16.and.k5(n).eq.197.and.k6(n).eq.249)
+     +                                     continue_mrk(n)=4  !for echo top>10000
+       !+                                     continue_mrk(n)=7  !for echo top>10000
+
+       if(k4(n).eq.4.and.k5(n).eq.8.and.k6(n).eq.103) continue_mrk(n)=4  !for hibrid scan reflectivity 
+
+      end do
 
         !set anomly mark
-        do n = 1, numvarbl
-         if(k5(n).eq.7.and.k6(n).eq.100) anomly_mrk(n)=1
-         if(k5(n).eq.2.and.k6(n).eq.102) anomly_mrk(n)=1
-         if(k5(n).eq.15.and.k6(n).eq.105) anomly_mrk(n)=1
-         if(k5(n).eq.16.and.k6(n).eq.105) anomly_mrk(n)=1
-         if(k5(n).eq.11.and.k6(n).eq.100) anomly_mrk(n)=1
-         if(k5(n).eq.11.and.k6(n).eq.105) anomly_mrk(n)=1
-         if(k5(n).eq.32.and.k6(n).eq.100) anomly_mrk(n)=1
-         if(k5(n).eq.33.and.k6(n).eq.100) anomly_mrk(n)=1
-         if(k5(n).eq.34.and.k6(n).eq.100) anomly_mrk(n)=1
-         if(k5(n).eq.32.and.k6(n).eq.105) anomly_mrk(n)=1
-         if(k5(n).eq.33.and.k6(n).eq.105) anomly_mrk(n)=1
-         if(k5(n).eq.34.and.k6(n).eq.105) anomly_mrk(n)=1
-        end do
+      do n = 1, numvarbl
+       if(k4(n).eq.3.and.k5(n).eq.5.and.k6(n).eq.100) anomly_mrk(n)=1
+       if(k4(n).eq.3.and.k5(n).eq.1.and.k6(n).eq.101) anomly_mrk(n)=1
+       if(k4(n).eq.0.and.k5(n).eq.4.and.k6(n).eq.103) anomly_mrk(n)=1
+       if(k4(n).eq.0.and.k5(n).eq.5.and.k6(n).eq.103) anomly_mrk(n)=1
+       if(k4(n).eq.0.and.k5(n).eq.0.and.k6(n).eq.100) anomly_mrk(n)=1
+       if(k4(n).eq.0.and.k5(n).eq.0.and.k6(n).eq.103) anomly_mrk(n)=1
+       if(k4(n).eq.2.and.k5(n).eq.2.and.k6(n).eq.100) anomly_mrk(n)=1
+       if(k4(n).eq.2.and.k5(n).eq.3.and.k6(n).eq.100) anomly_mrk(n)=1
+       if(k4(n).eq.2.and.k5(n).eq.1.and.k6(n).eq.100) anomly_mrk(n)=1
+      end do
 
-       do n = 1, numvarbl
+      do n = 1, numvarbl
         write(*,*) 'variable:', n
-c        write(*,*)'  fhomrk =',fhomrk(n),trim(fho(n)),nchrfho(n),
         write(*,*)'readcntl,  fhomrk =',fhomrk(n),trim(fho(n)),
      +  (rfhothr(n,i),i=1,fhomrk(n))
         write(*,*)'  afhomrk =',afhomrk(n),trim(fho(n)),nchrafho(n),
-c        write(*,*)'  afhomrk =',afhomrk(n),trim(fho(n)),
      +  (rafhothr(n,i),i=1,afhomrk(n))
         write(*,*)'  tendencymrk,updown,dt, =',tendencymrk(n),
      +  (updown(n,i),i=1,10), dt(n)
         write(*,*)'  anomly_mrk=',anomly_mrk(n)
         write(*,*)'  wavemrk, wv1, wv2 =',wavemrk(n),wv1(n),wv2(n)
-       end do
+      end do
 
 
 C---------------------------------------------------------------------------
@@ -774,22 +890,19 @@ C
 
 c  add by Binbin:
         do n = 1, numvarbl
-         if(k6(n).eq.100.or.k6(n).eq.107) then
+         if(k6(n).eq.100.or.k6(n).eq.104) then
             namlvl(n,:) = namlevel(:)
             nchrlvl(n,:) = nchrlevel(:)
-         else if (k6(n).eq.105.or.k6(n).eq.125) then
+         else if (k6(n).eq.103) then
             namlvl(n,1) = 'H'//trim(ck7(n))
-            nchrlvl(n,1) = len(namlvl(n,1))
-c         else if (k6(n).eq.107) then
-c            namlvl(n,1) = 'S'//trim(ck7(n))
-c            nchrlvl(n,1) = len(namlvl(n,1))
-         else if (k6(n).eq.102) then 
+            nchrlvl(n,1) = len_trim(namlvl(n,1))
+         else if (k6(n).eq.101) then 
             namlvl(n,1) = 'MSL'
             nchrlvl(n,1) = 3
          else if (k6(n).eq.200) then
             namlvl(n,1) = 'ATMOS'
             nchrlvl(n,1) = 5
-         else if (k6(n).eq.1) then
+         else if (k6(n).eq.1.or.k6(n).eq.215) then  !ceiling's k6=215 
             namlvl(n,1) = 'SFC'
             nchrlvl(n,1) = 3
          else if (k6(n).eq.2) then
@@ -805,7 +918,7 @@ c            nchrlvl(n,1) = len(namlvl(n,1))
             namlvl(n,1) = '0DEG'
             nchrlvl(n,1) = 4                                                                                                                     
          end if
-           write(*,*) 'namlvl=', namlvl(n,:)
+           write(*,*) 'namlvl nchrlvl=', namlvl(n,1),nchrlvl(n,1)
         end do
 
        write(*,*) 'setlevel done'

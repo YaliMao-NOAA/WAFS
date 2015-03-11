@@ -28,17 +28,20 @@ c           Mar, 2005
 
         getFO = 0.0
         if (trim(symbol).eq.'FHO>'.or.
-     +      trim(symbol).eq.'AFHO>') then
+     +      trim(symbol).eq.'AFHO>'.or.
+     +      trim(symbol).eq.'SFHO>') then
           if ( x .ge. threshold) then
             getFO = 1.0
           end if
         else if(trim(symbol).eq.'FHO<'.or.
-     +          trim(symbol).eq.'AFHO<') then
+     +          trim(symbol).eq.'AFHO<'.or.
+     +          trim(symbol).eq.'SFHO<') then
           if ( x .le. threshold) then
             getFO = 1.0
           end if
         else if(trim(symbol).eq.'FHO='.or.
-     +          trim(symbol).eq.'AFHO=') then
+     +          trim(symbol).eq.'AFHO='.or.
+     +          trim(symbol).eq.'SFHO=') then
           if ( x .eq. threshold) then
             getFO = 1.0
           end if

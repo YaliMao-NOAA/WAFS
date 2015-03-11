@@ -73,7 +73,8 @@ C
      +        ddfcst(mxfcst), hhfcst(mxfcst), fffcst(mxfcst),
      +        yyyyobsv(maxobs), mmobsv(maxobs),
      +        ddobsv(maxobs), hhobsv(maxobs), ffobsv(maxobs)
-      integer k5(mxvrbl),k6(mxvrbl),k7(mxvrbl),vectormrk(mxvrbl)
+      integer k5(mxvrbl),k6(mxvrbl),k7(mxvrbl),vectormrk(mxvrbl),
+     +        k4(mxvrbl)
  
       CHARACTER*24 fho(mxvrbl),    fhothr(mxvrbl,20)
       CHARACTER*24 afho(mxvrbl),   afhothr(mxvrbl,20)
@@ -84,15 +85,26 @@ C
       integer continue_mrk(mxvrbl)
       integer anomlylev(mxvrbl,maxlvl),anomly_mrk(mxvrbl)
 
+      CHARACTER*24 sfho(mxvrbl),sfhothr(mxvrbl,20)
+      CHARACTER*24 ffho(mxvrbl),ffhothr(mxvrbl,20)
+      integer  nchrsfho(mxvrbl),nchrsfhothr(mxvrbl,20),sfhomrk(mxvrbl)
+      integer  nchrffho(mxvrbl),nchrffhothr(mxvrbl,20),ffhomrk(mxvrbl)
+      real rsfhothr(mxvrbl,20)
+      real rffhothr(mxvrbl,20)
+
 
       COMMON /g2g/cyyyyfcst,cmmfcst,cddfcst,chhfcst,cfffcst,
      +            cyyyyobsv,cmmobsv,cddobsv,chhobsv,cffobsv,
      +             yyyyfcst, mmfcst, ddfcst, hhfcst, fffcst,
      +             yyyyobsv, mmobsv, ddobsv, hhobsv, ffobsv,
-     +             k5,k6,k7,ck7,vectormrk,namlvl,nchrlvl,
+     +             k4,k5,k6,k7,ck7,vectormrk,namlvl,nchrlvl,
      +        fhomrk,fho,nchrfho,fhothr,nchrfhothr,rfhothr,
      +             continue_mrk, anomly_mrk, anomlylev,
      +     afhomrk,afho,nchrafho,afhothr,nchrafhothr,rafhothr
+      COMMON /FRC/
+     +       sfhomrk,sfho,nchrsfho,sfhothr,nchrsfhothr,rsfhothr,
+     +       ffhomrk,ffho,nchrffho,ffhothr,nchrffhothr,rffhothr
+
 
 
       integer plevel(maxlvl)
@@ -166,6 +178,8 @@ C
            do 60 ivr = 1, numvarbl
               if(fhomrk(ivr).ne.0)    goto 60
               if(afhomrk(ivr).ne.0)    goto 60
+              if(sfhomrk(ivr).ne.0)    goto 60
+              if(ffhomrk(ivr).ne.0)    goto 60
              do 50 ilv = 1, levels(ivr)
               if(nodata(ifh,ivr,ilv).eq.1) goto 50
                 if (mode(iar).eq.1) then                          !all GRID domain (mode 1)

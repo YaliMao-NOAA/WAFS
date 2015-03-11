@@ -40,29 +40,28 @@ czhoub  if(kgds(4).eq.lgds(4).and.kgds(7).eq.lgds(7)) return
         return
         end
 
-       subroutine get_BiasData(biasgribfile,biasindxfile,
-     +    jmm,jdd,jhh,kk5,kk6,kk7,ngrid,bias)
+       subroutine get_BiasData(biasgribfile,
+     +    jmm,jdd,jhh,kk4,kk5,kk6,kk7,ngrid,bias)
 
+      use grib_mod
       include 'parm.inc'
-                                                                                                                                      
+      
+      type(gribfield) :: gfld                                                                                                                                
       dimension jpds(25),jgds(25),kpds(25),kgds(25),jjpds(25)          !grib
-      logical, allocatable, dimension(:)  :: lb
       real bias(ngrid)                                                                                                                                          
  
-      character*80 biasgribfile, biasindxfile
-      integer biasgribunit, biasindxunit
+      character*80 biasgribfile
+      integer biasgribunit
 
-      allocate(lb(ngrid))
 
       biasgribunit=205
-      biasindxunit=206
 
       write(*,*) ' In get_BiasData' 
 
 
        write(*,*) 'Observ time(MM,DD,HH) = ', jmm,jdd,jhh
 
-       write(*,*) trim(biasgribfile),' ',trim(biasindxfile)
+       write(*,*) trim(biasgribfile)
 
 
        call baopen(biasgribunit,biasgribfile, ierr)
@@ -71,36 +70,27 @@ czhoub  if(kgds(4).eq.lgds(4).and.kgds(7).eq.lgds(7)) return
         stop 118
        end if
 
-       call baopen(biasindxunit,biasindxfile, ierr)
-       if(ierr.ne.0) then
-        write(*,*) 'open ',trim(biasindxfile), ' error'
-        stop 218
-       end if
-
-
-         jgds=-1
-         jpds=-1
-         kgds=-1
-          
-         jpds(5) = kk5
-         jpds(6) = kk6
-         jpds(7) = kk7
+         jpd1=kk4
+         jpd2=kk5
+         jpd10=kk6
+         jpd12=kk7
                                                                                                                                    
          jpds(9)=jmm
          jpds(10)=jdd
          jpds(11)=jhh
 
-          call getgb(biasgribunit,biasindxunit,ngrid,0,jpds,jgds,
-     &                      kf, k, kpds, kgds, lb, bias, iret)
+         call readGB2(biasgribunit,0,jpd1,jpd2,jpd10,jpd12,
+     +      -1,jmm,jdd,jhh,-1,jf,gfld,iret)
+
           if(iret.ne.0) then
             write(*,*)'no bias data, iret=',iret  
             bias=0.0
+          else
+            bias=gfld%fld
           end if
                
         call baclose(biasgribunit, ierr)
-        call baclose(biasindxunit, ierr)
  
-          deallocate(lb)
                 
         return
         end

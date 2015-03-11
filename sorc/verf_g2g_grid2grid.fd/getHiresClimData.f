@@ -1,127 +1,72 @@
-       subroutine get_HiresClimData(meangribfile,meanindxfile,
-     +          sprdgribfile,sprdindxfile,
-     +    jmm,jdd,jhh,kk5,kk6,kk7,ngrid,Nmodel,kb,clip,nodata)
+       subroutine get_HiresClimData(meangribfile,sprdgribfile,
+     +    kk4,kk5,kk6,kk7,ngrid,Nmodel,kb,clip,nodata)
 
 
+      use grib_mod
       include 'parm.inc'
                                                                          
-                                                                                                                                      
-      dimension jpds(25),jgds(25),kpds(25),kgds(25),jjpds(25)          !grib
-      dimension kens(5),kprob(2),xprob(2),kclust(16),kmembr(80) !grib extension
-      logical, allocatable, dimension(:)  :: lb
+      type(gribfield) :: gfld                                                                                                                                
       real, allocatable, dimension(:)  :: mean,spread
       real clip(ngrid,kb)
                                                                                                                                            
-      CHARACTER*80 meangribfile, meanindxfile,
-     +             sprdgribfile, sprdindxfile
-      integer meangribunit, meanindxunit,
-     +        sprdgribunit, sprdindxunit
+      CHARACTER*80 meangribfile,sprdgribfile
 
       real opara(2), clim_values(11),prob(11)
 
-c      data (prob(k),k=1,11)
-c     * /0.999,0.9,0.8,0.7,0.6,0.5,0.4,0.3,0.2,0.1,0.001/
+      integer yy,mm,dd,cyc,ff
 
        data (prob(k),k=1,11)
      * /0.001,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,0.9999/
 
 
       nodata = -1
-      allocate(lb(ngrid))
       allocate(mean(ngrid))
       allocate(spread(ngrid))
 
-      meangribunit=201
-      meanindxunit=202
-      sprdgribunit=203
-      sprdindxunit=204
-
       write(*,*) ' In get_HiresClimData' 
 
-
-       write(*,*) 'Observ time(MM,DD,HH) = ', jmm,jdd,jhh
-
-       write(*,*) trim(meangribfile),' ',trim(meanindxfile),
-     +        ' ',trim(sprdgribfile),' ',trim(sprdindxfile)
+       write(*,*) trim(meangribfile),' ',trim(sprdgribfile)
 
 
        write(*,*)' Get clim mean data ------------------------'
-       call baopen(meangribunit,meangribfile, ierr)
+       call baopenr(51,meangribfile, ierr)
        if(ierr.ne.0) then
-        write(*,*)'open ',trim(meangribfile), ' error'
+        write(*,*)'open ',trim(meangribfile), ' error=',ierr
         stop 118
        end if
 
-       call baopen(meanindxunit,meanindxfile, ierr)
-       if(ierr.ne.0) then
-        write(*,*) 'open ',trim(meanindxfile), ' error'
-        stop 218
-       end if
+          call readClimGB2(51,8,kk4,kk5,kk6,kk7,gfld,iret)
 
-
-         jgds=-1
-         jpds=-1
-         kgds=-1
-          
-         jpds(5) = kk5
-         jpds(6) = kk6
-         jpds(7) = kk7
-                                                                                                                                   
-         jpds(9)=jmm
-         jpds(10)=jdd
-         jpds(11)=jhh
-
-          write(*,*) 'mean jpds(5,6,7)=',jpds(5),jpds(6),jpds(7)
-          write(*,*) 'mean jpds(9,10,11)=',jpds(9),jpds(10),jpds(11)
-
-          call getgb(meangribunit,meanindxunit,ngrid,0,jpds,jgds,
-     &                      kf, k, kpds, kgds, lb, mean, iret)
           if(iret.ne.0) then
             write(*,*)'read mean clim data file error=',iret  
             nodata = 1
+          else
+            mean=gfld%fld
+            write(*,'(10f8.2)') (mean(k),k=10001,10010)
           end if
                
-        call baclose(meangribunit, ierr)
-        call baclose(meanindxunit, ierr)
+        call baclose(51, ierr)
  
        write(*,*)' Get clim spread data ----------------------'                                      
 
-       call baopen(sprdgribunit,sprdgribfile, ierr)
+       call baopen(52,sprdgribfile, ierr)
        if(ierr.ne.0) then
         write(*,*)'open ',trim(sprdgribfile), ' error'
         nodata = 1 
        end if
 
-       call baopen(sprdindxunit,sprdindxfile, ierr)
-       if(ierr.ne.0) then
-        write(*,*) 'open ',trim(sprdindxfile), ' error'
-        nodata = 1
-       end if
+         call readClimGB2(52,8,kk4,kk5,kk6,kk7,gfld,iret)
 
 
-         jgds=-1
-         jpds=-1
-         kgds=-1
-
-         jpds(5) = kk5
-         jpds(6) = kk6
-         jpds(7) = kk7
-
-         jpds(9)=jmm
-         jpds(10)=jdd
-         jpds(11)=jhh
-
-          write(*,*)'spread jpds(5,6,7)=',jpds(5),jpds(6),jpds(7)
-
-          call getgb(sprdgribunit,sprdindxunit,ngrid,0,jpds,jgds,
-     &                      kf, k, kpds, kgds, lb, spread, iret)
           if(iret.ne.0) then
             write(*,*)'read spread clim data error=',iret     
             nodata = 1
+          else
+            spread=gfld%fld
+            write(*,'(10f8.2)') (spread(k),k=10001,10010)
           end if
 
-        call baclose(sprdgribunit, ierr)
-        call baclose(sprdindxunit, ierr)
+        call baclose(52, ierr)
 
 CCC Now compute climate data at 11 probability bin ----
          write(*,*)'Compute climate data at kb bin --'
@@ -150,13 +95,50 @@ CCC Now compute climate data at 11 probability bin ----
            clip = -99999.9
  
          end if                            
-                                                                              
-          deallocate(lb)
+
+
           deallocate(mean)
           deallocate(spread)
 
           write(*,*) 'Get_HiresClimData done, nodata=',nodata
                 
+        return
+        end
+
+      subroutine readClimGB2(igrb2,jpdtn,jpd1,jpd2,jpd10,jpd12,
+     +     gfld,iret)
+
+        use grib_mod
+
+        type(gribfield),intent(IN) :: gfld
+        integer jids(200), jpdt(200), jgdt(200)
+        integer igrb2,jpdtn,jpd1,jpd2,jpd10,jpd12,jpd27
+        logical :: unpack=.true.
+
+        write(*,*) igrb2, jpdtn,jpd1,jpd2,jpd10,jpd12
+
+        jids=-9999  !array define center, master/local table, year,month,day, hour, etc, -9999 wildcard to accept any
+        jpdt=-9999  !array define Product, to be determined
+        jgdt=-9999  !array define Grid , -9999 wildcard to accept any
+
+        jdisc=-1    !discipline#  -1 wildcard 
+        jgdtn=-1
+        jskp=0      !Number of fields to be skip, 0 search from beginning
+
+        jpdt(1)=jpd1   !Category #     
+        jpdt(2)=jpd2   !Product # under this category     
+        jpdt(10)=jpd10 !Product vertical ID      
+
+        if(jpd10.eq.100) then
+           jpdt(12)=jpd12*100   !pressure level     
+        else
+           jpdt(12)=jpd12
+        end if
+
+        call getgb2(igrb2,0,jskp,jdisc,jids,jpdtn,jpdt,jgdtn,jgdt,
+     +     unpack, jskp1, gfld,iret)
+
+
         return
         end
 

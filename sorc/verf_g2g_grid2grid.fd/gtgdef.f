@@ -10,7 +10,7 @@ C PROGRAM HISTORY LOG:
 C   98-01-04  Geoff DiMego   Brand new code
 C   2006-10-10 Binbin Z.     Add grid#255 for HYSPLIT MODEL
 C   2012--9-15 Binbin Z.     Add RTMA 2.5 grid
-C
+C   2014-5-6   Binbin Z.     Add Firewx grid 
 
 C USAGE:    CALL GTGDEF(IGRID,ISTAT,IMAX,JMAX,ALAT1,ELON1,
 C    1    DXX,DYY,ELONV,ALATAN,LATLONG,LAMBERT,POLARSTEREO)
@@ -38,27 +38,28 @@ C$$$
       LOGICAL latlong, lambert, polarstereo
 
       INTEGER kgds(91)
-      character*24 model, obstype
+      character*24 model, obstype, ens
+      integer  dumy(20) 
 C
       istat = 0
 C     
 C     USE W3FI71 WITH THE INPUT GRID NUMBER TO GET THE PDS
 C     FROM WHICH TO EXTRACT THE GRID DEFINITION PARAMETERS
 C
+      ens=model(1:7) 
       write(*,*) 'In gtgdef: igrid, model, obstype=', 
-     +   igrid, trim(model), '  ', trim(obstype)
+     +   igrid, trim(model), '  ', trim(obstype),' ',trim(ens)
     
       if(igrid.lt.255) then     
        CALL w3fi71(igrid,kgds,istat)
        IF (istat.ne.0) RETURN
-       else if(igrid.eq.255) then
-         kgds(2+1)=3      !specific for MATT's Hiresolution WRF   selfdefined 255 grid
-C         kgds(2+2)=940   !Matt's Central
-C         kgds(2+3)=739   !Matt's Central
-c         kgds(2+2)=1295   !Matt's CONUS
-c         kgds(2+3)=854    !Matt's CONUS
+      else if(igrid.eq.255) then
 
-        if(trim(obstype).eq.'RTMA' ) then 
+        if(trim(model).eq.'HRRR'.and.
+     +     trim(obstype).ne.'FIREWX' ) then
+            kgds(2+2)=1799
+            kgds(2+3)=1059
+        else if(trim(obstype).eq.'RTMA' ) then 
             kgds(2+2)=1073   !RTMA
             kgds(2+3)=689    !RTMA
             kgds(2+4)=23200
@@ -83,7 +84,8 @@ c         kgds(2+3)=854    !Matt's CONUS
             kgds(2+23)=-1
             kgds(2+24)=-1
             kgds(2+25)=-1
-          else if(trim(obstype).eq.'RTMA2') then
+          else if(trim(obstype).eq.'RTMA2' .or.
+     +        trim(obstype).eq.'URMA') then
             kgds(2+2)=2145   !2.5km RTMA
             kgds(2+3)=1377
             kgds(2+4)=20192
@@ -108,141 +110,30 @@ c         kgds(2+3)=854    !Matt's CONUS
             kgds(2+23)=-1
             kgds(2+24)=-1
             kgds(2+25)=-1
-           else if(trim(obstype).eq.'MOSAIC') then   !for operational hires WRF east/west region
-            kgds(2+2)=884   
-            kgds(2+3)=614
-            kgds(2+4)=22100
-            kgds(2+5)=-109800
-            kgds(2+6)=8
-            kgds(2+7)=-108000
-            kgds(2+8)=5000
-            kgds(2+9)=5000
-            kgds(2+10)=0
-            kgds(2+11)=64
-            kgds(2+12)=0
-            kgds(2+13)=40500
-            kgds(2+14)=40500
-            kgds(2+15)=0
-            kgds(2+16)=0
-            kgds(2+17)=-1
-            kgds(2+18)=-1
-            kgds(2+19)=0
-            kgds(2+20)=255
-            kgds(2+21)=-1
-            kgds(2+22)=-1
-            kgds(2+23)=-1
-            kgds(2+24)=-1
-            kgds(2+25)=-1
-          end if
 
-        else if(igrid.eq.256) then
-         kgds(2+1)=3      !specific for AWC ADDS
-         kgds(2+2)=1073
-         kgds(2+3)=689
-         kgds(2+4)=20192
-         kgds(2+5)=238446
-         kgds(2+6)=128
-         kgds(2+7)=265000
-         kgds(2+8)=5079
-         kgds(2+9)=5079
-         kgds(2+10)=0
-         kgds(2+11)=64
-         kgds(2+12)=25000
-         kgds(2+13)=25000
-         kgds(2+14)=0
-         kgds(2+15)=0
-         kgds(2+16)=0
-         kgds(2+17)=-1
-         kgds(2+18)=-1
-         kgds(2+19)=0
-         kgds(2+20)=255
-         kgds(2+21)=-1
-         kgds(2+22)=-1
-         kgds(2+23)=-1
-         kgds(2+24)=-1
-         kgds(2+25)=-1
+           else if(trim(obstype).eq.'FIREWX') then
+            read(15,*) (dumy(i),i=1,8), kgds(2+2),kgds(2+3)
 
-        else if(igrid.eq.258) then
-         kgds(2+1)=3      !specific for reflectivity on Hi-res WRF (5km) west region
-         kgds(2+2)=884
-         kgds(2+3)=614
-         kgds(2+4)=24500
-         kgds(2+5)=-129200
-         kgds(2+6)=8
-         kgds(2+7)=-108000
-         kgds(2+8)=5000
-         kgds(2+9)=5000
-         kgds(2+10)=0
-         kgds(2+11)=64
-         kgds(2+12)=40500
-         kgds(2+13)=40500
-         kgds(2+14)=0
-         kgds(2+15)=0
-         kgds(2+16)=0
-         kgds(2+17)=-1
-         kgds(2+18)=-1
-         kgds(2+19)=0
-         kgds(2+20)=255
-         kgds(2+21)=-1
-         kgds(2+22)=-1
-         kgds(2+23)=-1
-         kgds(2+24)=-1
-         kgds(2+25)=-1
-        else if(igrid.eq.257) then
-         kgds(2+1)=3      !specific for reflectivity on Hi-res WRF (5km) east region
-         kgds(2+2)=884
-         kgds(2+3)=614
-         kgds(2+4)=22100
-         kgds(2+5)=-109800
-         kgds(2+6)=8
-         kgds(2+7)=-89000
-         kgds(2+8)=5000
-         kgds(2+9)=5000
-         kgds(2+10)=0
-         kgds(2+11)=64
-         kgds(2+12)=38000
-         kgds(2+13)=38000
-         kgds(2+14)=0
-         kgds(2+15)=0
-         kgds(2+16)=0
-         kgds(2+17)=-1
-         kgds(2+18)=-1
-         kgds(2+19)=0
-         kgds(2+20)=255
-         kgds(2+21)=-1
-         kgds(2+22)=-1
-         kgds(2+23)=-1
-         kgds(2+24)=-1
-         kgds(2+25)=-1
+           else if(trim(obstype).eq.'SMOKE' ) then
+            kgds(2+2)=801
+            kgds(2+3)=534
 
-        else if(igrid.eq.189) then
+           else if(trim(obstype).eq.'DUST' ) then
+            kgds(2+2)=601
+            kgds(2+3)=251
 
-         kgds(2+1)=3      !specific for reflectivity on Hi-res WRF (5km) central region (CONUS) defined by Matt Pyle
-         kgds(2+2)=1295
-         kgds(2+3)=854
-         kgds(2+4)=20800
-         kgds(2+5)=-122000
-         kgds(2+6)=8
-         kgds(2+7)=-98000
-         kgds(2+8)=4000
-         kgds(2+9)=4000
-         kgds(2+10)=0
-         kgds(2+11)=64
-         kgds(2+12)=39000
-         kgds(2+13)=39000
-         kgds(2+14)=0
-         kgds(2+15)=0
-         kgds(2+16)=0
-         kgds(2+17)=-1
-         kgds(2+18)=-1
-         kgds(2+19)=0
-         kgds(2+20)=255
-         kgds(2+21)=-1
-         kgds(2+22)=-1
-         kgds(2+23)=-1
-         kgds(2+24)=-1
-         kgds(2+25)=-1
+           else if(trim(obstype).eq.'NDAS'.or.
+     +             trim(obstype).eq.'LAPS' ) then  !Isidora: modify here !for your system
+            kgds(2+2)=801
+            kgds(2+3)=581
 
+           end if
+
+           !even if model is HRRR, if verif is on MOSAIC grid, overwrite it
+           if(trim(obstype).eq.'ONMOSAIC') then
+            kgds(2+2)=1401
+            kgds(2+3)=701
+           end if
 
        end if
 C     

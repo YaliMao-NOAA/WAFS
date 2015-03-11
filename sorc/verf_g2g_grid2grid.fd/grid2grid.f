@@ -39,8 +39,11 @@ c    08/13/2010: B. Zhou, add grid# 189 (defined by Matt Pyle) to verifify refle
 C    04/18/2011: B. Zhou, add Yuejian's ensembel verification subroutine EFS 
 C    07/12/2011: B. Zhou, Update to use Hiresolution climatology data (created by Bo Yang) in EFS
 C    11/08/2011: B. Zhou, add adjustment of bias and S-N reverse for Canadian members in NAEFS 
-C
-C 
+C    11/08/2012  B. Zhou, Convert from CCS to WCOSS (Intel Linux OS)
+C    11/22/2013  B. Zhou, Add FSS stats 
+c    01/09/2014  B. Zhou, Modify reliability reli in PROB.f so that can be specific FHO threshold and also can set > or < or =
+c    01/05/2014  B. Zhou Change to grib2 I/O
+c
 C   Variables:
 C    - maxmod, mxfcst, mxdate, maxobs, mxarea, mxstat, mxvrbl, maxlvl
 C      integer: maximum numbers of models, forecast time, verified time, obs type, sub-region,
@@ -217,7 +220,8 @@ C  Binbin Zhou: For grid2grid
      +        ddfcst(mxfcst), hhfcst(mxfcst), fffcst(mxfcst),
      +        yyyyobsv(maxobs), mmobsv(maxobs),
      +        ddobsv(maxobs), hhobsv(maxobs), ffobsv(maxobs)
-      integer k5(mxvrbl),k6(mxvrbl),k7(mxvrbl),vectormrk(mxvrbl)
+      integer k5(mxvrbl),k6(mxvrbl),k7(mxvrbl),vectormrk(mxvrbl),
+     +        k4(mxvrbl)
       CHARACTER*6 ck7(mxvrbl)
 
       CHARACTER*24 namlvl(mxvrbl,maxlvl)
@@ -225,9 +229,16 @@ C  Binbin Zhou: For grid2grid
 
       CHARACTER*24 fho(mxvrbl),fhothr(mxvrbl,20)
       CHARACTER*24 afho(mxvrbl),afhothr(mxvrbl,20)
+      CHARACTER*24 sfho(mxvrbl),sfhothr(mxvrbl,20)
+      CHARACTER*24 ffho(mxvrbl),ffhothr(mxvrbl,20)
+
       integer  nchrfho(mxvrbl),nchrfhothr(mxvrbl,20),fhomrk(mxvrbl)
       integer  nchrafho(mxvrbl),nchrafhothr(mxvrbl,20),afhomrk(mxvrbl)
-      real rfhothr(mxvrbl,20), rafhothr(mxvrbl,20)
+      integer  nchrsfho(mxvrbl),nchrsfhothr(mxvrbl,20),sfhomrk(mxvrbl)
+      integer  nchrffho(mxvrbl),nchrffhothr(mxvrbl,20),ffhomrk(mxvrbl)
+
+      real rfhothr(mxvrbl,20), rafhothr(mxvrbl,20),rsfhothr(mxvrbl,20),
+     +     rffhothr(mxvrbl,20)
       integer  continue_mrk(mxvrbl)
 
       integer anomlylev(mxvrbl,maxlvl), anomly_mrk(mxvrbl)
@@ -236,10 +247,13 @@ C  Binbin Zhou: For grid2grid
      +            cyyyyobsv,cmmobsv,cddobsv,chhobsv,cffobsv,
      +             yyyyfcst, mmfcst, ddfcst, hhfcst, fffcst,
      +             yyyyobsv, mmobsv, ddobsv, hhobsv, ffobsv,
-     +             k5,k6,k7,ck7,vectormrk,namlvl,nchrlvl,
+     +             k4,k5,k6,k7,ck7,vectormrk,namlvl,nchrlvl,
      +        fhomrk,fho,nchrfho,fhothr,nchrfhothr,rfhothr,
      +             continue_mrk,anomly_mrk,anomlylev,
      +       afhomrk,afho,nchrafho,afhothr,nchrafhothr,rafhothr
+      COMMON /FRC/
+     +       sfhomrk,sfho,nchrsfho,sfhothr,nchrsfhothr,rsfhothr,
+     +       ffhomrk,ffho,nchrffho,ffhothr,nchrffhothr,rffhothr
 
       integer plevel(maxlvl)
       integer region_id(maxpts)
@@ -337,6 +351,11 @@ c--------------------------------------------------------------------
       CHARACTER*24 ensmbr(100)                                  !ensemble mamber names for NAEFS 
       real, allocatable, dimension(:) :: biasdata,ftemp
       CHARACTER*80 biasgribfile, biasindxfile
+
+      CHARACTER*1 tag(mxvrbl)
+      integer nxy(mxvrbl)
+
+      COMMON /fss/tag,nxy
 
 
 C
@@ -446,14 +465,14 @@ C
 
          do n=1,numvarbl
           write(*,*) trim(namvarbl(n)),
-     +   ' k5,k6,k7,ck7=', k5(n),k6(n),k7(n),ck7(n),
+     +   ' k4,k5,k6,k7,ck7=', k4(n),k5(n),k6(n),k7(n),ck7(n),
      +   ' tendencymrk=',tendencymrk(n),' fhomrk=',fhomrk(n),
      +   ' vectormrk=',vectormrk(n), 
      +   ' tendencymrk=', tendencymrk(n),
      +   ' updown=', (updown(n,k),k=1,fhomrk(n))                                                           
 
           write(*,*) trim(namvarbl(n)),
-     +     ' k5,k6,k7,ck7=', k5(n),k6(n),k7(n),
+     +     ' k4,k5,k6,k7,ck7=', k4(n),k5(n),k6(n),k7(n),
      +     'wavemrk=', wavemrk(n),wv1(n),wv2(n)
          end do
 
@@ -520,7 +539,6 @@ C    STEP 2. READ DATA FROM Thined GRIB Forecast file and Thined GRIB Observatio
  
 
            ogrbfile='obsv.grib.'//trim(namodel(1))   !add model name to deal with ensemble system
-           oinxfile='obsv.indx.'//trim(namodel(1))   !add model name to deal with ensemble system
 
            allocate(fcstdata2(numfcst,numvarbl,numlevel,ngrid))
            allocate(obsvdata2(numfcst,numvarbl,numlevel,ngrid))
@@ -540,27 +558,24 @@ C    STEP 2. READ DATA FROM Thined GRIB Forecast file and Thined GRIB Observatio
           hasdata=1
  
           fgrbfile='fcst.grib.'//trim(namodel(1))
-          finxfile='fcst.indx.'//trim(namodel(1))
           ifgrb=10+imodel
-          ifinx=100+imodel
 
           ensmbr(imodel)=namodel(1)
         
     !1: Read forecast data
-                                                                                                                                            
-        call getGRIBdata (ifgrb,ifinx,
-     +       fgrbfile,finxfile,
-     +       fcstdata,ufcst,vfcst,levels,
-     +       numfcst,numvarbl,numlevel,ngrid,
-     +       yyfcst,mmfcst,ddfcst,hhfcst,fffcst,k5,k6,k7,
-     +       plevel,namvarbl)
+     
+        call getGRIB2data (ifgrb,fgrbfile,fcstdata,ufcst,vfcst,
+     +       levels,numfcst,numvarbl,numlevel,ngrid,
+     +       yyfcst,mmfcst,ddfcst,hhfcst,fffcst,k4,k5,k6,k7,
+     +       plevel,namvarbl,Nmodel,namodel(1))
 
 
         !get Sfc height for cloud base/top computation
         HGTsfc=0.0
         if(trim(cloud_sfc).eq.'no') then    !cloud base/top from sea level
          do n=1,numvarbl
-          if(k5(n).eq.7.and.(k6(n).eq.2.or.k6(n).eq.3)) then
+          if(k4(n).eq.3.and.k5(n).eq.5.and.
+     +             (k6(n).eq.2.or.k6(n).eq.3)) then
            call getHGTsfc(HGTsfc, ngrid)
            goto 111   
           end if
@@ -568,7 +583,8 @@ C    STEP 2. READ DATA FROM Thined GRIB Forecast file and Thined GRIB Observatio
 111      continue
          !compute the cloud base/top
          do n=1,numvarbl
-           if(k5(n).eq.7.and.(k6(n).eq.2.or.k6(n).eq.3)) then
+           if(k4(n).eq.3.and.k5(n).eq.5.and.
+     +               (k6(n).eq.2.or.k6(n).eq.3)) then
             do ng=1,ngrid
              fcstdata(:,n,:,ng)=fcstdata(:,n,:,ng)-HGTsfc(ng)
             end do
@@ -584,12 +600,10 @@ C    STEP 2. READ DATA FROM Thined GRIB Forecast file and Thined GRIB Observatio
     !2:read observation data
         
        if(imodel.eq.1 ) then
-         call getGRIBdata (42,43,
-     +       ogrbfile,oinxfile,
-     +       obsvdata,uobsv,vobsv,levels,
-     +       numfcst,numvarbl,numlevel,ngrid,
-     +       yyobsv,mmobsv,ddobsv,hhobsv,ffobsv,k5,k6,k7,
-     +       plevel,namvarbl)
+         call getGRIB2data (42,ogrbfile,obsvdata,uobsv,vobsv,
+     +       levels,numfcst,numvarbl,numlevel,ngrid,
+     +       yyobsv,mmobsv,ddobsv,hhobsv,ffobsv,k4,k5,k6,k7,
+     +       plevel,namvarbl,Nmodel,namodel(1))
 
              write(*,*) 'read obsv grib done'
        end if
@@ -618,14 +632,15 @@ C    STEP 2. READ DATA FROM Thined GRIB Forecast file and Thined GRIB Observatio
      +       fcstdata2,ufcst2,vfcst2,levels,
      +       numfcst,numvarbl,numlevel,ngrid,
      +       yyfcst2(1,:),mmfcst2(1,:),ddfcst2(1,:),
-     +       hhfcst2(1,:),fffcst2(1,:),k5,k6,k7,plevel,namvarbl,
+     +       hhfcst2(1,:),fffcst2(1,:),k4,k5,k6,k7,plevel,namvarbl,
      +       tendencymrk)
      
           call get_hasdata(fcstdata2,numfcst,numvarbl,numlevel,
      +               ngrid,levels,tendencymrk,3,hasdata)
 
           do n=1,numvarbl                    !for cloud base/top from sea level
-           if(k5(n).eq.7.and.(k6(n).eq.2.or.k6(n).eq.3)) then
+           if(k4(n).eq.3.and.k5(n).eq.5.and.
+     +       (k6(n).eq.2.or.k6(n).eq.3)) then
             do ng=1,ngrid
              fcstdata2(:,n,:,ng)=fcstdata2(:,n,:,ng)-HGTsfc(ng)
             end do
@@ -637,7 +652,7 @@ C    STEP 2. READ DATA FROM Thined GRIB Forecast file and Thined GRIB Observatio
      +       obsvdata2,uobsv2,vobsv2,levels,
      +       numfcst,numvarbl,numlevel,ngrid,
      +       yyobsv2(1,:),mmobsv2(1,:),ddobsv2(1,:),
-     +       hhobsv2(1,:),ffobsv2(1,:),k5,k6,k7,plevel,namvarbl,
+     +       hhobsv2(1,:),ffobsv2(1,:),k4,k5,k6,k7,plevel,namvarbl,
      +       tendencymrk)
           call get_hasdata(obsvdata2,numfcst,numvarbl,numlevel,
      +               ngrid,levels,tendencymrk,3,hasdata)
@@ -667,7 +682,7 @@ C    STEP 2. READ DATA FROM Thined GRIB Forecast file and Thined GRIB Observatio
      +       fcstdata2,ufcst2,vfcst2,levels,
      +       numfcst,numvarbl,numlevel,ngrid,
      +       yyfcst2(2,:),mmfcst2(2,:),ddfcst2(2,:),
-     +       hhfcst2(2,:),fffcst2(2,:),k5,k6,k7,plevel,namvarbl,
+     +       hhfcst2(2,:),fffcst2(2,:),k4,k5,k6,k7,plevel,namvarbl,
      +       tendencymrk)
 
 
@@ -676,7 +691,8 @@ C    STEP 2. READ DATA FROM Thined GRIB Forecast file and Thined GRIB Observatio
 
 
           do n=1,numvarbl                    !for cloud base/top from sea level
-           if(k5(n).eq.7.and.(k6(n).eq.2.or.k6(n).eq.3)) then
+           if(k4(n).eq.3.and.k5(n).eq.5.and.
+     +         (k6(n).eq.2.or.k6(n).eq.3)) then
             do ng=1,ngrid
              fcstdata2(:,n,:,ng)=fcstdata2(:,n,:,ng)-HGTsfc(ng)
             end do
@@ -688,7 +704,7 @@ C    STEP 2. READ DATA FROM Thined GRIB Forecast file and Thined GRIB Observatio
      +       obsvdata2,uobsv2,vobsv2,levels,
      +       numfcst,numvarbl,numlevel,ngrid,
      +       yyobsv2(2,:),mmobsv2(2,:),ddobsv2(2,:),
-     +       hhobsv2(2,:),ffobsv2(2,:),k5,k6,k7,plevel,namvarbl,
+     +       hhobsv2(2,:),ffobsv2(2,:),k4,k5,k6,k7,plevel,namvarbl,
      +       tendencymrk)
     
           call get_hasdata(obsvdata2,numfcst,numvarbl,numlevel,
@@ -719,7 +735,7 @@ C    STEP 2. READ DATA FROM Thined GRIB Forecast file and Thined GRIB Observatio
      +       fcstdata2,ufcst2,vfcst2,levels,
      +       numfcst,numvarbl,numlevel,ngrid,
      +       yyfcst2(3,:),mmfcst2(3,:),ddfcst2(3,:),
-     +       hhfcst2(3,:),fffcst2(3,:),k5,k6,k7,plevel,namvarbl,
+     +       hhfcst2(3,:),fffcst2(3,:),k4,k5,k6,k7,plevel,namvarbl,
      +       tendencymrk)
 
           call get_hasdata(fcstdata2,numfcst,numvarbl,numlevel,
@@ -727,7 +743,8 @@ C    STEP 2. READ DATA FROM Thined GRIB Forecast file and Thined GRIB Observatio
 
 
           do n=1,numvarbl                    !for cloud base/top from sea level
-           if(k5(n).eq.7.and.(k6(n).eq.2.or.k6(n).eq.3)) then
+           if(k4(n).eq.3.and.k5(n).eq.5.and.
+     +          (k6(n).eq.2.or.k6(n).eq.3)) then
             do ng=1,ngrid
              fcstdata2(:,n,:,ng)=fcstdata2(:,n,:,ng)-HGTsfc(ng)
             end do
@@ -739,7 +756,7 @@ C    STEP 2. READ DATA FROM Thined GRIB Forecast file and Thined GRIB Observatio
      +       obsvdata2,uobsv2,vobsv2,levels,
      +       numfcst,numvarbl,numlevel,ngrid,
      +       yyobsv2(3,:),mmobsv2(3,:),ddobsv2(3,:),
-     +       hhobsv2(3,:),ffobsv2(3,:),k5,k6,k7,plevel,namvarbl,
+     +       hhobsv2(3,:),ffobsv2(3,:),k4,k5,k6,k7,plevel,namvarbl,
      +       tendencymrk)
 
           call get_hasdata(obsvdata2,numfcst,numvarbl,numlevel,
@@ -776,7 +793,7 @@ C    STEP 2. READ DATA FROM Thined GRIB Forecast file and Thined GRIB Observatio
      +       fcstdata2,ufcst2,vfcst2,levels,
      +       numfcst,numvarbl,numlevel,ngrid,
      +       yyfcst2(4,:),mmfcst2(4,:),ddfcst2(4,:),
-     +       hhfcst2(4,:),fffcst2(4,:),k5,k6,k7,plevel,namvarbl,
+     +       hhfcst2(4,:),fffcst2(4,:),k4,k5,k6,k7,plevel,namvarbl,
      +       tendencymrk)
 
           call get_hasdata(fcstdata2,numfcst,numvarbl,numlevel,
@@ -784,7 +801,8 @@ C    STEP 2. READ DATA FROM Thined GRIB Forecast file and Thined GRIB Observatio
 
 
           do n=1,numvarbl                    !for cloud base/top from sea level
-           if(k5(n).eq.7.and.(k6(n).eq.2.or.k6(n).eq.3)) then
+           if(k4(n).eq.3.and.k5(n).eq.5.and.
+     +          (k6(n).eq.2.or.k6(n).eq.3)) then
             do ng=1,ngrid
              fcstdata2(:,n,:,ng)=fcstdata2(:,n,:,ng)-HGTsfc(ng)
             end do
@@ -796,7 +814,7 @@ C    STEP 2. READ DATA FROM Thined GRIB Forecast file and Thined GRIB Observatio
      +       obsvdata2,uobsv2,vobsv2,levels,
      +       numfcst,numvarbl,numlevel,ngrid,
      +       yyobsv2(4,:),mmobsv2(4,:),ddobsv2(4,:),
-     +       hhobsv2(4,:),ffobsv2(4,:),k5,k6,k7,plevel,namvarbl,
+     +       hhobsv2(4,:),ffobsv2(4,:),k4,k5,k6,k7,plevel,namvarbl,
      +       tendencymrk)
        
           call get_hasdata(obsvdata2,numfcst,numvarbl,numlevel,
@@ -885,7 +903,7 @@ c     grib got filtered.
 
 
           !if wind speed, U and V components also needs to filtered
-          if(k5(nvr).eq.32) then
+          if(k4(nvr).eq.2.and.k5(nvr).eq.1) then
            !U-component
            do j = 1, jmax(1)
            do i = 1, imax(1)
@@ -971,7 +989,7 @@ cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 C    STEP 3. DO FVS Computation
    
  
-       nvsdb = 500
+       nvsdb = 99
        open (nvsdb, file='grid2grid.vsdb', status='unknown')
 
        getClimData_called = 0      
@@ -1013,6 +1031,23 @@ c      ----- stats without anomly --------------------------------------
            write(*,*) 'FHO done'
         end if
 
+         if(trim(namstat(ist)).eq.'SFHO') then
+           call gtSFHO(nvsdb, imodel,ist,numfcst,numvfyobs,numarea,
+     +          numvarbl,numlevel,ngrid,levels,tendencymrk,
+     +          updown,hasdata,fcstdata, obsvdata)
+           write(*,*) 'SFHO done'
+        end if
+
+         if(trim(namstat(ist)).eq.'PFHO') then
+           call gtFSS(nvsdb, imodel,ist,numfcst,numvfyobs,numarea,
+     +          numvarbl,numlevel,ngrid,levels,tendencymrk,
+     +          updown,hasdata,fcstdata, obsvdata)
+           write(*,*) 'PFHO done'
+        end if
+
+
+
+
         if(trim(namstat(ist)).eq.'EFHO') then  !Note: EFHO and FHO can not put into same user control file at same time (20090717)
            namstat(ist)='FHO'                  !Either verify FHO either verify EFHO, can't verify the two at same time
 c           fho(ist)='FHO'//fho(ist)(5:5)       !otherwise, need to add efhomrk array. Right now EFHO and FHO share same fhomrk
@@ -1042,14 +1077,14 @@ c        ------ stats with anomly ---------------------------------------
      +     trim(namstat(ist)).eq.'VAL1L2') then
 
           !Step 1: set anomlylev marks for all levels
-          call getAnomlyLevMrk(k5,k6,anomly_mrk,plevel,
+          call getAnomlyLevMrk(k4,k5,k6,anomly_mrk,plevel,
      +       numvarbl,numlevel,anomlylev)
 
           !step 2: read climatologic data (in case of ensemble, only first member does it to save time)
 
           if(getClimData_called .eq. 0) then 
 
-           call getAnomlyLevMrk(k5,k6,anomly_mrk,plevel,
+           call getAnomlyLevMrk(k4,k5,k6,anomly_mrk,plevel,
      +       numvarbl,numlevel,anomlylev)
            
            write(*,*) 'AnomlyLevMrk:'
@@ -1061,7 +1096,7 @@ c        ------ stats with anomly ---------------------------------------
 
            call getMeanClimData(climdata,uclim,vclim,
      +       levels,numfcst,numvfyobs,numvarbl,numlevel,ngrid,
-     +       yyobsv,mmobsv,ddobsv,hhobsv,ffobsv,k5,k6,k7,
+     +       yyobsv,mmobsv,ddobsv,hhobsv,ffobsv,k4,k5,k6,k7,
      +       plevel,namvarbl,anomly_mrk,anomlylev,
      +       cmmobsv,cddobsv)
            write(*,*) ' getMeanClimData done'
@@ -1113,7 +1148,7 @@ c        ------ stats with anomly ---------------------------------------
               write(*,'(10f10.2)')(climdata(nfcst,nvr,nlvl,ij),ij=1,10)
 
               !if wind speed, U and V components also needs to filtered
-              if(k5(nvr).eq.32) then
+              if(k4(nvr).eq.2.and.k5(nvr).eq.1) then
 
                !U-component
                do j = 1, jmax(1)
@@ -1215,7 +1250,7 @@ c ----------------------------- end of stats with anomly --------------------
 
         fcstmdl(imodel,:,:,:,:)=fcstdata(:,:,:,:)     !first save forecast data of each models 
 
-        if(k5(numvarbl).eq.32) then
+        if(k4(numvarbl).eq.2.and.k5(numvarbl).eq.1) then
          ufcstmdl(imodel,:,:,:,:)=ufcst(:,:,:,:)
          vfcstmdl(imodel,:,:,:,:)=vfcst(:,:,:,:)
 
@@ -1240,10 +1275,11 @@ c        Step 1.  find climatological data:
         do 2001 ist = 1, numstat 
       
          if(trim(namstat(ist)).eq.'EFS') then       !Yuejian's ensemble verification package
- 
+                                                    !EFS use climatology data as reference
           !Read bias data and reverse S-N for NAEFS's Canadian ensembles
-          if ( trim(ensname).eq.'NAEFS/40') then
-           write(*,*) 'ensname=',trim(ensname)
+          if ( trim(ensname).eq.'NAEFS/40'.or.
+     +         trim(ensname).eq.'CMCE/20'  ) then
+           write(*,*) 'Bias correction for ensname=',trim(ensname)
            
             do 190 ifh = 1, numfcst
             do 180 iob = 1, numvfyobs
@@ -1254,6 +1290,7 @@ c        Step 1.  find climatological data:
               jmm=mmobsv(ifh)
               jdd=ddobsv(ifh)
               jhh=hhobsv(ifh)
+              kk4=k4(ivr)
               kk5=k5(ivr)
               kk6=k6(ivr)
               if(kk6.eq.100) then
@@ -1263,15 +1300,15 @@ c        Step 1.  find climatological data:
               end if
 
              biasgribfile='bias.grib.NAEFS'
-             biasindxfile='bias.indx.NAEFS'
 
-           call get_BiasData(biasgribfile,biasindxfile,
-     +       jmm,jdd,jhh,kk5,kk6,kk7,ngrid,biasdata)
+           call get_BiasData(biasgribfile,
+     +       jmm,jdd,jhh,kk4,kk5,kk6,kk7,ngrid,biasdata)
 
            write(*,*) 'Get Bias data file done!'
          
             do iens=1,Nmodel
-             if(ensmbr(iens)(7:9).eq.'cmc') then          !for NAEFS's Canadian ensemble member,
+             if(ensmbr(iens)(7:9).eq.'cmc' .or.
+     +          ensmbr(iens)(1:4).eq.'cmce' ) then          !for  Canadian ensemble member, 'naefs.cmcxx','cmce.gensxx'
                ftemp(:)=fcstmdl(iens,ifh,ivr,ilv,:)       !do rerefence adjust and reverse S-N
                call debias (biasdata, ftemp, ngrid)
                call cvncep(ftemp, ngrid,imax(1),jmax(1))
@@ -1295,14 +1332,14 @@ c        Step 1.  find climatological data:
 
         end if ! end if 'EFS'
 
-        if(trim(namstat(ist)).eq.'EFS1' ) then
+        if(trim(namstat(ist)).eq.'EFS1' ) then         !EFS1 use single model as reference      
+ 
           call EFS(nvsdb,Nmodel,ensname,ist,numfcst,numvfyobs,
      +      numarea,numvarbl,numlevel,ngrid,levels,plevel,
      +      hasdata,fcstmdl,obsvdata,ensmbr,1,2)
            write(*,*) 'call EFS1 done!'
 
         end if ! end if 'EFS1'
-
 
         if(trim(namstat(ist)).eq.'ESL1L2') then
          call ESL1L2(nvsdb,Nmodel,ensname,ist,numfcst,numvfyobs,

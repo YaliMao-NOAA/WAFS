@@ -1,7 +1,7 @@
 #!/bin/ksh 
 ########################################################################################################
 #
-#  prepg2g.sh is the script to prepare g2g verification, doing following steps 
+#  prepg2g.sh is the script to prepare grid2grid verification, doing following steps 
 #       after read in user-defined control file: 
 #      (1) Check verification types:      
 #          case 1: one verification data to verify multiple cycles of previous forecast
@@ -21,24 +21,166 @@
 #
 #    Author: Binbin Zhou, NCEP/EMC
 #            Feb, 2005
+#            B. Zhou 2014-11-15, upgraded to grib2
 #    
-#  Note:   
-#  NCEP model output filenames have such form as
-#
-#       fhead.tnnz.fgrbtype.fhh.ftm  (e.g. nam.t06z.awphys.f15.tm0, nam.t06z.awip32.f15.tm0)
-#
-#  So,  observation data files names are also re-named(if necessary) to similer format
-#
 #########################################################################################################
-set -x
 
-wgrb=${wgrb:-/nwprod/util/exec}
+#function to get field's searching string  
+get_field_string(){
+
+k4=$1
+k5=$2
+k6=$3
+k7=$4
+p=$5
+
+#Temperature
+if [ $k4 -eq 0 ] && [ $k5 -eq 0 ] ; then
+
+  if [ $k6 -eq 103 ] ; then
+   echo ":TMP:$k7 m "
+  elif [ $k6 -eq 100 ] ; then
+   echo ":TMP:$p mb"
+  fi
+
+#Dew Point Temperature
+elif [ $k4 -eq 0 ] && [ $k5 -eq 6 ] ; then
+
+  if [ $k6 -eq 103 ] ; then
+   echo ":DPT:$k7 m "
+  elif [ $k6 -eq 100 ] ; then
+   echo ":DPT:$p mb"
+  fi
+
+
+
+#Height
+elif [ $k4 -eq 3 ] && [ $k5 -eq 5 ] ; then
+
+  if [ $k6 -eq 1 ] ; then
+   echo ":HGT:surface"
+  elif [ $k6 -eq 100 ] ; then
+   echo ":HGT:$p mb"
+  elif [ $k6 -eq 2 ] ; then
+   echo ":HGT:cloud base"
+  elif [ $k6 -eq 3 ] ; then
+   echo ":HGT:cloud top"
+  elif [ $k6 -eq 215 ] ; then
+   echo ":HGT:cloud ceiling"
+  elif [ $k6 -eq 4 ] ; then
+   echo ":HGT:0C isotherm"
+  fi
+
+#RH
+elif [ $k4 -eq 1 ] && [ $k5 -eq 1 ] ; then
+
+  if [ $k6 -eq 103 ] ; then
+   echo ":RH:$k7 m "
+  elif [ $k6 -eq 100 ] ; then
+   echo ":RH:$p mb"
+  fi
+
+#U wind
+elif [ $k4 -eq 2 ] && [ $k5 -eq 2 ] ; then
+
+  if [ $k6 -eq 103 ] ; then
+   echo ":UGRD:$k7 m "
+  elif [ $k6 -eq 100 ] ; then
+   echo ":UGRD:$p mb"
+  fi
+
+#V wind
+elif [ $k4 -eq 2 ] && [ $k5 -eq 3 ] ; then
+
+  if [ $k6 -eq 103 ] ; then
+   echo ":VGRD:$k7 m "
+  elif [ $k6 -eq 100 ] ; then
+   echo ":VGRD:$p mb"
+  fi
+
+#Reflectivity composite
+elif [ $k4 -eq 16 ] && [ $k5 -eq 196 ] ; then
+
+  #if [ $k6 -eq 200 ] ; then
+   echo ":REFC:entire atmosphere"
+  #fi 
+  #if [ $k6 -eq 10 ] ; then   # HRRR 
+  # echo ":REFC:entire atmosphere"
+  #fi
+
+#Reflectivity at different levels 
+elif [ $k4 -eq 16 ] && [ $k5 -eq 195 ] ; then
+
+  if [ $k6 -eq 105 ] ; then
+   echo ":REFD:1 hybrid"
+  elif [ $k6 -eq 103 ] ; then
+   echo ":REFD:$k7 m"
+  fi
+
+#Hybrid Scan Reflectivity (temporarily used in MOSAIC) 
+elif [ $k4 -eq 15 ] && [ $k5 -eq 15 ] ; then
+  if [ $k6 -eq 200 ] ; then
+   echo ":var discipline=0 master_table=2 parmcat=15 parm=15:"
+  fi
+
+#echo-top
+elif [ $k4 -eq 16 ] && [ $k5 -eq 197 ] ; then
+
+  if [ $k6 -eq 200 ] ; then
+   echo ":RETOP:"
+  fi
+
+#1000m Reflectivity
+#elif [ $k4 -eq 16 ] && [ $k5 -eq 195 ] ; then
+#
+#   if [ $k6 -eq 103 ] ; then
+#    echo ":REFD:$k7 m "
+#   fi
+ 
+#Visibility
+elif [ $k4 -eq 19 ] && [ $k5 -eq 0 ] ; then
+
+  if [ $k6 -eq 1 ] ; then
+   echo ":VIS:surface"
+  fi
+
+#Mean Sea Level Pressure
+elif [ $k4 -eq 3 ] && [ $k5 -eq 1 ] ; then
+
+  if [ $k6 -eq 101 ] ; then
+   echo ":PRMSL:mean sea level"
+  fi
+
+#Absolute voticity
+elif [ $k4 -eq 2 ] && [ $k5 -eq 10 ] ; then
+  if [ $k6 -eq 100 ] ; then
+   echo ":ABSV:$p mb"
+  fi
+
+#Total cloud
+elif [ $k4 -eq 6 ] && [ $k5 -eq 1 ] ; then
+  if [ $k6 -eq 200 ] ; then
+   echo ":TCDC:entire atmosphere"
+  fi
+
+else
+ 
+  echo "Variable not defined, add it into get_field_string function!"
+
+fi
+
+
+}
+
+set -x 
+wgrb=/nwprod/util/exec
 gribindex=${gribindex:-/nwprod/util/exec/grbindex}
-
 cp $PARMverf_g2g/verf_g2g.grid104 grid#104
 cp $PARMverf_g2g/verf_g2g.regions regions
 
+
 rm -f g2g.ctl
+
 
 # Specify the tendency buttons and cloud base/top care here:
 export tnd03=${tnd03:-'close'}
@@ -47,6 +189,8 @@ export tnd12=${tnd12:-'close'}
 export tnd24=${tnd24:-'close'}
 export cloud_base_from_sfc=${cloud_base_from_sfc:-"no"}
 export lat_weight=${lat_weight:-"no"}
+
+
 
 # Now begin to read user-control file #########################################################
 
@@ -170,8 +314,6 @@ export lat_weight=${lat_weight:-"no"}
        else
          echo forecast files: ${filefcst[$t]}  not exist
           echo ${fday[$t]}${tf}${f[$t]}" "${oday[0]}${to}00" "${fday[$t]}${tf}${f03[$t]}" "${oday03[0]}${to03}00" "${fday[$t]}${tf}${f06[$t]}" "${oday06[0]}${to06}00" "${fday[$t]}${tf}${f12[$t]}" "${oday12[0]}${to12}00" "${fday[$t]}${tf}${f24[$t]}" "${oday24[0]}${to24}00 >> g2g.ctl
-#         rm -f g2g.ctl
-#         exit
        fi
         t=`expr $t + 1`
      done
@@ -259,8 +401,6 @@ export lat_weight=${lat_weight:-"no"}
      else
          echo ${filefcst[0]} or ${fileobsv[0]} not exist
 echo ${fday[0]}${tf}${b[0]}" "${oday[0]}${to}00" "${fday[0]}${tf}${b03[0]}" "${oday03[0]}${to03}00" "${fday[0]}${tf}${b06[0]}" "${oday06[0]}${to06}00" "${fday[0]}${tf}${b12[0]}" "${oday12[0]}${to12}00" "${fday[0]}${tf}${b24[0]}" "${oday24[0]}${to24}00 >> g2g.ctl
-#         rm -f g2g.ctl
-#         exit
      fi
 
      t=1
@@ -342,8 +482,6 @@ echo ${fday[0]}${tf}${b[0]}" "${oday[0]}${to}00" "${fday[0]}${tf}${b03[0]}" "${o
        else
          echo ${filefcst[$t]} or ${fileobsv[$t]} not exist
 echo ${fday[0]}${tf}${b[$t]}" "${oday[$t]}${to}00" "${fday[0]}${tf}${b03[$t]}" "${oday03[$t]}${to03}00" "${fday[0]}${tf}${b06[$t]}" "${oday06[$t]}${to06}00" "${fday[0]}${tf}${b12[$t]}" "${oday12[$t]}${to12}00" "${fday[0]}${tf}${b24[$t]}" "${oday24[$t]}${to24}00 >> g2g.ctl
-#         rm -f g2g.ctl
-#         exit
        fi
 
        t=`expr $t + 1`
@@ -388,410 +526,289 @@ echo ${fday[0]}${tf}${b[$t]}" "${oday[$t]}${to}00" "${fday[0]}${tf}${b03[$t]}" "
 
  read LINE                   #Header 8
    set -A var $LINE
-   k5[0]=${var[2]}
-   k6[0]=${var[3]}
-   k7[0]=${var[4]}
-
    echo $LINE >> g2g.ctl
 
-   loop=1
+   k4[1]=${var[2]}
+   k5[1]=${var[3]}
+   k6[1]=${var[4]}
+   k7[1]=${var[5]}
+
    nvar=${var[0]}
-   while [ $loop -lt $nvar ]
+   loop=2
+   while [ $loop -le $nvar ]
     do
      read LINE
      set -A var $LINE
-     k5[$loop]=${var[1]}
-     k6[$loop]=${var[2]}
-     k7[$loop]=${var[3]}
-     if [ ${k5[$loop]} -eq 0 ] ; then
-       echo $LINE not exist
-       exit
-     fi
      echo $LINE  >> g2g.ctl
+     k4[$loop]=${var[1]}
+     k5[$loop]=${var[2]}
+     k6[$loop]=${var[3]}
+     k7[$loop]=${var[4]}
      loop=`expr $loop + 1`
    done
+
+
+ read LINE                      #Header 9
+   set -A level $LINE
+   echo $LINE >> g2g.ctl
+
+   nlevel=${level[0]}
+   p[1]=${level[1]:1}
+   loop=2
+   while [ $loop -le $nlevel ] ; do
+     read LINE
+     set -A level $LINE
+     echo $LINE >> g2g.ctl
+     p[$loop]=${level[0]:1}
+     loop=`expr $loop + 1`  
+   done
+
+  #Now pressure level array p[i], i=1,nlevel (nlevel at least is 1)
 
 
 # Begin to thin the GRIB files #############################################################################################
 
    rm -f obsv.grib fcst.grib obsv03.grib fcst03.grib obsv06.grib fcst06.grib obsv12.grib fcst12.grib obsv24.grib fcst24.grib
-   rm -f obsv.indx fcst.indx obsv03.indx fcst03.indx obsv06.indx fcst06.indx obsv12.indx fcst12.indx obsv24.indx fcst24.indx
 
    varslp=0
 
-   echo CASE $cas Model: $model 
-
-   if [ $model = 'GFS' ] || [ $model = 'GFS_212' ] ; then
-    accumufcst="TR="
-    accumuobsv="TR="
-   elif [ $model = 'HYSPLIT' ] ; then
-    accumufcst="TR=3:"
-    accumuobsv="TR=0:"
-   elif [ $model = 'CMAQ' ] ; then
-    accumufcst="TR=3:"
-    accumuobsv="TR=0:"
-   else
-    accumufcst="TR=0:"
-    accumuobsv="TR=0:"
-   fi
-
-   if [ $obsrvtype = 'RTMA' ] || [ $obsrvtype = 'AWC' ] ; then
-     accumufcst="TR="
-     accumuobsv="TR";
-   fi
+ens=` echo $model | cut -c 1-4`
+echo CASE $cas Model: $ens
+echo CASE $cas Model: $model 
  
 
    echo "BEGIN to wgrib files ............................................"
 
-   if [ $cas -eq 1 ] ; then                  # case 1
+ if [ $cas -eq 1 ] ; then                  # case 1
 
     echo CASE  1  : One verification time vs diff cycles of  forecasts
 
-     varslp=0
-     while [ $varslp -lt $nvar ]             # for all variables
-      do
-       if [ ${k5[$varslp]} -ne 32 ] ; then   # skip wind vector  
-         kpds="kpds5="${k5[$varslp]}":kpds6="${k6[$varslp]}
-         echo $kpds
+     varslp=1
+     while [ $varslp -le $nvar ]  ; do           # for all variables
+      
+         if [ ${k4[$varslp]} -eq 2 ] && [ ${k5[$varslp]} -eq 1 ] ; then  #for all wind vector variables
 
-         # for WAFS SADIS's CAT an Icing 
-         if [ ${k5[$varslp]} -eq 168 ] ;   then     # SADIS's CAT
-            accumufcst="TR=0:"
-            accumuobsv="TR=1:"
-         elif [ ${k5[$varslp]} -eq 172 ] ; then     # SADIS's icing potential
-            accumufcst="TR=0:"
-            accumuobsv="TR=0:"
-         fi
+             if [ ${k6[$varslp]} -eq 100 ] ; then
+               nlp=$nlevel                  #number of pressure levels for variables on pressure levels 
+             else
+               nlp=1                        #single level for single level variables 
+             fi
 
-         echo  wgribing ${fileobsv[0]} .........
+             lp=1
+             while [ $lp -le $nlp ] ; do
 
-         $wgrb/wgrib ${fileobsv[0]} |grep $kpds|grep $accumuobsv|$wgrb/wgrib -i -grib ${fileobsv[0]} -o x  
-         cat x >>obsv.grib
-         
-         echo "CHECK HERE !!!!"
-          
-         if [ $tnd03 = 'open' ] ; then
-          $wgrb/wgrib ${fileobsv03[0]} |grep $kpds|grep $accumuobsv|$wgrb/wgrib -i -grib ${fileobsv03[0]} -o x
-          cat x >>obsv03.grib
-         fi
+                u_string=$(get_field_string 2 2 ${k6[$varslp]} ${k7[$varslp]} ${p[$lp]})
+                v_string=$(get_field_string 2 3 ${k6[$varslp]} ${k7[$varslp]} ${p[$lp]})
 
-         if [ $tnd06 = 'open' ] ; then
-          $wgrb/wgrib ${fileobsv06[0]} |grep $kpds|grep $accumuobsv|$wgrb/wgrib -i -grib ${fileobsv06[0]} -o x
-          cat x >>obsv06.grib
-         fi
+                #One wind obsv cycle 
+                $wgrb/wgrib2 -match  "$u_string" ${fileobsv[0]} |$wgrb/wgrib2 -i  ${fileobsv[0]} -grib x
+                cat x >>obsv.grib
+                $wgrb/wgrib2 -match  "$v_string" ${fileobsv[0]} |$wgrb/wgrib2 -i  ${fileobsv[0]} -grib x
+                cat x >>obsv.grib
+                echo  wgrib2ing ${fileobsv[0]} for $u_string and $v_string ..... 
 
-         if [ $tnd12 = 'open' ] ; then
-          $wgrb/wgrib ${fileobsv12[0]} |grep $kpds|grep $accumuobsv|$wgrb/wgrib -i -grib ${fileobsv12[0]} -o x
-          cat x >>obsv12.grib
-         fi
+                #Multiple wind fcst cycles
+                timelp=0
+                while [ $timelp -lt ${tfcst[0]} ] ; do # for all previous forecast cycles
+                    echo  wgrib2ing ${filefcst[$timelp]} .......
+                    $wgrb/wgrib2 -match "$u_string"  ${filefcst[$timelp]} |$wgrb/wgrib2 -i ${filefcst[$timelp]} -grib y
+                    cat y >>fcst.grib
+                    $wgrb/wgrib2 -match "$v_string"  ${filefcst[$timelp]} |$wgrb/wgrib2 -i ${filefcst[$timelp]} -grib y
+                    cat y >>fcst.grib
+                    echo  wgrib2ing ${filefcst[$timelp]} for $u_string and $v_string ..... 
 
-         if [ $tnd24 = 'open' ] ; then
-          $wgrb/wgrib ${fileobsv24[0]} |grep $kpds|grep $accumuobsv|$wgrb/wgrib -i -grib ${fileobsv24[0]} -o x
-          cat x >>obsv24.grib
-         fi
+                    timelp=`expr $timelp + 1`
+                done
 
-         timelp=0
-         while [ $timelp -lt ${tfcst[0]} ] # for all previous forecast cycles
-          do  
+                lp=$((lp + 1))          # same as lp=`expr $lp +1` 
 
-          echo  wgribing ${filefcst[$timelp]} .......
+             done # end of all levels
 
-          $wgrb/wgrib ${filefcst[$timelp]} |grep $kpds|grep $accumufcst|$wgrb/wgrib -i -grib  ${filefcst[$timelp]} -o y
-          cat y >>fcst.grib 
+         else                          #for non-wind vector variables
 
-          if [ -s ${filefcst03[$timelp]} ] && [ $tnd03 = 'open' ] ; then
-            $wgrb/wgrib ${filefcst03[$timelp]} |grep $kpds|grep $accumufcst|$wgrb/wgrib -i -grib  ${filefcst03[$timelp]} -o y
-            cat y >>fcst03.grib
-          fi
-          if [ -s ${filefcst06[$timelp]} ] && [ $tnd06 = 'open' ] ; then
-            $wgrb/wgrib ${filefcst06[$timelp]} |grep $kpds|grep $accumufcst|$wgrb/wgrib -i -grib  ${filefcst06[$timelp]} -o y
-            cat y >>fcst06.grib
-          fi
-          if [ -s ${filefcst12[$timelp]} ] && [ $tnd12 = 'open' ] ; then
-            $wgrb/wgrib ${filefcst12[$timelp]} |grep $kpds|grep $accumufcst|$wgrb/wgrib -i -grib  ${filefcst12[$timelp]} -o y
-            cat y >>fcst12.grib
-          fi
-          if [ -s ${filefcst24[$timelp]} ] && [ $tnd24 = 'open' ] ; then
-            $wgrb/wgrib ${filefcst24[$timelp]} |grep $kpds|grep $accumufcst|$wgrb/wgrib -i -grib  ${filefcst24[$timelp]} -o y
-            cat y >>fcst24.grib
-          fi
+             if [ ${k6[$varslp]} -eq 100 ] ; then
+               nlp=$nlevel                  #number of pressure levels for variables on pressure levels 
+             else 
+               nlp=1                        #single level for single level variables 
+             fi
 
-          timelp=`expr $timelp + 1` 
-         done
-       fi
-       varslp=`expr $varslp + 1`
-     done
+             lp=1
+             while [ $lp -le $nlp ] ; do
+           
+                echo "ID: $lp $nlp ${k4[$varslp]} ${k5[$varslp]} ${k6[$varslp]} ${k7[$varslp]} ${p[$lp]}" 
+ 
+                kpds=$(get_field_string ${k4[$varslp]} ${k5[$varslp]} ${k6[$varslp]} ${k7[$varslp]} ${p[$lp]})
+                echo "Search string: $kpds" 
 
-       nvar_1=`expr $nvar - 1`
 
-      if [ ${k5[$nvar_1]} -eq 32 ] ; then  #if vector wind is specfied, must specifiy U and V (no matter if U or V are also spcified
-         $wgrb/wgrib ${fileobsv[0]} |grep "kpds5=33:"|grep $accumuobsv|$wgrb/wgrib -i -grib ${fileobsv[0]} -o x
-         cat x >>obsv.grib
+                #One cycle obsv
+                $wgrb/wgrib2 -match "$kpds" ${fileobsv[0]}|$wgrb/wgrib2 -i  ${fileobsv[0]} -grib x 
+                cat x >>obsv.grib
+                echo wgrib2ing ${fileobsv[0]} for $kpds .........
 
-         # for tendency case:
-         if [ $tnd03 = 'open' ] ; then
-          $wgrb/wgrib ${fileobsv03[0]} |grep "kpds5=33:"|grep $accumuobsv|$wgrb/wgrib -i -grib ${fileobsv03[0]} -o x
-          cat x >>obsv03.grib
-         fi
-         if [ $tnd06 = 'open' ] ; then
-          $wgrb/wgrib ${fileobsv06[0]} |grep "kpds5=33:"|grep $accumuobsv|$wgrb/wgrib -i -grib ${fileobsv06[0]} -o x
-          cat x >>obsv06.grib
-         fi
-         if [ $tnd12 = 'open' ] ; then
-          $wgrb/wgrib ${fileobsv12[0]} |grep "kpds5=33:"|grep $accumuobsv|$wgrb/wgrib -i -grib ${fileobsv12[0]} -o x
-          cat x >>obsv12.grib
-         fi
-         if [ $tnd24 = 'open' ] ; then
-          $wgrb/wgrib ${fileobsv24[0]} |grep "kpds5=33:"|grep $accumuobsv|$wgrb/wgrib -i -grib ${fileobsv24[0]} -o x
-          cat x >>obsv24.grib
-         fi
+                if [ ${k4[$varslp]}  -eq 16 ] && [ ${k5[$varslp]} -eq 195 ] ; then #MOSAIC HSR use different ID from models
+                  $wgrb/wgrib2 -match "var discipline=0 master_table=2 parmcat=15 parm=15" ${fileobsv[0]}|$wgrb/wgrib2 -i  ${fileobsv[0]} -grib x
+                  cat x >>obsv.grib
+                  echo wgrib2ing ${fileobsv[0]} for MOSAIC HRS .........
+                fi 
 
-         $wgrb/wgrib ${fileobsv[0]} |grep "kpds5=34:"|grep $accumuobsv|$wgrb/wgrib -i -grib ${fileobsv[0]} -o x
-         cat x >>obsv.grib
+                #Multip previous fcst cycles
+                timelp=0
+                while [ $timelp -lt ${tfcst[0]} ] ; do                 # for all previous forecast cycles
 
-         if [ $tnd03 = 'open' ] ; then
-          $wgrb/wgrib ${fileobsv03[0]} |grep "kpds5=34:"|grep $accumuobsv|$wgrb/wgrib -i -grib ${fileobsv03[0]} -o x
-          cat x >>obsv03.grib
-         fi
-         if [ $tnd06 = 'open' ] ; then
-          $wgrb/wgrib ${fileobsv06[0]} |grep "kpds5=34:"|grep $accumuobsv|$wgrb/wgrib -i -grib ${fileobsv06[0]} -o x
-          cat x >>obsv06.grib
-         fi
-         if [ $tnd12 = 'open' ] ; then
-          $wgrb/wgrib ${fileobsv12[0]} |grep "kpds5=34:"|grep $accumuobsv|$wgrb/wgrib -i -grib ${fileobsv12[0]} -o x
-          cat x >>obsv12.grib
-         fi
-         if [ $tnd24 = 'open' ] ; then
-          $wgrb/wgrib ${fileobsv24[0]} |grep "kpds5=34:"|grep $accumuobsv|$wgrb/wgrib -i -grib ${fileobsv24[0]} -o x
-          cat x >>obsv24.grib
-         fi
+                  #if HRRR's echo-top, use different k4,k5,k6 values
+                  #if [ $model = 'HRRR' ] && [ ${k4[$varslp]} -eq 16 ] && [ ${k5[$varslp]} -eq 197 ] && [ ${k6[$varslp]} -eq 200 ] ; then
+                  #   kpds=$(get_field_string 16 3 3 0 ${p[$lp]}) 
+                  #fi 
 
-         timelp=0
-         while [ $timelp -lt ${tfcst[0]} ] # for all previous forecast cycles
-         do
-           $wgrb/wgrib ${filefcst[$timelp]} |grep "kpds5=33:"|grep $accumufcst|$wgrb/wgrib -i -grib ${filefcst[$timelp]} -o y
-           cat y >>fcst.grib
-           $wgrb/wgrib ${filefcst[$timelp]} |grep "kpds5=34:"|grep $accumufcst|$wgrb/wgrib -i -grib ${filefcst[$timelp]} -o y
-           cat y >>fcst.grib          
+                  echo  wgrib2ing ${filefcst[$timelp]} for fcst var $varslp.......
+                  $wgrb/wgrib2 -match "$kpds" ${filefcst[$timelp]} |$wgrb/wgrib2 -i ${filefcst[$timelp]} -grib y
+                  cat y >>fcst.grib 
+                  echo wgrib2ing ${filefcst[$timelp]} for for $kpds .........                  
 
-           if [ -s ${filefcst03[$timelp]} ] && [ $tnd03 = 'open' ] ; then
-             $wgrb/wgrib ${filefcst03[$timelp]} |grep "kpds5=33:"|grep $accumufcst|$wgrb/wgrib -i -grib ${filefcst03[$timelp]} -o y
-             cat y >>fcst03.grib
-             $wgrb/wgrib ${filefcst03[$timelp]} |grep "kpds5=34:"|grep $accumufcst|$wgrb/wgrib -i -grib ${filefcst03[$timelp]} -o y
-             cat y >>fcst03.grib
-           fi
-           if [ -s ${filefcst06[$timelp]} ] && [ $tnd06 = 'open' ] ; then
-             $wgrb/wgrib ${filefcst06[$timelp]} |grep "kpds5=33:"|grep $accumufcst|$wgrb/wgrib -i -grib ${filefcst06[$timelp]} -o y
-             cat y >>fcst06.grib
-             $wgrb/wgrib ${filefcst06[$timelp]} |grep "kpds5=34:"|grep $accumufcst|$wgrb/wgrib -i -grib ${filefcst06[$timelp]} -o y
-             cat y >>fcst06.grib
-           fi
-           if [ -s ${filefcst12[$timelp]} ] && [ $tnd12 = 'open' ] ; then
-             $wgrb/wgrib ${filefcst12[$timelp]} |grep "kpds5=33:"|grep $accumufcst|$wgrb/wgrib -i -grib ${filefcst12[$timelp]} -o y
-             cat y >>fcst12.grib
-             $wgrb/wgrib ${filefcst12[$timelp]} |grep "kpds5=34:"|grep $accumufcst|$wgrb/wgrib -i -grib ${filefcst12[$timelp]} -o y
-             cat y >>fcst12.grib
-           fi
-           if [ -s ${filefcst24[$timelp]} ] && [ $tnd24 = 'open' ] ; then
-             $wgrb/wgrib ${filefcst24[$timelp]} |grep "kpds5=33:"|grep $accumufcst|$wgrb/wgrib -i -grib ${filefcst24[$timelp]} -o y
-             cat y >>fcst24.grib
-             $wgrb/wgrib ${filefcst24[$timelp]} |grep "kpds5=34:"|grep $accumufcst|$wgrb/wgrib -i -grib ${filefcst24[$timelp]} -o y
-             cat y >>fcst24.grib
-           fi
+                  timelp=`expr $timelp + 1` 
+                done   # end of all previous forecast cycles
 
-           timelp=`expr $timelp + 1`
-         done
-      fi
+                lp=`expr $lp + 1`
+
+             done # end of all levels
+    
+          fi     #end of non-wind variables
+
+        varslp=`expr $varslp + 1`
+
+     done      # end of while foop for all variables     
 
     if [ $cloud_base_from_sfc = "no" ] ; then
-     varslp=0
-     while [ $varslp -lt $nvar ]             # for cloud base/top, need surface height
-      do
-      if [ ${k5[$varslp]} -eq 7 ] ; then
-         if [ ${k6[$varslp]} -eq 2 ] || [ ${k6[$varslp]} -eq 3 ] ; then
-           $wgrb/wgrib ${filefcst[0]} |grep "kpds5=7:kpds6=1:kpds7=0"|grep $accumufcst|$wgrb/wgrib -i -grib ${filefcst[0]} -o sfc.grib
-           $gribindex sfc.grib sfc.indx
-           varslp=$nvar
+       varslp=1
+       while [ $varslp -le $nvar ] ; do            # for cloud base/top, need surface height
+         if [ ${k4[$varslp]} -eq 3 ] && [ ${k5[$varslp]} -eq 5 ] ; then
+             if [ ${k6[$varslp]} -eq 2 ] || [ ${k6[$varslp]} -eq 3 ] ; then
+               $wgrb/wgrib2 -match "HGT:surface" ${filefcst[0]} |$wgrb/wgrib2 -i ${filefcst[0]} -grib sfc.grib2
+               echo wgrib2ing ${filefcst[0]} for HGT:surface ........... 
+               varslp=$nvar
+             fi
          fi
-       fi
-       varslp=`expr $varslp + 1`
-     done
+         varslp=$((varslp + 1))
+       done
     fi
 
    else                                      # case 2
 
-     varslp=0
-     while [ $varslp -lt $nvar ]             # for all variable 
-       do
-       if [ ${k5[$varslp]} -ne 32 ] ; then   # skip wind vector
-         kpds="kpds5="${k5[$varslp]}":kpds6="${k6[$varslp]}
-         timelp=0
-         while [ $timelp -lt ${tobsv[0]} ] # for all later-on verfied data
-           do
-            $wgrb/wgrib ${fileobsv[$timelp]} |grep $kpds|grep $accumuobsv|$wgrb/wgrib -i -grib ${fileobsv[$timelp]} -o x
-            cat x >>obsv.grib
+     echo CASE  2  : One forecast is verified by different observation at different valid time
+     echo $nvar
 
-            if [ $tnd03 = 'open' ] ; then           
-             $wgrb/wgrib ${fileobsv03[$timelp]} |grep $kpds|grep $accumuobsv|$wgrb/wgrib -i -grib ${fileobsv03[$timelp]} -o x
-             cat x >>obsv03.grib
-            fi
-            if [ $tnd06 = 'open' ] ; then
-             $wgrb/wgrib ${fileobsv06[$timelp]} |grep $kpds|grep $accumuobsv|$wgrb/wgrib -i -grib ${fileobsv06[$timelp]} -o x
-             cat x >>obsv06.grib
-            fi
-            if [ $tnd12 = 'open' ] ; then
-             $wgrb/wgrib ${fileobsv12[$timelp]} |grep $kpds|grep $accumuobsv|$wgrb/wgrib -i -grib ${fileobsv12[$timelp]} -o x
-             cat x >>obsv12.grib
-            fi
-            if [ $tnd24 = 'open' ] ; then
-             $wgrb/wgrib ${fileobsv24[$timelp]} |grep $kpds|grep $accumuobsv|$wgrb/wgrib -i -grib ${fileobsv24[$timelp]} -o x
-             cat x >>obsv24.grib
-            fi
+     varslp=1
+     while [ $varslp -le $nvar ] ; do            # for all variable 
 
-            $wgrb/wgrib ${filefcst[$timelp]} |grep $kpds|grep $accumufcst|$wgrb/wgrib -i -grib ${filefcst[$timelp]} -o y
-            cat y >>fcst.grib
+       if [ ${k4[$varslp]} -eq 2 ] && [ ${k5[$varslp]} -eq 1 ] ; then #for all wind vector variables
 
-            if [ -s ${filefcst03[$timelp]} ] && [ $tnd03 = 'open' ] ; then
-              $wgrb/wgrib ${filefcst03[$timelp]} |grep $kpds|grep $accumufcst|$wgrb/wgrib -i -grib ${filefcst03[$timelp]} -o y
-              cat y >>fcst03.grib
-            fi
-            if [ -s ${filefcst06[$timelp]} ] && [ $tnd06 = 'open' ] ; then
-              $wgrb/wgrib ${filefcst06[$timelp]} |grep $kpds|grep $accumufcst|$wgrb/wgrib -i -grib ${filefcst06[$timelp]} -o y
-              cat y >>fcst06.grib
-            fi
-            if [ -s ${filefcst12[$timelp]} ] && [ $tnd12 = 'open' ] ; then
-              $wgrb/wgrib ${filefcst12[$timelp]} |grep $kpds|grep $accumufcst|$wgrb/wgrib -i -grib ${filefcst12[$timelp]} -o y
-              cat y >>fcst12.grib
-            fi
-            if [ -s ${filefcst24[$timelp]} ] && [ $tnd24 = 'open' ] ; then
-              $wgrb/wgrib ${filefcst24[$timelp]} |grep $kpds|grep $accumufcst|$wgrb/wgrib -i -grib ${filefcst24[$timelp]} -o y
-              cat y >>fcst24.grib
-            fi
-            timelp=`expr $timelp + 1`
-           done
-        fi       
-           varslp=`expr $varslp + 1`
-      done
-  
-      nvar_1=`expr $nvar - 1`
-      if [ ${k5[$nvar_1]} -eq 32 ] ; then  #if vector wind is specfied, also specifiy U and V (no matter if U,V already spcified
-        timelp=0
-        while [ $timelp -lt ${tobsv[0]} ] # for all later-on verfied data
-        do
-           $wgrb/wgrib ${filefcst[$timelp]} |grep "kpds5=33:"|grep $accumufcst|$wgrb/wgrib -i -grib ${filefcst[$timelp]} -o y
-           $wgrb/wgrib ${fileobsv[$timelp]} |grep "kpds5=33:"|grep $accumuobsv|$wgrb/wgrib -i -grib ${fileobsv[$timelp]} -o x
-           cat x >>obsv.grib
-           cat y >>fcst.grib
-           $wgrb/wgrib ${filefcst[$timelp]} |grep "kpds5=34"|grep $accumufcst|$wgrb/wgrib -i -grib ${filefcst[$timelp]} -o y
-           $wgrb/wgrib ${fileobsv[$timelp]} |grep "kpds5=34"|grep $accumuobsv|$wgrb/wgrib -i -grib ${fileobsv[$timelp]} -o x
-           cat x >>obsv.grib
-           cat y >>fcst.grib
-          
-           if [ -s ${filefcst03[$timelp]} ] && [ $tnd03 = 'open' ] ; then
-             $wgrb/wgrib ${filefcst03[$timelp]} |grep "kpds5=33:"|grep $accumufcst|$wgrb/wgrib -i -grib ${filefcst03[$timelp]} -o y
-             cat y >>fcst03.grib
-             $wgrb/wgrib ${filefcst03[$timelp]} |grep "kpds5=34:"|grep $accumufcst|$wgrb/wgrib -i -grib ${filefcst03[$timelp]} -o y
-             cat y >>fcst03.grib
-           fi
-           if [ -s ${fileobsv03[$timelp]} ] && [ $tnd03 = 'open' ] ; then
-             $wgrb/wgrib ${fileobsv03[$timelp]} |grep "kpds5=33:"|grep $accumuobsv|$wgrb/wgrib -i -grib ${fileobsv03[$timelp]} -o x
-             cat x >>obsv03.grib
-             $wgrb/wgrib ${fileobsv03[$timelp]} |grep "kpds5=34:"|grep $accumuobsv|$wgrb/wgrib -i -grib ${fileobsv03[$timelp]} -o x
-             cat x >>obsv03.grib
-           fi
+          if [ ${k6[$varslp]} -eq 100 ] ; then
+               nlp=$nlevel                  #number of pressure levels for variables on pressure levels 
+          else
+               nlp=1                        #single level for single level variables 
+          fi
 
-           if [ -s ${filefcst06[$timelp]} ] && [ $tnd06 = 'open' ] ; then
-             $wgrb/wgrib ${filefcst06[$timelp]} |grep "kpds5=33:"|grep $accumufcst|$wgrb/wgrib -i -grib ${filefcst06[$timelp]} -o y
-             cat y >>fcst06.grib
-             $wgrb/wgrib ${filefcst06[$timelp]} |grep "kpds5=34:"|grep $accumufcst|$wgrb/wgrib -i -grib ${filefcst06[$timelp]} -o y
-             cat y >>fcst06.grib
-           fi
-           if [ -s ${fileobsv06[$timelp]} ] && [ $tnd06 = 'open' ] ; then
-             $wgrb/wgrib ${fileobsv06[$timelp]} |grep "kpds5=33:"|grep $accumuobsv|$wgrb/wgrib -i -grib ${fileobsv06[$timelp]} -o x
-             cat x >>obsv06.grib
-             $wgrb/wgrib ${fileobsv06[$timelp]} |grep "kpds5=34:"|grep $accumuobsv|$wgrb/wgrib -i -grib ${fileobsv06[$timelp]} -o x
-             cat x >>obsv06.grib
-           fi
-           if [ -s ${filefcst12[$timelp]} ] && [ $tnd12 = 'open' ] ; then
-             $wgrb/wgrib ${filefcst12[$timelp]} |grep "kpds5=33:"|grep $accumufcst|$wgrb/wgrib -i -grib ${filefcst12[$timelp]} -o y
-             cat y >>fcst12.grib
-             $wgrb/wgrib ${filefcst12[$timelp]} |grep "kpds5=34:"|grep $accumufcst|$wgrb/wgrib -i -grib ${filefcst12[$timelp]} -o y
-             cat y >>fcst12.grib
-           fi
-           if [ -s ${fileobsv12[$timelp]} ] && [ $tnd12 = 'open' ] ; then
-             $wgrb/wgrib ${fileobsv12[$timelp]} |grep "kpds5=33:"|grep $accumuobsv|$wgrb/wgrib -i -grib ${fileobsv12[$timelp]} -o x
-             cat x >>obsv12.grib
-             $wgrb/wgrib ${fileobsv12[$timelp]} |grep "kpds5=34:"|grep $accumuobsv|$wgrb/wgrib -i -grib ${fileobsv12[$timelp]} -o x
-             cat x >>obsv12.grib
-           fi
-           if [ -s ${filefcst24[$timelp]} ] && [ $tnd24 = 'open' ] ; then
-             $wgrb/wgrib ${filefcst24[$timelp]} |grep "kpds5=33:"|grep $accumufcst|$wgrb/wgrib -i -grib ${filefcst24[$timelp]} -o y
-             cat y >>fcst24.grib
-             $wgrb/wgrib ${filefcst24[$timelp]} |grep "kpds5=34:"|grep $accumufcst|$wgrb/wgrib -i -grib ${filefcst24[$timelp]} -o y
-             cat y >>fcst24.grib
-           fi
-           if [ -s ${fileobsv24[$timelp]} ] && [ $tnd24 = 'open' ] ; then
-             $wgrb/wgrib ${fileobsv24[$timelp]} |grep "kpds5=33:"|grep $accumuobsv|$wgrb/wgrib -i -grib ${fileobsv24[$timelp]} -o x
-             cat x >>obsv24.grib
-             $wgrb/wgrib ${fileobsv24[$timelp]} |grep "kpds5=34:"|grep $accumuobsv|$wgrb/wgrib -i -grib ${fileobsv24[$timelp]} -o x
-             cat x >>obsv24.grib
-           fi
-           timelp=`expr $timelp + 1`
-        done    
-      fi
+          lp=1
+          while [ $lp -le $nlp ] ; do
+
+             u_string=$(get_field_string 2 2 ${k6[$varslp]} ${k7[$varslp]} ${p[$lp]})
+             v_string=$(get_field_string 2 3 ${k6[$varslp]} ${k7[$varslp]} ${p[$lp]})
+             echo  wgrib2ing ${fileobsv[0]} for $u_string $v_string ....... 
+
+             timelp=0
+             while [ $timelp -lt ${tobsv[0]} ] ; do # for all later-on validation times
+
+              $wgrb/wgrib2 -match  "$u_string" ${filefcst[$timelp]} |$wgrb/wgrib2 -i  ${filefcst[$timelp]} -grib y
+              $wgrb/wgrib2 -match  "$u_string" ${fileobsv[$timelp]} |$wgrb/wgrib2 -i  ${fileobsv[$timelp]} -grib x
+              cat x >>obsv.grib
+              cat y >>fcst.grib
+
+              $wgrb/wgrib2 -match  "$v_string" ${filefcst[$timelp]} |$wgrb/wgrib2 -i  ${filefcst[$timelp]} -grib y
+              $wgrb/wgrib2 -match  "$v_string" ${fileobsv[$timelp]} |$wgrb/wgrib2 -i  ${fileobsv[$timelp]} -grib x
+              cat x >>obsv.grib
+              cat y >>fcst.grib
+             
+              echo  wgrib2ing ${filefcst[$timelp]} for $u_string $v_string .......
+              echo  wgrib2ing ${fileobsv[$timelp]} for $u_string $v_string .......
+
+              timelp=`expr $timelp + 1`
+
+             done                                 #done fol all validation times loop
+
+             lp=$((lp + 1))          # same as lp=`expr $lp +1`
+
+          done                                   #done fol all levels loop
+                                     
+       else                           # for if all non-wind vector fields     
+
+          if [ ${k6[$varslp]} -eq 100 ] ; then
+            nlp=$nlevel                  #number of pressure levels for variables on pressure levels 
+          else
+            nlp=1                        #single level for single level variables 
+          fi
+
+          lp=1
+          while [ $lp -le $nlp ] ; do
+
+             kpds=$(get_field_string ${k4[$varslp]} ${k5[$varslp]} ${k6[$varslp]} ${k7[$varslp]} ${p[$lp]})
+             echo "Search string: $kpds" 
+
+            timelp=0
+            while [ $timelp -lt ${tobsv[0]} ] ; do # for all later-on validation times
+
+              #if HRRR's echo-top, use different k4,k5,k6 values
+              #if [ $model = 'HRRR' ] && [ ${k4[$varslp]} -eq 16 ] && [ ${k5[$varslp]} -eq 197 ] && [ ${k6[$varslp]} -eq 200 ] ; then
+              #     kpdsf=$(get_field_string 16 3 3 0 ${p[$lp]})
+              #fi
+
+              $wgrb/wgrib2 -match  "$kpds" ${fileobsv[$timelp]} |$wgrb/wgrib2 -i ${fileobsv[$timelp]} -grib x
+              $wgrb/wgrib2 -match  "$kpds" ${filefcst[$timelp]} |$wgrb/wgrib2 -i ${filefcst[$timelp]} -grib y
+              cat x >>obsv.grib
+              cat y >>fcst.grib
+              echo  wgrib2ing ${filefcst[$timelp]} for $kpds .......
+              echo  wgrib2ing ${fileobsv[$timelp]} for $kpds .......
+
+                if [ ${k4[$varslp]}  -eq 16 ] && [ ${k5[$varslp]} -eq 195 ] ; then #MOSAIC HSR use different ID from models
+                  $wgrb/wgrib2 -match "var discipline=0 master_table=2 parmcat=15 parm=15" ${fileobsv[$timelp]}|$wgrb/wgrib2 -i  ${fileobsv[$timelp]} -grib x
+                  cat x >>obsv.grib
+                  echo wgrib2ing ${fileobsv[$timelp]} for MOSAIC HSR .........
+                fi
+
+
+              timelp=`expr $timelp + 1`
+            done                                  # done for all validation times loop
+
+            lp=$((lp + 1))
+
+          done                                    # done for all level loop
+
+       fi    # done for if all both wind and non-wind variables                       
+
+      varslp=$((varslp + 1)) 
+
+     done    # done loop for all variables 
 
     if [ $cloud_base_from_sfc = "no" ] ; then
-     varslp=0
-     while [ $varslp -lt $nvar ]             # for cloud base/top, need surface height
-      do
-      if [ ${k5[$varslp]} -eq 7 ] ; then
-         if [ ${k6[$varslp]} -eq 2 ] || [ ${k6[$varslp]} -eq 3 ] ; then
-           $wgrb/wgrib ${filefcst[0]} |grep "kpds5=7:kpds6=1:kpds7=0"|grep $accumufcst|$wgrb/wgrib -i -grib ${filefcst[0]} -o sfc.grib
-           $gribindex sfc.grib sfc.indx
-           varslp=$nvar
+       varslp=1
+       while [ $varslp -le $nvar ] ; do            # for cloud base/top, need surface height
+         if [ ${k4[$varslp]} -eq 3 ] && [ ${k5[$varslp]} -eq 5 ] ; then
+             if [ ${k6[$varslp]} -eq 2 ] || [ ${k6[$varslp]} -eq 3 ] ; then
+               $wgrb/wgrib2 -match "HGT:surface" ${filefcst[0]} |$wgrb/wgrib2 -i ${filefcst[0]} -grib sfc.grib2
+               varslp=$nvar
+               echo  wgrib2ing ${filefcst[0]} for HGT:surface ........
+             fi
          fi
-       fi
-       varslp=`expr $varslp + 1`
-     done
+         varslp=$((varslp + 1))
+       done
     fi
 
+  fi      # done for case 2
 
-  fi
+ls -l 
 
-      #ls -l 
 
-      $gribindex fcst.grib fcst.indx
-      $gribindex obsv.grib obsv.indx
-
-      if [ $tnd03 = 'open' ] ; then
-        $gribindex fcst03.grib fcst03.indx
-        $gribindex obsv03.grib obsv03.indx
-      fi
-      if [ $tnd06 = 'open' ] ; then      
-       $gribindex fcst06.grib fcst06.indx
-       $gribindex obsv06.grib obsv06.indx
-      fi
-      if [ $tnd12 = 'open' ] ; then
-       $gribindex fcst12.grib fcst12.indx
-       $gribindex obsv12.grib obsv12.indx
-      fi
-      if [ $tnd24 = 'open' ] ; then
-       $gribindex fcst24.grib fcst24.indx
-       $gribindex obsv24.grib obsv24.indx
-      fi
-
-   rm -f x y
-
- read LINE                      #Header 9
-   echo $LINE >> g2g.ctl
-   set -A level $LINE
-   loop=${level[0]}
-   while [ $loop -gt 1 ]
-    do
-     read LINE
-     echo $LINE >> g2g.ctl
-     loop=`expr $loop - 1`
-   done
+rm -f x y
 
   echo $cloud_base_from_sfc >>  g2g.ctl  #Header 10
   echo $lat_weight >> g2g.ctl            #Header 11 
@@ -799,32 +816,22 @@ echo ${fday[0]}${tf}${b[$t]}" "${oday[$t]}${to}00" "${fday[0]}${tf}${b03[$t]}" "
 
    mv g2g.ctl g2g.ctl.$model
    mv fcst.grib fcst.grib.$model 
-   mv fcst.indx fcst.indx.$model
    mv obsv.grib obsv.grib.$model
-   mv obsv.indx obsv.indx.$model
  if [ $tnd03 = 'open' ] ; then
    mv fcst03.grib fcst03.grib.$model
-   mv fcst03.indx fcst03.indx.$model
    mv obsv03.grib obsv03.grib.$model
-   mv obsv03.indx obsv03.indx.$model
  fi
  if [ $tnd06 = 'open' ] ; then
    mv fcst06.grib fcst06.grib.$model
-   mv fcst06.indx fcst06.indx.$model
    mv obsv06.grib obsv06.grib.$model
-   mv obsv06.indx obsv06.indx.$model
  fi
  if [ $tnd12 = 'open' ] ; then
    mv fcst12.grib fcst12.grib.$model
-   mv fcst12.indx fcst12.indx.$model
    mv obsv12.grib obsv12.grib.$model
-   mv obsv12.indx obsv12.indx.$model
  fi
  if [ $tnd24 = 'open' ] ; then
    mv fcst24.grib fcst24.grib.$model
-   mv fcst24.indx fcst24.indx.$model
    mv obsv24.grib obsv24.grib.$model
-   mv obsv24.indx obsv24.indx.$model
  fi
 
 
@@ -835,6 +842,7 @@ fi
 if [ ${tobsv[1]} -gt 2000000000 ] ; then
  echo $model ${tobsv[1]} > temp
 fi
+
 
 exit
  

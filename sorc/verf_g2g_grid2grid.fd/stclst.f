@@ -43,11 +43,9 @@ C*	Remove blanks from the input string if the separator is not
 C*	a blank.
 C
 	IF  ( sep .ne. ' ' )  THEN
-CCZeus	    CALL ST_RMBL  ( string, strbuf, isize, iret )
             isize=len_trim(string)
             strbuf=string(1:isize)
 	  ELSE
-CZeus	    CALL ST_RXBL  ( string, strbuf, isize, iret ) 
             isize=len_trim(string)
             strbuf=string(1:isize)
 	END IF

@@ -1,22 +1,25 @@
 	subroutine getMeanClimData(data,uclim,vclim,
      +         levels,numfcst,numvfyobs,numvarbl,numlevel,ngrid,
-     +         yy,mm,dd,hh,ff, k5,k6,k7,
+     +         yy,mm,dd,hh,ff, k4,k5,k6,k7,
      +         plevel, namvarbl,anomly_mrk,anomlylev,
      +         cmm,cdd)
 
 
+      use grib_mod
+
       include 'parm.inc'
-                                                                                                                                             
+      
+      type(gribfield) :: gfld                                                                                                                                       
       integer numvfyobs,numfcst,numvarbl,numlevel,ngrid
                                                                                                                                              
-      real var(ngrid),
+      real 
      + data(numfcst,numvarbl,numlevel,ngrid),
      + u(2,numlevel,ngrid),v(2,numlevel,ngrid)
      
       real uclim(numfcst,numvarbl,numlevel,ngrid),
      +     vclim(numfcst,numvarbl,numlevel,ngrid)
                                                                                                                                             
-      integer k5(mxvrbl),k6(mxvrbl),k7(mxvrbl)
+      integer k5(mxvrbl),k6(mxvrbl),k7(mxvrbl),k4(mxvrbl)
       integer plevel(maxlvl)
       integer levels(mxvrbl)          !levels for different variables
       integer yy(maxobs), mm(maxobs), dd(maxobs), hh(maxobs),
@@ -24,10 +27,7 @@
       CHARACTER*24 namvarbl(mxvrbl)
       CHARACTER*2  cmm(maxobs),cdd(maxobs)      
                                                                                                                                       
-      dimension jpds(25),jgds(25),kpds(25),kgds(25),jjpds(25)          !grib
-      dimension kens(5),kprob(2),xprob(2),kclust(16),kmembr(80) !grib extension
       integer yyfcst(mxfcst),yyobsv(maxobs)
-      logical, allocatable, dimension(:)  :: lb
                                                                                                                                              
       CHARACTER*80 grbfile, indxfile
       integer grbunit, indxunit
@@ -41,35 +41,24 @@
       data (h(i),i=1,5)
      + /0, 6, 12, 18, 24/
 
-      allocate(lb(ngrid))
-
       data = 0.0
-
-      grbunit=201
-      indxunit=202
 
       write(*,*) ' In getMeanClimData' 
 
-
       do 2000 nobsv = 1, numvfyobs
+
+       grbunit=201+nobsv
 
        write(*,*) 'Observ time = ', nobsv
 
        grbfile='climat.1959'//cmm(nobsv)//cdd(nobsv)
-       indxfile='climat.1959'//cmm(nobsv)//cdd(nobsv)//'.indx'
 
-       write(*,*) trim(grbfile),' ',trim(indxfile)
+       write(*,*) trim(grbfile)
 
-       call baopen(grbunit,grbfile, ierr)
+       call baopenr(grbunit,grbfile, ierr)
        if(ierr.ne.0) then
         write(*,*)'open climat grib file ',trim(grbfile), ' error'
         stop 118
-       end if
-
-       call baopen(indxunit,indxfile, ierr)
-       if(ierr.ne.0) then
-        write(*,*) 'open climat index file ',trim(indxfile), ' error'
-        stop 218
        end if
 
 
@@ -82,30 +71,26 @@
         end if
        end do
  
-         jgds=-1
-         jpds=-1
-         kgds=-1
-                                                                                                                                             
-         jpds(8)=59
-         jpds(9)=mm(nobsv)
-c         jpds(10)=dd(nobsv)
+         iyy=59
+         imm=mm(nobsv)
 
          write(*,*)'h1,h2=',h12(1),h12(2)
          write(*,*)'anomly_mrk=',(anomly_mrk(nvar),nvar=1,numvarbl)
 
-        do 1000 nvar = 1, numvarbl
+        do 1000 nvar = 1, numvarbl 
 
-         jpds(14)=0
+         jpdtn=0
+         jpd1=k4(nvar)
+         jpd2=k5(nvar)
+         jpd10=k6(nvar)
 
-         jpds(5) = k5(nvar)
-         jpds(6) = k6(nvar)
 
          if(anomly_mrk(nvar).eq.0) goto 1000
 
-          write(*,*) 'nvar=', nvar, ' jpds(5)=',jpds(5)
+          write(*,*) 'nvar=', nvar
 
-          jp = jpds(6)                                  !Binbin: these 2 lines are used to
-          if(jpds(6).eq.100.or.jpds(6).eq.107) jp=100   !deal with both jpds=100 and jpds=107
+          jp = jpd10                                  !Binbin: these 2 lines are used to
+          if(jpd10.eq.100.or.jpd10.eq.104) jp=100   !deal with both jpds=100 and jpds=107
           
           if(jp.eq.100) then
             levels(nvar) = numlevel
@@ -122,112 +107,81 @@ c         jpds(10)=dd(nobsv)
 
            write(*,*) 'mh=',mh, 'h12(mh)=', h12(mh)  
 
-           jpds(11)=h12(mh)
+           ihh=h12(mh)
 
-           if(jpds(5).ne.32) then
-
-              do 400 np = 1, levels(nvar)
-              
-               if(anomlylev(nvar,np).eq.0) goto 400
-
-               if(jp.eq.100) then
-                jpds(7) = plevel(np)
-               else
-                jpds(7) = k7(nvar)
-                !based on YueJian's data set, T2m, Tmax, Tmin,U10,V10, are diagnositic,
-                !and cycle-time should be substrcted by 6 hr
-                if(jpds(5).eq.11.or.jpds(5).eq.15.or.
-     +             jpds(5).eq.16.or.jpds(5).eq.33.or.
-     +             jpds(5).eq.34) then
-                   jpds(11) = jpds(11) - 6
-                   if (jpds(11).lt.0) jpds(11) = 18
-                   jpds(14) = 6
-                 end if
-               end if
-
-               write(*,*) '   jpds',jpds
-
-               call getgb(grbunit, indxunit, ngrid, 0, jpds, jgds,
-     &                      kf, k, kpds, kgds, lb, var, iret)
-               if(iret.ne.0) then
-                 cintp(mh,np,:) = - 1.0E9
-                 write(*,*)'read data error=',iret,  
-     &              'for mh=',mh,' at ', jpds(7)
-                else
-                 cintp(mh,np,:)=var(:)
-               end if
-
-c               write(*,*) ' cintp:',h12(mh), 'level=', jpds(7)
-c               write(*,*) (cintp(mh,np,i),i=1,5)
-
-400           continue
-
-            else if(jpds(5).eq.32) then
+           if(jpd1.eq.2.and.jpd2.eq.1)  then
 
               do 500 np = 1, levels(nvar)
 
-               jjpds=jpds
                if(jp.eq.100) then
-                jjpds(7) = plevel(np)
+                jpd12 = plevel(np)
                else
-                jjpds(7) = k7(nvar)
+                jpd12 = k7(nvar)
                 !based on YueJian's data set, W10m are diagnositic,
                 !and cycle-time should be substrcted by 6 hr 
-                jjpds(11) = jjpds(11) - 6
-                if (jjpds(11).lt.0) jjpds(11) = 18
-                jjpds(14) = 6
+                ihh = ihh - 6
+                if (ihh.lt.0) ihh = 18
+                !!!??? GRIB2??? jjpds(14) = 6
                end if
 
                if(anomlylev(nvar,np).eq.0) goto 500
 
-               jjpds(5)=33
+               call readGB2(grbunit,0,2,2,jpd10,jpd12,1959,
+     +            mm(nobsv),dd(nobsv),ihh,-1,ngrid,gfld,iret)
 
-               write(*,*) '   jjpds',jjpds
-
-               call getgb(grbunit, indxunit, ngrid, 0, jjpds, jgds,
-     &                      kf, k, kpds, kgds, lb, var, iret)
                if(iret.ne.0) then
                  u(mh,np,:) = - 1.0E9
-                 write(*,*)'read u error=',iret,
-     &           ' for mh=', mh, ' at ',jjpds(7)
                else
-                 u(mh,np,:)=var(:)
+                 u(mh,np,:)=gfld%fld(:)
                end if
 
-               jjpds=jpds
-               if(jp.eq.100) then
-                jjpds(7) = plevel(np)
-               else
-                jjpds(7) = k7(nvar)
-                jjpds(11) = jjpds(11) - 6
-                if (jjpds(11).lt.0) jjpds(11) = 18
-                jjpds(14) = 6
-               end if
+               call readGB2(grbunit,0,2,3,jpd10,jpd12,1959,
+     +            mm(nobsv),dd(nobsv),ihh,-1,ngrid,gfld,iret)
 
-               jjpds(5)=34
-
-               write(*,*) '   jjpds',jjpds
-
-               call getgb(grbunit, indxunit, ngrid, 0, jjpds, jgds,
-     &                      kf, k, kpds, kgds, lb, var, iret)
                if(iret.ne.0) then
                  v(mh,np,:) = - 1.0E9
-                 write(*,*)'read v error=',iret,
-     &           ' for mh=', mh, ' at ',jjpds(7)
                else
-                 v(mh,np,:)=var(:)
+                 v(mh,np,:)=gfld%fld(:)
                end if
 
                cintp(mh,np,:)=sqrt(
      &            u(mh,np,:)*u(mh,np,:)+
      &            v(mh,np,:)*v(mh,np,:) )
 
-c               write(*,*) ' cintp:',h12(mh), 'level=', jjpds(7)
-c               write(*,*) (cintp(mh,np,i),i=1,5)
-c               write(*,*) 'u(mh,np,:), v(mh,np,:)=',
-c     +         (u(mh,np,i),i=1,5),(v(mh,np,i),i=1,5)
-
 500           continue
+
+           else
+  
+             do 400 np = 1, levels(nvar)
+
+               if(anomlylev(nvar,np).eq.0) goto 400
+
+               if(jp.eq.100) then
+                jpd12 = plevel(np)
+               else
+                jpd12 = k7(nvar)
+                if( (jpd1.eq.0.and.jpd2.eq.0).or.
+     +              (jpd1.eq.0.and.jpd2.eq.4).or.
+     +              (jpd1.eq.0.and.jpd2.eq.5).or.
+     +              (jpd1.eq.2.and.jpd2.eq.2).or.
+     +              (jpd1.eq.2.and.jpd2.eq.3) ) then
+
+                   ihh = ihh - 6
+                   if (ihh.lt.0) ihh = 18
+                   !!!??? GRIB2 ????jpds(14) = 6
+                 end if
+               end if
+
+               call readGB2(grbunit,0,jpd1,jpd2,jpd10,jpd12,1959,
+     +            mm(nobsv),dd(nobsv),ihh,-1,ngrid,gfld,iret)
+
+               if(iret.ne.0) then
+                 cintp(mh,np,:) = - 1.0E9
+                else
+                 cintp(mh,np,:)=gfld%fld(:)
+               end if
+
+400          continue
 
            end if
 
@@ -246,7 +200,7 @@ c     +         (u(mh,np,i),i=1,5),(v(mh,np,i),i=1,5)
 c       write(*,'(a14,i5, 5f10.2)') 'data at level ', np,
 c     &     (data(nobsv,nvar,np,i),i=1,5)
 
-           if(jpds(5).eq.32) then
+           if(jpd1.eq.2.and.jpd2.eq.1) then
             uclim(nobsv,nvar,np,:)=u(1,np,:)+
      &      (u(2,np,:)-u(1,np,:))
      &      /(h12(2)-h12(1))*(hh(nobsv)-h12(1))
@@ -275,9 +229,7 @@ c     &       (vclim(nobsv,nvar,np,i),i=1,5)
  
                
         call baclose(grbunit, ierr)
-        call baclose(indxunit, ierr)
                                                                                                                       
-          deallocate(lb)
 
                 
         return

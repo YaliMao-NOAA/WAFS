@@ -4,12 +4,15 @@
 
 
 c    This program is to generate PROB for ensemble forecast
-c      adaped from Yuejian Zhu's FVPROB_pub.f 
+c      adaped from Yuejian Zhu FVPROB_pub.f 
 c
 c    Author: Binbin Zhou
 c          April 18 2011
-c    Modification: B. Zhou, 20120614,  add Yuejian's output format files  
-                                                                                                                 
+c    Modification: B. Zhou, 20120614,  add Yuejian output format files  
+c    Modification: B. Zhou, 20140110, add specified thresholds for reliability
+c            and Hit-False alarm rate  PROB subroutine
+c                         
+                                                                                         
       INCLUDE 'parm.inc'
       
       INTEGER, intent(IN) :: Nmodel, ist, numvfyobs,numarea,
@@ -43,6 +46,7 @@ c    Modification: B. Zhou, 20120614,  add Yuejian's output format files
      +  elonv(mxarea), alatan(mxarea), latlong(mxarea),
      +  lambert(mxarea), polarstereo(mxarea),regions
 
+      COMMON /grb/igribid
 
       integer nodata(mxfcst,mxvrbl,maxlvl)
       COMMON /nofile/nodata
@@ -52,10 +56,9 @@ c    Modification: B. Zhou, 20120614,  add Yuejian's output format files
                                                                                                                                                          
       CHARACTER*1 blank, equal
 
-      CHARACTER*80 meangribfile,meanindxfile,
-     +             sprdgribfile,sprdindxfile
+      CHARACTER*80 meangribfile,sprdgribfile
 
-c      CHARACTER*80 biasgribfile, biasindxfile
+c      CHARACTER*80 biasgribfile
 C
 
       LOGICAL*1 latlong, lambert, polarstereo    !Add  by Binbin, otherwise, they are can not be retrieved
@@ -75,12 +78,22 @@ C
      +        yyyyobsv(maxobs), mmobsv(maxobs),
      +        ddobsv(maxobs), hhobsv(maxobs), ffobsv(maxobs)
       integer k5(mxvrbl),k6(mxvrbl),k7(mxvrbl),vectormrk(mxvrbl)
- 
-      CHARACTER*24 fho(mxvrbl),    fhothr(mxvrbl,20)
+      integer k4(mxvrbl)
+
+      CHARACTER*24 fho(mxvrbl),    fhothr(mxvrbl,20), op
       CHARACTER*24 afho(mxvrbl),   afhothr(mxvrbl,20)
+
       integer  nchrfho(mxvrbl),nchrfhothr(mxvrbl,20),fhomrk(mxvrbl)
       integer  nchrafho(mxvrbl),nchrafhothr(mxvrbl,20),afhomrk(mxvrbl)
-      real rfhothr(mxvrbl,20)
+
+      CHARACTER*24 sfho(mxvrbl),sfhothr(mxvrbl,20)
+      CHARACTER*24 ffho(mxvrbl),ffhothr(mxvrbl,20)
+      integer  nchrsfho(mxvrbl),nchrsfhothr(mxvrbl,20),sfhomrk(mxvrbl)
+      integer  nchrffho(mxvrbl),nchrffhothr(mxvrbl,20),ffhomrk(mxvrbl)
+      real rsfhothr(mxvrbl,20)
+      real rffhothr(mxvrbl,20) 
+
+      real rfhothr(mxvrbl,20), thresholds(20) 
       real rafhothr(mxvrbl,20)
       integer continue_mrk(mxvrbl)
       integer anomlylev(mxvrbl,maxlvl),anomly_mrk(mxvrbl)
@@ -90,10 +103,13 @@ C
      +            cyyyyobsv,cmmobsv,cddobsv,chhobsv,cffobsv,
      +             yyyyfcst, mmfcst, ddfcst, hhfcst, fffcst,
      +             yyyyobsv, mmobsv, ddobsv, hhobsv, ffobsv,
-     +             k5,k6,k7,ck7,vectormrk,namlvl,nchrlvl,
+     +             k4,k5,k6,k7,ck7,vectormrk,namlvl,nchrlvl,
      +        fhomrk,fho,nchrfho,fhothr,nchrfhothr,rfhothr,
      +             continue_mrk, anomly_mrk, anomlylev,
-     +     afhomrk,afho,nchrafho,afhothr,nchrafhothr,rafhothr
+     +       afhomrk,afho,nchrafho,afhothr,nchrafhothr,rafhothr
+      COMMON /FRC/
+     +       sfhomrk,sfho,nchrsfho,sfhothr,nchrsfhothr,rsfhothr,
+     +       ffhomrk,ffho,nchrffho,ffhothr,nchrffhothr,rffhothr
 
 
       integer plevel(maxlvl)
@@ -165,10 +181,9 @@ c      real biasdata(ngrid),ftemp(ngrid)
       write(*,*) 'In EFS:',Nmodel,ist,numfcst,numvfyobs,numarea,
      +  numvarbl,numlevel,ngrid
 
-       
+      write(*,*) 'fho symbol', (fho(ivr),ivr=1,numvarbl)  
       write(*,*) 'fhomrk', (fhomrk(ivr),ivr=1,numvarbl)
-      write(*,*) 'afhomrk', (afhomrk(ivr),ivr=1,numvarbl)
-      write(*,*) 'rafhothr', (rafhothr(6,i),i=1,5)
+      write(*,*) 'rfhothr', (rfhothr(ivr,1),ivr=1,numvarbl)
       do i=1,numfcst
        write(*,*) 'nfcst=',i
        do j=1,numvarbl
@@ -198,18 +213,21 @@ c      real biasdata(ngrid),ftemp(ngrid)
         do 80 iob = 1, numvfyobs
           do 70 iar = 1, numarea
            do 60 ivr = 1, numvarbl
-            if(fhomrk(ivr).ne.0)    goto 60
-            if(afhomrk(ivr).ne.0)    goto 60
+            !if(fhomrk(ivr).ne.0)    goto 60
              do 50 ilv = 1, levels(ivr)
               if(nodata(ifh,ivr,ilv).eq.1) goto 50
 
-c (1)   Get  climatology data at all grid points based on Yuejian's code 
+c (1)   Get  climatology data at all grid points based on Yuejian code 
          
 c         jmm=mmobsv(ifh)
 c         jdd=ddobsv(ifh)
 c         jhh=hhobsv(ifh)
         
+          nthrs=fhomrk(ivr)
+          op=fho(ivr)
+          thresholds(:)=rfhothr(ivr,:)
 
+          kk4=k4(ivr)
           kk5=k5(ivr)
           kk6=k6(ivr)
           if(kk6.eq.100) then
@@ -220,9 +238,9 @@ c         jhh=hhobsv(ifh)
 
        !(I) get climate bin data
 
-       if (ib.eq.1) then      !use a singgle model forecast data as climate reference
-                              !in this case, this single model forecast yyyy,mm,dd,hh,ff
-                              !are same as the ensemble forecast's yyyy,mm,dd,hh,ff
+       if (ib.eq.1.or.ib.eq.0) then      !use a singgle model forecast data as climate reference
+                                         !in this case, this single model forecast yyyy,mm,dd,hh,ff
+                                         !are same as the ensemble forecast's yyyy,mm,dd,hh,ff
          jmm=mmfcst(ifh)
          jdd=ddfcst(ifh)
          jhh=hhfcst(ifh)
@@ -231,12 +249,6 @@ c         jhh=hhobsv(ifh)
      +         cmmfcst(ifh)//cddfcst(ifh)//chhfcst(ifh)//
      +         cfffcst(ifh)
           sprdgribfile="clim.sprd."//cyyyyfcst(ifh)//
-     +         cmmfcst(ifh)//cddfcst(ifh)//chhfcst(ifh)//
-     +         cfffcst(ifh)
-          meanindxfile="indx.mean."//cyyyyfcst(ifh)//
-     +         cmmfcst(ifh)//cddfcst(ifh)//chhfcst(ifh)//
-     +         cfffcst(ifh)
-          sprdindxfile="indx.sprd."//cyyyyfcst(ifh)//
      +         cmmfcst(ifh)//cddfcst(ifh)//chhfcst(ifh)//
      +         cfffcst(ifh)
 
@@ -254,21 +266,14 @@ c         jhh=hhobsv(ifh)
         sprdgribfile="clim.stdv."//
      +         cmmobsv(ifh)//cddobsv(ifh)//chhobsv(ifh)
 
-       meanindxfile="clim.mean.indx."//
-     +         cmmobsv(ifh)//cddobsv(ifh)//chhobsv(ifh)
-
-       sprdindxfile="clim.stdv.indx."//
-     +         cmmobsv(ifh)//cddobsv(ifh)//chhobsv(ifh)
 
        end if
 
-c       write(*,*) trim(meangribfile),' ',trim(sprdgribfile),' ',
-c     +            trim(meanindxfile),' ',trim(sprdindxfile)
+       write(*,*) trim(meangribfile),' ',trim(sprdgribfile)
 
         clip = 0. 
-        call get_HiresClimData(meangribfile,meanindxfile,
-     +                        sprdgribfile,sprdindxfile,
-     +    jmm,jdd,jhh,kk5,kk6,kk7,ngrid,Nmodel,kb,clip,noclim)
+        call get_HiresClimData(meangribfile,sprdgribfile,
+     +    kk4,kk5,kk6,kk7,ngrid,Nmodel,kb,clip,noclim)
 
         if(noclim.eq.1) then
           nodata(ifh,ivr,ilv)=noclim
@@ -278,6 +283,7 @@ c     +            trim(meanindxfile),' ',trim(sprdindxfile)
 
         if (mode(iar).eq.1) then                          !all GRID domain (mode 1)
         
+          write(*,*) 'All domain region points:', ngrid 
           allocate(rclim(ngrid,kb))
           allocate(rfanl(ngrid))
           allocate(rfcst(ngrid,Nmodel))
@@ -294,25 +300,25 @@ c     +            trim(meanindxfile),' ',trim(sprdindxfile)
 
           wght(:)=area_factor(:)*ngrid/swgt
 
+          if (igribid.eq.255) wght(:)=1.0
+
           !(III) get all members data and obsv data
           do iens=1,Nmodel
             rfcst(:,iens)=fcstmdl(iens,ifh,ivr,ilv,:)
           end do
 
           rfanl(:)=obsvdata(ifh,ivr,ilv,:)
-
  
           scrf = 1.0/float(ib)
                    
           if (ib.eq.1) then
            tprob=0.0
            cprob=0.0
+          
            do i=1,ngrid
              tprob=tprob+wght(i)
-c             if(rfanl(i).gt.rclim(i,1).and.
-c     +          rfanl(i).le.rclim(i,2)) then
-               if(rfanl(i).le.rclim(i,2)) then 
-                  cprob=cprob+wght(i)
+             if(rfanl(i).le.rclim(i,2)) then 
+               cprob=cprob+wght(i)
              end if
            end do
           
@@ -330,7 +336,8 @@ c     +          rfanl(i).le.rclim(i,2)) then
 
 
           call dist(rfcst,rfanl,rclim,wght,nxy,ib,Nmodel)
-          call prob(rfcst,rfanl,rclim,wght,nxy,ib,Nmodel,scrf)
+          call prob(rfcst,rfanl,rclim,wght,nxy,ib,Nmodel,scrf,
+     +    op,thresholds,nthrs)      !op,thresholds nthrs are added by B.Zhou on 20140110
 
           do k = 1, Nmodel+1
            fit(ifh,iob,iar,ivr,ilv,k)=dists(k)
@@ -382,7 +389,8 @@ c     +          rfanl(i).le.rclim(i,2)) then
          deallocate(rclim)
 
         else if (mode(iar).eq.2) then                        !Sub-region cases
-
+ 
+         
          if (numreg(iar).le.30) then                         !Sub-region case 1: 30 small fixed regions
 
           nxy=0
@@ -391,6 +399,8 @@ c     +          rfanl(i).le.rclim(i,2)) then
              nxy=nxy+1
            end if
           end do  
+
+          write(*,*) 'Sub-region#',numreg(iar),' points:', nxy
 
           allocate(rclim(nxy,kb))
           allocate(rfanl(nxy))
@@ -406,7 +416,7 @@ c     +          rfanl(i).le.rclim(i,2)) then
              nxy=nxy+1
             !(I) get climate bin data
 
-            rclim(nxy,:) = clip(nxy,:)                      !Only clim data at grids within sub-region are used 
+            rclim(nxy,:) = clip(i,:)                      !Only clim data at grids within sub-region are used 
 
             !(II) Get weights
              area_factor(nxy)=cos(datan(1.0d0)*region_latlon(1,i)/45.0)  !use Fanglin Yang's equation
@@ -424,12 +434,6 @@ c     +          rfanl(i).le.rclim(i,2)) then
           do i = 1, nxy
             wght(i)=area_factor(i)*nxy/swgt
           end do
- 
-c           do i = 1,nxy
-c           write(*,'(i7,20f7.1)')i,(rfcst(i,k),k=1,20)
-c           write(*,'(i7,13f7.1)')i,(rclim(i,k),k=1,11),rfanl(i),
-c     +                             wght(i)
-c           end do
  
           dists=0.
           probs = 0.
@@ -449,11 +453,11 @@ c           end do
 
           end if
 
-
           write(*,*) 'Call dist'
           call dist(rfcst,rfanl,rclim,wght,nxy,ib,Nmodel)
           write(*,*) 'Call prob'
-          call prob(rfcst,rfanl,rclim,wght,nxy,ib,Nmodel,scrf)
+          call prob(rfcst,rfanl,rclim,wght,nxy,ib,Nmodel,scrf,
+     +    op,thresholds,nthrs)
 
           do k = 1, Nmodel+1
            fit(ifh,iob,iar,ivr,ilv,k)=dists(k)
@@ -528,7 +532,7 @@ c           end do
              nxy=nxy+1
 
             !(I) get climate bin data
-             rclim(nxy,:)=clip(nxy,:)
+             rclim(nxy,:)=clip(i,:)
 
             !(II) Get weights
              area_factor(nxy)=cos(datan(1.0d0)*region_latlon(1,i)/45.0)  !use Fanglin Yang's equation
@@ -546,12 +550,6 @@ c           end do
           do i = 1, nxy
             wght(i)=area_factor(i)*nxy/swgt
           end do
-
-c           do i = 1,nxy
-c           write(*,'(i7,20f7.1)')i,(rfcst(i,k),k=1,20)
-c           write(*,'(i7,13f7.1)')i,(rclim(i,k),k=1,11),rfanl(i),
-c     +                             wght(i)
-c           end do
 
           dists=0.
           probs = 0.
@@ -571,12 +569,9 @@ c           end do
 
           end if
 
-
-          write(*,*) 'N.H:',iar,ivr, rfcst(5000,:),rfanl(5000),
-     +     rclim(5000,:)
-
           call dist(rfcst,rfanl,rclim,wght,nxy,ib,Nmodel)
-          call prob(rfcst,rfanl,rclim,wght,nxy,ib,Nmodel,scrf)
+          call prob(rfcst,rfanl,rclim,wght,nxy,ib,Nmodel,scrf,
+     +    op,thresholds,nthrs)
 
           do k = 1, Nmodel+1
            fit(ifh,iob,iar,ivr,ilv,k)=dists(k)
@@ -648,7 +643,7 @@ c           end do
            if(region_latlon(1,i).le.0.0) then
              nxy=nxy+1
             !(I) get climate bin data
-             rclim(nxy,:)=clip(nxy,:)
+             rclim(nxy,:)=clip(i,:)
 
             !(II) Get weights
              area_factor(nxy)=cos(datan(1.0d0)*region_latlon(1,i)/45.0)  !use Fanglin Yang's equation
@@ -666,12 +661,6 @@ c           end do
           do i = 1, nxy
             wght(i)=area_factor(i)*nxy/swgt
           end do
-
-c           do i = 1,nxy
-c           write(*,'(i7,20f7.1)')i,(rfcst(i,k),k=1,20)
-c           write(*,'(i7,13f7.1)')i,(rclim(i,k),k=1,11),rfanl(i),
-c     +                             wght(i)
-c           end do
 
          dists = 0.
           probs = 0.
@@ -691,12 +680,9 @@ c           end do
 
           end if
 
-
-          write(*,*) 'S.H:',iar,ivr, rfcst(5000,:),rfanl(5000),
-     +    rclim(5000,:)
-
           call dist(rfcst,rfanl,rclim,wght,nxy,ib,Nmodel)
-          call prob(rfcst,rfanl,rclim,wght,nxy,ib,Nmodel,scrf)
+          call prob(rfcst,rfanl,rclim,wght,nxy,ib,Nmodel,scrf,
+     +    op,thresholds,nthrs)
 
           do k = 1, Nmodel+1
            fit(ifh,iob,iar,ivr,ilv,k)=dists(k)
@@ -748,65 +734,63 @@ c           end do
          deallocate(rclim)
 
 
-         else if(numreg(iar).eq.33) then                     !Sub-region case 4: user defined case
-           if (ptr1(1,iar).ne.ptr2(1,iar).and.           
+        else if(numreg(iar).eq.33) then                     !Sub-region case 4: user defined case
+
+         if (ptr1(1,iar).ne.ptr2(1,iar).and.           
      +         ptr1(2,iar).ne.ptr2(2,iar)) then        
 
           nxy=0
-          do  i = 1,ngrid                             !  find how many points
-         if(region_latlon(2,i).ge.ptr1(1,iar).and.    !      ----------------x
-     +     region_latlon(2,i).le.ptr2(1,iar).and.     !     |                |
-     +     region_latlon(1,i).ge.ptr1(2,iar).and.     !     |                |
-     +     region_latlon(1,i).le.ptr2(2,iar)) then    !     |                |
-                                                      !     x----------------
-                                                      !  (ptr1(1), ptr1(2))
-             nxy=nxy+1
-           end if
-          end do
+           do  i = 1,ngrid    !  find how many points within user-defined regtangular region
+
+            if(region_latlon(2,i).ge.ptr1(1,iar).and.    !      ----------------x  (ptr2(1), ptr2(2))
+     +        region_latlon(2,i).le.ptr2(1,iar).and.     !     |                |
+     +        region_latlon(1,i).ge.ptr1(2,iar).and.     !     |                |
+     +        region_latlon(1,i).le.ptr2(2,iar)) then    !     |                |
+                                                         !     x----------------
+                                                         !  (ptr1(1), ptr1(2))
+                    nxy=nxy+1
+             end if
+           end do
+       
+          write(*,*) 'In EFS, user-defined region nxy=',nxy  
 
           allocate(rclim(nxy,kb))
           allocate(rfanl(nxy))
           allocate(rfcst(nxy,Nmodel))
 
 
-       nxy=0
-       swgt = 0.
-       rclim = 0.
+           nxy=0
+           swgt = 0.
+           rclim = 0.
 
-       do 5007 i = 1,ngrid
-                                                      !            (ptr2(1), ptr2(2))
-         if(region_latlon(2,i).ge.ptr1(1,iar).and.    !      ----------------x
-     +     region_latlon(2,i).le.ptr2(1,iar).and.     !     |                |
-     +     region_latlon(1,i).ge.ptr1(2,iar).and.     !     |                |
-     +     region_latlon(1,i).le.ptr2(2,iar)) then    !     |                |
-                                                      !     x----------------
-                                                      !  (ptr1(1), ptr1(2))
-           nxy=nxy+1
-          !(I) get climate bin data
-           rclim(nxy,:)=clip(nxy,:)
+          do 5007 i = 1,ngrid
+           !Search points within user-defined region    
+            if(region_latlon(2,i).ge.ptr1(1,iar).and.    
+     +        region_latlon(2,i).le.ptr2(1,iar).and.     
+     +        region_latlon(1,i).ge.ptr1(2,iar).and.     
+     +        region_latlon(1,i).le.ptr2(2,iar)) then   
+                                                      
+             nxy=nxy+1
 
-          !(II) Get weights
-           area_factor(nxy)=cos(datan(1.0d0)*region_latlon(1,i)/45.0)  !use Fanglin Yang's equation  
-           swgt=swgt +  area_factor(nxy)
+             !(I) get climate bin data
+             rclim(nxy,:)=clip(i,:)
 
-          !(III) all members data and obsv data
-           do iens=1,Nmodel
-             rfcst(nxy,iens)=fcstmdl(iens,ifh,ivr,ilv,i)
-           end do
-           rfanl(nxy)=obsvdata(ifh,ivr,ilv,i)
+             !(II) Get weights
+             area_factor(nxy)=cos(datan(1.0d0)*region_latlon(1,i)/45.0)  !use Fanglin Yang's equation  
+             swgt=swgt +  area_factor(nxy)
+
+             !(III) all members data and obsv data
+             do iens=1,Nmodel
+               rfcst(nxy,iens)=fcstmdl(iens,ifh,ivr,ilv,i)
+             end do
+             rfanl(nxy)=obsvdata(ifh,ivr,ilv,i)
              
-        end if !end if region_latlon
+            end if !end if region_latlon
 5007    continue                          
             
           do i = 1, nxy
             wght(i)=area_factor(i)*nxy/swgt
           end do
- 
-c           do i = 1,nxy
-c           write(*,'(i7,20f7.1)')i,(rfcst(i,k),k=1,20)
-c           write(*,'(i7,13f7.1)')i,(rclim(i,k),k=1,11),rfanl(i),
-c     +                             wght(i)
-c          end do
  
           dists = 0.
           probs = 0.
@@ -826,11 +810,9 @@ c          end do
 
           end if
 
-          write(*,*) 'NA:',iar,ivr, rfcst(5000,:),rfanl(5000),
-     +      rclim(5000,:)
-
           call dist(rfcst,rfanl,rclim,wght,nxy,ib,Nmodel)
-          call prob(rfcst,rfanl,rclim,wght,nxy,ib,Nmodel,scrf)
+          call prob(rfcst,rfanl,rclim,wght,nxy,ib,Nmodel,scrf,
+     +    op,thresholds,nthrs)
  
           do k = 1, Nmodel+1
            fit(ifh,iob,iar,ivr,ilv,k)=dists(k)

@@ -89,6 +89,13 @@ C
       integer continue_mrk(mxvrbl)
       integer anomlylev(mxvrbl,maxlvl),anomly_mrk(mxvrbl)
 
+      CHARACTER*24 sfho(mxvrbl),sfhothr(mxvrbl,20)
+      CHARACTER*24 ffho(mxvrbl),ffhothr(mxvrbl,20)
+      integer  nchrsfho(mxvrbl),nchrsfhothr(mxvrbl,20),sfhomrk(mxvrbl)
+      integer  nchrffho(mxvrbl),nchrffhothr(mxvrbl,20),ffhomrk(mxvrbl)
+      real rsfhothr(mxvrbl,20)
+      real rffhothr(mxvrbl,20)
+
 
       COMMON /g2g/cyyyyfcst,cmmfcst,cddfcst,chhfcst,cfffcst,
      +            cyyyyobsv,cmmobsv,cddobsv,chhobsv,cffobsv,
@@ -98,6 +105,9 @@ C
      +        fhomrk,fho,nchrfho,fhothr,nchrfhothr,rfhothr,
      +             continue_mrk, anomly_mrk, anomlylev,
      +     afhomrk,afho,nchrafho,afhothr,nchrafhothr,rafhothr
+      COMMON /FRC/
+     +       sfhomrk,sfho,nchrsfho,sfhothr,nchrsfhothr,rsfhothr,
+     +       ffhomrk,ffho,nchrffho,ffhothr,nchrffhothr,rffhothr
 
 
       integer plevel(maxlvl)

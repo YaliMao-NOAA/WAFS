@@ -65,6 +65,7 @@ C
      +        yyyyobsv(maxobs), mmobsv(maxobs),
      +        ddobsv(maxobs), hhobsv(maxobs), ffobsv(maxobs)
       integer k5(mxvrbl),k6(mxvrbl),k7(mxvrbl),vectormrk(mxvrbl)
+      integer k4(mxvrbl)
  
       CHARACTER*24 fho(mxvrbl),    fhothr(mxvrbl,20)
       CHARACTER*24 afho(mxvrbl),  afhothr(mxvrbl,20)
@@ -76,14 +77,26 @@ C
       integer tendencymrk(mxvrbl), continue_mrk(mxvrbl)
       integer anomlylev(mxvrbl,maxlvl),anomly_mrk(mxvrbl)
 
+      CHARACTER*24 sfho(mxvrbl),sfhothr(mxvrbl,20)
+      CHARACTER*24 ffho(mxvrbl),ffhothr(mxvrbl,20)
+      integer  nchrsfho(mxvrbl),nchrsfhothr(mxvrbl,20),sfhomrk(mxvrbl)
+      integer  nchrffho(mxvrbl),nchrffhothr(mxvrbl,20),ffhomrk(mxvrbl)
+      real rsfhothr(mxvrbl,20)
+      real rffhothr(mxvrbl,20)
+
+
       COMMON /g2g/cyyyyfcst,cmmfcst,cddfcst,chhfcst,cfffcst,
      +            cyyyyobsv,cmmobsv,cddobsv,chhobsv,cffobsv,
      +             yyyyfcst, mmfcst, ddfcst, hhfcst, fffcst,
      +             yyyyobsv, mmobsv, ddobsv, hhobsv, ffobsv,
-     +             k5,k6,k7,ck7,vectormrk,namlvl,nchrlvl,
+     +             k4,k5,k6,k7,ck7,vectormrk,namlvl,nchrlvl,
      +      fhomrk,fho,nchrfho,fhothr,nchrfhothr,rfhothr, 
      +             continue_mrk,anomly_mrk,anomlylev,
      +   afhomrk,afho,nchrafho,afhothr,nchrafhothr,rafhothr
+      COMMON /FRC/
+     +       sfhomrk,sfho,nchrsfho,sfhothr,nchrsfhothr,rsfhothr,
+     +       ffhomrk,ffho,nchrffho,ffhothr,nchrffhothr,rffhothr
+
 
 
 
@@ -103,9 +116,6 @@ C
       real area_factor(maxpts)
       COMMON /weight/area_factor
 
-      real fcstij(imax(1),jmax(1)),obsvij(imax(1),jmax(1))
-      integer ix, jy
-
       DATA blank /' '/
       DATA equal /'='/
       DATA namversion /'V01'/
@@ -122,6 +132,7 @@ C
       write(*,*)  'continue_mrk',(continue_mrk(i),i=1,numvarbl)     
 
       write(*,*)'weight factor=', area_factor(10000)
+      
 
       allocate(sumf(numfcst,numvarbl,numlevel,numarea,numvfyobs,10))
       allocate(sumo(numfcst,numvarbl,numlevel,numarea,numvfyobs,10))
@@ -147,20 +158,16 @@ C
        write(*,*) continue_mrk(ivr)
       end do
 
-       do ifh = 1,1 
-         do ivr = 1, numvarbl
-           write(*,*) namvarbl(ivr), continue_mrk(ivr)
-           do ilv = 1, levels(ivr)
-              do i = 1,ngrid
-                if(fcstdata(ifh,ivr,ilv,i).gt.0.0 .and.
-     +             fcstdata(ifh,ivr,ilv,i).le.1000.) then
-c                write(*,*) i, obsvdata(ifh,ivr,ilv,i),
-c     +          fcstdata(ifh,ivr,ilv,i)
-                end if
-              end do
-            end do
-           end do
-         end do
+c       do ifh = 1,1 
+c         do ivr = 1, numvarbl
+c           write(*,*) namvarbl(ivr), continue_mrk(ivr)
+c           do ilv = 1, levels(ivr)
+c        write(*,111) (fcstdata(ifh,ivr,ilv,i),i=1001,1010)
+c 111    format(10f8.2)
+c        write(*,111) (obsvdata(ifh,ivr,ilv,i),i=1001,1010)
+c            end do
+c           end do
+c         end do
 
       do 90 ifh = 1, numfcst
         do 80 iob = 1, numvfyobs
@@ -170,6 +177,7 @@ c     +          fcstdata(ifh,ivr,ilv,i)
              do 55 ifo = 1, fhomrk(ivr)
                do 50 ilv = 1, levels(ivr)
                 if(nodata(ifh,ivr,ilv).eq.1) goto 50
+
                 if (mode(iar).eq.1) then                          !all GRID domain (mode 1)
                   do 501 i = 1,ngrid
                     if(continue_mrk(ivr).eq.1 .and.
@@ -182,8 +190,15 @@ c     +          fcstdata(ifh,ivr,ilv,i)
             if(continue_mrk(ivr).eq.3 .and.
      +      obsvdata(ifh,ivr,ilv,i).eq.0.0) goto 501  !for RTMA RH case
 
-            if(continue_mrk(ivr).eq.4 .and.
-     +      obsvdata(ifh,ivr,ilv,i).lt. -120.0) goto 501  !for reflectivity
+            if (continue_mrk(ivr).eq.4 .and.
+     +       obsvdata(ifh,ivr,ilv,i).le.-100.0 ) goto 501
+c     +       (obsvdata(ifh,ivr,ilv,i).le.-100.0.or.
+c     +        fcstdata(ifh,ivr,ilv,i).le.-100.0) ) goto 501  !for reflectivity
+
+c            if (continue_mrk(ivr).eq.7 .and.
+c     +       (obsvdata(ifh,ivr,ilv,i).le.-100.0.or.
+c     +        fcstdata(ifh,ivr,ilv,i).le.-9999.0) ) goto 501  !for echo-top
+
             if(continue_mrk(ivr).eq.6 .and.
      +      obsvdata(ifh,ivr,ilv,i).lt. 1.0) goto 501 ! for visibility
             if(continue_mrk(ivr).eq.6 .and.
@@ -192,6 +207,10 @@ c     +          fcstdata(ifh,ivr,ilv,i)
      +      obsvdata(ifh,ivr,ilv,i).le. 0.0) goto 501 ! for fog 
             if(continue_mrk(ivr).eq.5 .and.
      +      fcstdata(ifh,ivr,ilv,i).le. 0.0) goto 501 ! for fog
+
+            if(continue_mrk(ivr).eq.5 .and.
+     +      (obsvdata(ifh,ivr,ilv,i).le.0.0.or.
+     +       fcstdata(ifh,ivr,ilv,i).le.0.0) ) goto 501 ! for ceiling
 
 
 
@@ -213,11 +232,9 @@ c     +          fcstdata(ifh,ivr,ilv,i)
      +                  updown(ivr,ifo),rfhothr(ivr,ifo),fho(ivr))
                      end if
 
-c                    write(*,*) 'grid point=',i,
-c     +              'fcst=',fcstdata(ifh,ivr,ilv,i),
-c     +              'obsv=',obsvdata(ifh,ivr,ilv,i), 
-c     +              'threhold=', fho(ivr), rfhothr(ivr,ifo)
-c                    write(*,*)'f,o,h=', f, o, h
+c                    write(*,'(i10,2f8.3)') i,
+c     +              fcstdata(ifh,ivr,ilv,i),obsvdata(ifh,ivr,ilv,i) 
+c                    !write(*,*)'f,o,h=', f, o, h
  
 
                     sumf(ifh,ivr,ilv,iar,iob,ifo) = 
@@ -253,11 +270,21 @@ c                    write(*,*)'f,o,h=', f, o, h
             if(continue_mrk(ivr).eq.3 .and.
      +      obsvdata(ifh,ivr,ilv,i).eq.0.0) goto 502  !for RTMA RH case
 
-            if(continue_mrk(ivr).eq.4 .and.
-     +      obsvdata(ifh,ivr,ilv,i).lt. -120.0) goto 502  !for reflectivity
+            if (continue_mrk(ivr).eq.4 .and.
+     +       obsvdata(ifh,ivr,ilv,i).le.-100.0 )goto 502  !for reflectivity
+c     +       (obsvdata(ifh,ivr,ilv,i).le.-100.0.or.
+c     +        fcstdata(ifh,ivr,ilv,i).le.-100.0) ) goto 502  !for reflectivity
+
+c            if (continue_mrk(ivr).eq.7 .and.
+c     +       (obsvdata(ifh,ivr,ilv,i).le.-100.0.or.
+c     +        fcstdata(ifh,ivr,ilv,i).le.-9999.0) ) goto 502  !for echo-top
 
             if(continue_mrk(ivr).eq.4 .and.
      +      obsvdata(ifh,ivr,ilv,i).lt. 1.0) goto 502 ! for visibility
+
+            if(continue_mrk(ivr).eq.5 .and. 
+     +      (obsvdata(ifh,ivr,ilv,i).le.0.0.or.
+     +       fcstdata(ifh,ivr,ilv,i).le.0.0) ) goto 502 ! for ceiling
 
 
                  if(region_id(i).eq.numreg(iar)) then
@@ -312,11 +339,14 @@ c     +                   obsvdata(ifh,ivr,ilv,i)
             if(continue_mrk(ivr).eq.3 .and.
      +      obsvdata(ifh,ivr,ilv,i).eq.0.0) goto 503  !for RTMA RH case
 
-            if(continue_mrk(ivr).eq.4 .and.
-     +      obsvdata(ifh,ivr,ilv,i).le. -120.0) goto 503  !for reflectivity
 
-            if(continue_mrk(ivr).eq.4 .and.
+            if(continue_mrk(ivr).eq.6 .and.
      +      obsvdata(ifh,ivr,ilv,i).lt. 1.0) goto 503 ! for visibility
+
+            if(continue_mrk(ivr).eq.5 .and.
+     +      (obsvdata(ifh,ivr,ilv,i).le.0.0.or.
+     +       fcstdata(ifh,ivr,ilv,i).le.0.0) ) goto 503 ! for ceiling
+
 
                       if(region_latlon(1,i).gt.0.0) then
                       if(tendencymrk(ivr).eq.0) then
@@ -370,14 +400,21 @@ c     +                   obsvdata(ifh,ivr,ilv,i)
             if(continue_mrk(ivr).eq.3 .and.
      +      obsvdata(ifh,ivr,ilv,i).eq.0.0) goto 504  !for RTMA RH case
 
+
             if(continue_mrk(ivr).eq.4 .and.
      +      obsvdata(ifh,ivr,ilv,i).le. -120.0) goto 504  !for reflectivity
 
             if(continue_mrk(ivr).eq.4 .and.
      +      obsvdata(ifh,ivr,ilv,i).le. 1.0) goto 504  !for visibility
 
+            if(continue_mrk(ivr).eq.5 .and.
+     +      (obsvdata(ifh,ivr,ilv,i).le.0.0.or.
+     +       fcstdata(ifh,ivr,ilv,i).le.0.0) ) goto 504 ! for ceiling
+
+
                       if(region_latlon(1,i).lt.0.0) then
                        if(tendencymrk(ivr).eq.0) then
+
                          f=getFO(fcstdata(ifh,ivr,ilv,i),
      +                       rfhothr(ivr,ifo),fho(ivr))
                          o=getFO(obsvdata(ifh,ivr,ilv,i),
@@ -438,6 +475,11 @@ c     +                   obsvdata(ifh,ivr,ilv,i)
             if(continue_mrk(ivr).eq.4 .and.
      +      obsvdata(ifh,ivr,ilv,i).le. 1.0) goto 505  !for visibility
 
+                       
+            if(continue_mrk(ivr).eq.5 .and.
+     +      (obsvdata(ifh,ivr,ilv,i).le.0.0.or.
+     +       fcstdata(ifh,ivr,ilv,i).le.0.0) ) goto 505 ! for ceiling
+
                                                                          !  |
                       if(region_latlon(1,i).ge.ptr1(2,iar).and.          !  |
      +                     region_latlon(1,i).le.ptr2(2,iar)) then       !  |
@@ -493,11 +535,16 @@ c     +                   obsvdata(ifh,ivr,ilv,i)
             if(continue_mrk(ivr).eq.3 .and.
      +      obsvdata(ifh,ivr,ilv,i).eq.0.0) goto 506  !for RTMA RH case
 
+
             if(continue_mrk(ivr).eq.4 .and.
      +      obsvdata(ifh,ivr,ilv,i).le. -120.0) goto 506  !for reflectivity
 
             if(continue_mrk(ivr).eq.4 .and.
      +      obsvdata(ifh,ivr,ilv,i).le. 1.0) goto 506  !for visibility
+
+            if(continue_mrk(ivr).eq.5 .and.
+     +      (obsvdata(ifh,ivr,ilv,i).le.0.0.or.
+     +       fcstdata(ifh,ivr,ilv,i).le.0.0) ) goto 506 ! for ceiling
 
                                                                          !  
                         if(region_latlon(2,i).ge.ptr1(1,iar).and.        !       x -----------------x 
@@ -542,6 +589,8 @@ c     +                   obsvdata(ifh,ivr,ilv,i)
 506                   continue  
                      else if (ptr1(1,iar).ne.ptr2(1,iar).and.    !user defined case 3, all points in a regtangular
      +                        ptr1(2,iar).ne.ptr2(2,iar)) then        
+
+
                        do 507 i = 1,ngrid           
 
                                                  
@@ -555,11 +604,31 @@ c     +                   obsvdata(ifh,ivr,ilv,i)
             if(continue_mrk(ivr).eq.3 .and.
      +      obsvdata(ifh,ivr,ilv,i).eq.0.0) goto 507  !for RTMA RH case
 
-            if(continue_mrk(ivr).eq.4 .and.
-     +      obsvdata(ifh,ivr,ilv,i).lt. -120.0 ) goto 507  !for reflectivity
+
+            if (continue_mrk(ivr).eq.4 .and.
+     +       obsvdata(ifh,ivr,ilv,i).le.-100.0) goto 507  !for reflectivity
 
             if(continue_mrk(ivr).eq.4 .and.
      +      obsvdata(ifh,ivr,ilv,i).le. 1.0) goto 507  !for visibility
+
+
+c            if (continue_mrk(ivr).eq.4 .and.
+c     +       (obsvdata(ifh,ivr,ilv,i).le.-100.0.or.
+c     +        fcstdata(ifh,ivr,ilv,i).le.-100.0) ) goto 507  !for reflectivity
+
+c            if (continue_mrk(ivr).eq.7 .and.
+c     +       (obsvdata(ifh,ivr,ilv,i).le.-100.0.or.
+c     +        fcstdata(ifh,ivr,ilv,i).le.-9999.0) ) goto 507  !for echo-top
+
+
+
+            if(continue_mrk(ivr).eq.6 .and.
+     +      obsvdata(ifh,ivr,ilv,i).le. 1.0) goto 507  !for visibility
+
+            if(continue_mrk(ivr).eq.5 .and.
+     +      (obsvdata(ifh,ivr,ilv,i).le.0.0.or.
+     +       fcstdata(ifh,ivr,ilv,i).le.0.0) ) goto 507 ! for ceiling
+
 
                                                                       !             (ptr2(1), ptr2(2))
                         if(region_latlon(2,i).ge.ptr1(1,iar).and.     !      ----------------x
@@ -603,7 +672,8 @@ c     +                   obsvdata(ifh,ivr,ilv,i)
      +              weigh(ifh,ivr,ilv,iar,iob,ifo) + area_factor(i)
 
                          end if
-507                  continue                        
+507                  continue  
+                      
                      end if
                    end if
 
@@ -625,6 +695,13 @@ c     +                   obsvdata(ifh,ivr,ilv,i)
             do 51 ilv = 1, levels(ivr)
              if(nodata(ifh,ivr,ilv).eq.1) goto 51
              if(weigh(ifh,ivr,ilv,iar,iob,ifo).ne.0.0) then
+
+             write(*,*) weigh(ifh,ivr,ilv,iar,iob,ifo),
+     +       sumf(ifh,ivr,ilv,iar,iob,ifo),
+     +       sumh(ifh,ivr,ilv,iar,iob,ifo),
+     +       sumo(ifh,ivr,ilv,iar,iob,ifo)
+     
+
               sumf(ifh,ivr,ilv,iar,iob,ifo)=
      +        sumf(ifh,ivr,ilv,iar,iob,ifo)/
      +        weigh(ifh,ivr,ilv,iar,iob,ifo)
@@ -645,18 +722,12 @@ c     +                   obsvdata(ifh,ivr,ilv,i)
      +           sumh(ifh,ivr,ilv,iar,iob,ifo)=0.0
                                                                                                                                                                                    
 
+             write(*,*) weigh(ifh,ivr,ilv,iar,iob,ifo),
+     +       sumf(ifh,ivr,ilv,iar,iob,ifo),
+     +       sumh(ifh,ivr,ilv,iar,iob,ifo),
+     +       sumo(ifh,ivr,ilv,iar,iob,ifo)
 
-c              if(sumo(ifh,ivr,ilv,iar,iob,ifo).ne.0.0) then  ! hit rate is conditional prob
-c                sumh(ifh,ivr,ilv,iar,iob,ifo)=               !after talked to Keith Brill, won't consider conditional prob
-c     +          sumh(ifh,ivr,ilv,iar,iob,ifo)/              
-c     +          sumo(ifh,ivr,ilv,iar,iob,ifo)
-c              end if
 
-c              write(*,'(6i4,4f15.5)') ifh,iob,iar,ivr,ifo,ilv,
-c     +         sumf(ifh,ivr,ilv,iar,iob,ifo),
-c     +         sumo(ifh,ivr,ilv,iar,iob,ifo),
-c     +         sumh(ifh,ivr,ilv,iar,iob,ifo),
-c     +         count(ifh,ivr,ilv,iar,iob,ifo)
              end if
 51          continue
 56        continue
@@ -751,7 +822,7 @@ c                   if(count(ifh,ivr,ilv,iar,iob,ifo).le.0) goto 150
      +                              sumf(ifh,ivr,ilv,iar,iob,ifo),
      +                              sumh(ifh,ivr,ilv,iar,iob,ifo),
      +                              sumo(ifh,ivr,ilv,iar,iob,ifo)
- 1000                   FORMAT (A,F8.0,3E18.9)
+ 1000                   FORMAT (A,F10.0,3E18.9)
                        end if
                     END IF
 150             continue

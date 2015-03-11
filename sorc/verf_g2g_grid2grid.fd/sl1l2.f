@@ -16,7 +16,8 @@ c
      +         numfcst,numvarbl,numlevel,ngrid, levels(mxvrbl),
      +         hasdata(mxfcst,mxvrbl,maxlvl)
 
-      REAL,dimension(numfcst,numvarbl,numlevel,ngrid),intent(IN) ::
+      !REAL,dimension(numfcst,numvarbl,numlevel,ngrid),intent(IN) ::
+      REAL,dimension(numfcst,numvarbl,numlevel,ngrid) ::
      +          fcstdata, obsvdata
                                                                                                                                                    
  
@@ -70,7 +71,8 @@ C
      +        ddfcst(mxfcst), hhfcst(mxfcst), fffcst(mxfcst),
      +        yyyyobsv(maxobs), mmobsv(maxobs),
      +        ddobsv(maxobs), hhobsv(maxobs), ffobsv(maxobs)
-      integer k5(mxvrbl),k6(mxvrbl),k7(mxvrbl),vectormrk(mxvrbl)
+      integer k5(mxvrbl),k6(mxvrbl),k7(mxvrbl),vectormrk(mxvrbl),
+     +        k4(mxvrbl)
  
       CHARACTER*24 fho(mxvrbl),    fhothr(mxvrbl,20)
       CHARACTER*24 afho(mxvrbl),   afhothr(mxvrbl,20)
@@ -81,15 +83,25 @@ C
       integer continue_mrk(mxvrbl)
       integer anomlylev(mxvrbl,maxlvl),anomly_mrk(mxvrbl)
 
+      CHARACTER*24 sfho(mxvrbl),sfhothr(mxvrbl,20)
+      CHARACTER*24 ffho(mxvrbl),ffhothr(mxvrbl,20)
+      integer  nchrsfho(mxvrbl),nchrsfhothr(mxvrbl,20),sfhomrk(mxvrbl)
+      integer  nchrffho(mxvrbl),nchrffhothr(mxvrbl,20),ffhomrk(mxvrbl)
+      real rsfhothr(mxvrbl,20)
+      real rffhothr(mxvrbl,20)
+
 
       COMMON /g2g/cyyyyfcst,cmmfcst,cddfcst,chhfcst,cfffcst,
      +            cyyyyobsv,cmmobsv,cddobsv,chhobsv,cffobsv,
      +             yyyyfcst, mmfcst, ddfcst, hhfcst, fffcst,
      +             yyyyobsv, mmobsv, ddobsv, hhobsv, ffobsv,
-     +             k5,k6,k7,ck7,vectormrk,namlvl,nchrlvl,
+     +             k4,k5,k6,k7,ck7,vectormrk,namlvl,nchrlvl,
      +        fhomrk,fho,nchrfho,fhothr,nchrfhothr,rfhothr,
      +             continue_mrk, anomly_mrk, anomlylev,
      +     afhomrk,afho,nchrafho,afhothr,nchrafhothr,rafhothr
+      COMMON /FRC/
+     +       sfhomrk,sfho,nchrsfho,sfhothr,nchrsfhothr,rsfhothr,
+     +       ffhomrk,ffho,nchrffho,ffhothr,nchrffhothr,rffhothr
 
 
       integer plevel(maxlvl)
@@ -123,8 +135,12 @@ C
       end do
 
 
-      write(*,*) 'mode(iar)=',mode
-      write(*,*) 'numreg(iar)=',numreg
+c      write(*,*) 'mode(iar)=',mode
+c      write(*,*) 'numreg(iar)=',numreg
+c      write(*,*) 'levels(ivr)=',levels
+c      write(*,*) 'nchrlvl(ivr,ilv)=',nchrlvl
+c      write(*,*) 'nchrlevel(ilv)=',nchrlevl
+   
 
         allocate (sumdata(numfcst,numvarbl,numlevel,numarea,numvfyobs))
         allocate (sumgrid(numfcst,numvarbl,numlevel,numarea,numvfyobs))
@@ -134,23 +150,6 @@ C
         allocate   (count(numfcst,numvarbl,numlevel,numarea,numvfyobs))
         allocate   (weigh(numfcst,numvarbl,numlevel,numarea,numvfyobs))
 
-c       do nvar=1,numvarbl
-c         do np =1, levels(nvar)
-c          write (*,*) namlevel(np), namlvl(nvar,np)
-c         end do
-c       end do
-
-
-c      do ifh = 1, numfcst
-c      do ivr = 1, numvarbl
-c      write(*,*)'ifh=',ifh,' ivr=',ivr
-c      do ilv = 1, levels(ivr)
-c       write(*,'(i8, 10f10.2)')ilv,(fcstdata(ifh,ivr,ilv,i),i=1,10)
-c       write(*,'(i8, 10f10.2)')ilv,(obsvdata(ifh,ivr,ilv,i),i=1,10)
-c      end do
-c      end do
-c      end do
- 
 
           count = 0.0
           weigh = 0.0
@@ -168,27 +167,69 @@ c      end do
               if(vectormrk(ivr).ne.0) goto 60     !
               if(fhomrk(ivr).ne.0)    goto 60
               if(afhomrk(ivr).ne.0)    goto 60
+              if(sfhomrk(ivr).ne.0)    goto 60
+              if(ffhomrk(ivr).ne.0)    goto 60
              do 50 ilv = 1, levels(ivr)
               if(nodata(ifh,ivr,ilv).eq.1) goto 50
 
-                if (mode(iar).eq.1) then                          !all GRID domain (mode 1)
-                  do 5001 i = 1,ngrid
-                    if(continue_mrk(ivr).eq.1 .and.               
+               if (mode(iar).eq.1) then                          !all GRID domain (mode 1)
+                do 5001 i = 1,ngrid
+                  if(continue_mrk(ivr).eq.1 .and.               
      +                 obsvdata(ifh,ivr,ilv,i).lt.0.0 ) goto 5001    !for cloud-like uncontinuous parameters
-                    
-                    if(continue_mrk(ivr).eq.2 .and.(
-     +                 obsvdata(ifh,ivr,ilv,i).lt.0.0 .or.
-     +                  fcstdata(ifh,ivr,ilv,i).lt.0.0) ) goto 5001  !for aerosol/smoke.  May 28, 2008: cloud also is considered to be this
+      
+            if (continue_mrk(ivr).eq.4 .and.
+     +       (obsvdata(ifh,ivr,ilv,i).le.-100.0.or.
+     +        fcstdata(ifh,ivr,ilv,i).le.-100.0) ) goto 5001  !for reflectivity
+
+            if (continue_mrk(ivr).eq.7 .and.
+     +       (obsvdata(ifh,ivr,ilv,i).le.-100.0.or.
+     +        fcstdata(ifh,ivr,ilv,i).le.-9999.0) ) goto 5001  !for echo-top
+ 
+             
+            if(continue_mrk(ivr).eq.2 .and.(
+     +          obsvdata(ifh,ivr,ilv,i).lt.0.0 .or.
+     +          fcstdata(ifh,ivr,ilv,i).lt.0.0) ) goto 5001  !for aerosol/smoke.  May 28, 2008: cloud also is considered to be this
 
 
-                    if(continue_mrk(ivr).eq.9 .and.(
-     +                 obsvdata(ifh,ivr,ilv,i).eq.0.0 .or.
-     +                  fcstdata(ifh,ivr,ilv,i).eq.0.0) ) goto 5001  !for soil temperature and soil moisture
+            if(continue_mrk(ivr).eq.9 .and.(
+     +          obsvdata(ifh,ivr,ilv,i).eq.0.0 .or.
+     +          fcstdata(ifh,ivr,ilv,i).eq.0.0) ) goto 5001  !for soil temperature and soil moisture
 
 
             if(continue_mrk(ivr).eq.3 .and.
      +      obsvdata(ifh,ivr,ilv,i).eq.0.0) goto 5001  !for RTMA RH case 
+
+            if(continue_mrk(ivr).eq.6 .and.
+     +      obsvdata(ifh,ivr,ilv,i).lt. 1.0) goto 5001 ! for visibility
+            if(continue_mrk(ivr).eq.6 .and.
+     +      fcstdata(ifh,ivr,ilv,i).le. 0.0) goto 5001 ! for visibility
+            if(continue_mrk(ivr).eq.5 .and.
+     +      obsvdata(ifh,ivr,ilv,i).le. 0.0) goto 5001 ! for fog
+            if(continue_mrk(ivr).eq.5 .and.
+     +      fcstdata(ifh,ivr,ilv,i).le. 0.0) goto 5001 ! for fog
+
  
+            if(continue_mrk(ivr).eq.4) then             !minus dBZ means very small reflectivity 
+              if(obsvdata(ifh,ivr,ilv,i).lt.0.)
+     +         obsvdata(ifh,ivr,ilv,i)=10.0**obsvdata(ifh,ivr,ilv,i)
+              if(fcstdata(ifh,ivr,ilv,i).lt.0.) 
+     +         fcstdata(ifh,ivr,ilv,i)=10.0**fcstdata(ifh,ivr,ilv,i)
+            end if
+
+            if(continue_mrk(ivr).eq.5.and.
+     +        (obsvdata(ifh,ivr,ilv,i).le.0.0.or.
+     +         fcstdata(ifh,ivr,ilv,i).le.0.0) )  goto 5001  ! for ceiling
+
+
+            if(continue_mrk(ivr).eq.7) then
+              if(fcstdata(ifh,ivr,ilv,i).le.0.0) then
+                fcstdata(ifh,ivr,ilv,i)=0.0
+              end if
+              if(obsvdata(ifh,ivr,ilv,i).le.0.0) then
+                obsvdata(ifh,ivr,ilv,i)=0.0
+              end if
+            end if
+
                        sumdata(ifh,ivr,ilv,iar,iob) = 
      +                        sumdata(ifh,ivr,ilv,iar,iob)
      +                        + obsvdata(ifh,ivr,ilv,i)
@@ -239,10 +280,54 @@ c      end do
      +                 obsvdata(ifh,ivr,ilv,i).eq.0.0 .or.
      +                  fcstdata(ifh,ivr,ilv,i).eq.0.0) ) goto 5002  !for soil temperature and soil moisture
 
-            if(continue_mrk(ivr).eq.3 .and.
-     +      obsvdata(ifh,ivr,ilv,i).eq.0.0) goto 5002  !for RTMA RH case
+                    if(continue_mrk(ivr).eq.3 .and.
+     +                    obsvdata(ifh,ivr,ilv,i).eq.0.0) goto 5002  !for RTMA RH case
+
+            if(continue_mrk(ivr).eq.6 .and.
+     +      obsvdata(ifh,ivr,ilv,i).lt. 1.0) goto 5002 ! for visibility
+            if(continue_mrk(ivr).eq.6 .and.
+     +      fcstdata(ifh,ivr,ilv,i).le. 0.0) goto 5002 ! for visibility
+            if(continue_mrk(ivr).eq.5 .and.
+     +      obsvdata(ifh,ivr,ilv,i).le. 0.0) goto 5002 ! for fog
+            if(continue_mrk(ivr).eq.5 .and.
+     +      fcstdata(ifh,ivr,ilv,i).le. 0.0) goto 5002 ! for fog
+
+            if(continue_mrk(ivr).eq.5.and.
+     +        (obsvdata(ifh,ivr,ilv,i).le.0.0.or.  
+     +         fcstdata(ifh,ivr,ilv,i).le.0.0) )  goto 5002  ! for ceiling
+
+
+            if (continue_mrk(ivr).eq.4 .and.
+     +       (obsvdata(ifh,ivr,ilv,i).le.-100.0.or.
+     +        fcstdata(ifh,ivr,ilv,i).le.-100.0) ) goto 5002  !for reflectivity
+
+            if (continue_mrk(ivr).eq.7 .and.
+     +       (obsvdata(ifh,ivr,ilv,i).le.-100.0.or.
+     +        fcstdata(ifh,ivr,ilv,i).le.-9999.0) ) goto 5002  !for echo-top
+
+
+
+            if(continue_mrk(ivr).eq.4) then             !minus dBZ means very small reflectivity 
+              if(obsvdata(ifh,ivr,ilv,i).lt.0.)
+     +         obsvdata(ifh,ivr,ilv,i)=10.0**obsvdata(ifh,ivr,ilv,i)
+              if(fcstdata(ifh,ivr,ilv,i).lt.0.)
+     +         fcstdata(ifh,ivr,ilv,i)=10.0**fcstdata(ifh,ivr,ilv,i)
+            end if
+
+
+            if(continue_mrk(ivr).eq.7) then
+              if(fcstdata(ifh,ivr,ilv,i).le.0.0) then
+                fcstdata(ifh,ivr,ilv,i)=0.0
+              end if
+              if(obsvdata(ifh,ivr,ilv,i).le.0.0) then
+                obsvdata(ifh,ivr,ilv,i)=0.0
+              end if
+            end if
+
+
 
                       if(region_id(i).eq.numreg(iar)) then
+
 
                        sumdata(ifh,ivr,ilv,iar,iob) =
      +                        sumdata(ifh,ivr,ilv,iar,iob)
@@ -300,6 +385,11 @@ c      end do
             if(continue_mrk(ivr).eq.3 .and.
      +      obsvdata(ifh,ivr,ilv,i).eq.0.0) goto 5003  !for RTMA RH case
 
+
+            if(continue_mrk(ivr).eq.5.and.
+     +        (obsvdata(ifh,ivr,ilv,i).le.0.0.or.  
+     +         fcstdata(ifh,ivr,ilv,i).le.0.0) )  goto 5003  ! for ceiling
+
                        sumdata(ifh,ivr,ilv,iar,iob) =
      +                        sumdata(ifh,ivr,ilv,iar,iob)
      +                        + obsvdata(ifh,ivr,ilv,i)
@@ -351,6 +441,11 @@ c      end do
 
             if(continue_mrk(ivr).eq.3 .and.
      +      obsvdata(ifh,ivr,ilv,i).eq.0.0) goto 5004  !for RTMA RH case
+
+            if(continue_mrk(ivr).eq.5.and.
+     +        (obsvdata(ifh,ivr,ilv,i).le.0.0.or.  
+     +         fcstdata(ifh,ivr,ilv,i).le.0.0) )  goto 5004  ! for ceiling
+
 
                       if(region_latlon(1,i).lt.0.0) then
                        sumdata(ifh,ivr,ilv,iar,iob) =
@@ -407,6 +502,10 @@ c      end do
             if(continue_mrk(ivr).eq.3 .and.
      +      obsvdata(ifh,ivr,ilv,i).eq.0.0) goto 5005  !for RTMA RH case
 
+            if(continue_mrk(ivr).eq.5.and.
+     +        (obsvdata(ifh,ivr,ilv,i).le.0.0.or.  
+     +         fcstdata(ifh,ivr,ilv,i).le.0.0) )  goto 5005  ! for ceiling
+
 
                         if(region_latlon(1,i).ge.ptr1(2,iar).and.        !  |
      +                     region_latlon(1,i).le.ptr2(2,iar)) then       !  |
@@ -455,6 +554,11 @@ c      end do
      +                 obsvdata(ifh,ivr,ilv,i).eq.0.0 .or.
      +                  fcstdata(ifh,ivr,ilv,i).eq.0.0) ) goto 5006  !for soil temperature and soil moisture
 
+            if(continue_mrk(ivr).eq.5.and.
+     +        (obsvdata(ifh,ivr,ilv,i).le.0.0.or.  
+     +         fcstdata(ifh,ivr,ilv,i).le.0.0) )  goto 5006  ! for ceiling
+
+
             if(continue_mrk(ivr).eq.3 .and.
      +      obsvdata(ifh,ivr,ilv,i).eq.0.0) goto 5006  !for RTMA RH case
 
@@ -492,22 +596,67 @@ c      end do
 
                          end if
 5006                  continue 
-                     else if (ptr1(1,iar).ne.ptr2(1,iar).and.    !user defined case 3, all points in a regtangular
-     +                        ptr1(2,iar).ne.ptr2(2,iar)) then        !
-                       do 5007 i = 1,ngrid      
-                    if(continue_mrk(ivr).eq.1.and.
-     +                 obsvdata(ifh,ivr,ilv,i).lt.0.0 ) goto 5007
 
-                    if(continue_mrk(ivr).eq.2 .and.(
-     +                 obsvdata(ifh,ivr,ilv,i).lt.0.0 .or.
-     +                  fcstdata(ifh,ivr,ilv,i).lt.0.0) ) goto 5007  !for aerosol/smoke
+          else if (ptr1(1,iar).ne.ptr2(1,iar).and.    !user defined case 3, all points in a regtangular
+     +               ptr1(2,iar).ne.ptr2(2,iar)) then        !
 
-                    if(continue_mrk(ivr).eq.9 .and.(
-     +                 obsvdata(ifh,ivr,ilv,i).eq.0.0 .or.
-     +                  fcstdata(ifh,ivr,ilv,i).eq.0.0) ) goto 5007  !for soil temperature and soil moisture
+            do 5007 i = 1,ngrid      
+               if(continue_mrk(ivr).eq.1.and.
+     +           obsvdata(ifh,ivr,ilv,i).lt.0.0 ) goto 5007
 
-            if(continue_mrk(ivr).eq.3 .and.
-     +      obsvdata(ifh,ivr,ilv,i).eq.0.0) goto 5007  !for RTMA RH case
+               if(continue_mrk(ivr).eq.2 .and.(
+     +            obsvdata(ifh,ivr,ilv,i).lt.0.0 .or.
+     +            fcstdata(ifh,ivr,ilv,i).lt.0.0) ) goto 5007  !for aerosol/smoke
+
+               if(continue_mrk(ivr).eq.9 .and.(
+     +            obsvdata(ifh,ivr,ilv,i).eq.0.0 .or.
+     +            fcstdata(ifh,ivr,ilv,i).eq.0.0) ) goto 5007  !for soil temperature and soil moisture
+
+               if(continue_mrk(ivr).eq.3 .and.
+     +            obsvdata(ifh,ivr,ilv,i).eq.0.0) goto 5007  !for RTMA RH case
+
+            if(continue_mrk(ivr).eq.6 .and.
+     +      obsvdata(ifh,ivr,ilv,i).lt. 1.0) goto 5007 ! for visibility
+            if(continue_mrk(ivr).eq.6 .and.
+     +      fcstdata(ifh,ivr,ilv,i).le. 0.0) goto 5007 ! for visibility
+            if(continue_mrk(ivr).eq.5 .and.
+     +      obsvdata(ifh,ivr,ilv,i).le. 0.0) goto 5007 ! for fog
+            if(continue_mrk(ivr).eq.5 .and.
+     +      fcstdata(ifh,ivr,ilv,i).le. 0.0) goto 5007 ! for fog
+
+
+            if(continue_mrk(ivr).eq.5.and.
+     +        (obsvdata(ifh,ivr,ilv,i).le.0.0.or.  
+     +         fcstdata(ifh,ivr,ilv,i).le.0.0) ) goto 5007 ! for ceiling
+
+
+            if (continue_mrk(ivr).eq.4 .and.
+     +       (obsvdata(ifh,ivr,ilv,i).le.-100.0.or.
+     +        fcstdata(ifh,ivr,ilv,i).le.-100.0) ) goto 5007  !for reflectivity
+
+            if (continue_mrk(ivr).eq.7 .and.
+     +       (obsvdata(ifh,ivr,ilv,i).le.-100.0.or.
+     +        fcstdata(ifh,ivr,ilv,i).le.-9999.0) ) goto 5007  !for echo-top
+
+
+            if(continue_mrk(ivr).eq.4) then             !minus dBZ means very small reflectivity 
+              if(obsvdata(ifh,ivr,ilv,i).lt.0.)
+     +         obsvdata(ifh,ivr,ilv,i)=10.0**obsvdata(ifh,ivr,ilv,i)
+              if(fcstdata(ifh,ivr,ilv,i).lt.0.)
+     +         fcstdata(ifh,ivr,ilv,i)=10.0**fcstdata(ifh,ivr,ilv,i)
+            end if
+
+
+            if(continue_mrk(ivr).eq.7) then
+              if(fcstdata(ifh,ivr,ilv,i).le.0.0) then
+                fcstdata(ifh,ivr,ilv,i)=0.0
+              end if
+              if(obsvdata(ifh,ivr,ilv,i).le.0.0) then
+                obsvdata(ifh,ivr,ilv,i)=0.0
+              end if
+            end if
+
+
 
                                                                       !            (ptr2(1), ptr2(2))
                         if(region_latlon(2,i).ge.ptr1(1,iar).and.     !      ----------------x
@@ -666,7 +815,7 @@ c      end do
      +                              sumprod(ifh,ivr,ilv,iar,iob),
      +                              ssqgrid(ifh,ivr,ilv,iar,iob),
      +                              ssqdata(ifh,ivr,ilv,iar,iob)
- 1000                   FORMAT (A,F7.0,5E18.9)
+ 1000                   FORMAT (A,F10.0,5E18.9)
                        end if
                     END IF
 150            continue
