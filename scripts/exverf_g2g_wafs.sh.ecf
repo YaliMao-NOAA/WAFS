@@ -1,0 +1,62 @@
+#! /bin/ksh
+########################################################################################
+# Name of Script: exverf_g2g_wafs.sh.ecf
+# Purpose of Script: To generate the verification products for the g2g verification
+#                    on the model wafs output to be used by the Forecast Verification System
+# Arguments: exverf_g2g_wafs.sh.ecf $yyyy$mm$dd
+# Log history:
+########################################################################################
+set -x
+
+cd $DATA
+
+echo "$0 STRDATE "`date`
+
+msg="$job HAS BEGUN"
+postmsg "$jlogfile" "$msg"
+
+export vday=$1
+
+# Read in the model information
+cp $PARMverf_g2g/verf_g2g_wafs.modelinfo g2g.modelinfo
+
+cat g2g.modelinfo |while read line
+do
+  vmodel=`echo $line |awk -F"|" '{print $1}'`
+  if [[ $vmodel =~ ^# ]] ; then
+    continue # skip a line starting with '#'
+  fi
+
+  if [[ $vmodel = 'cip' || $vmodel = 'gcipconus' ]] ; then
+    export vgrid=130
+    # Get the observation CIP icing data
+    $USHverf_g2g/verf_g2g_get_wafs.sh $vmodel $vday $vmodel
+  elif [ $vmodel = 'gcip' ] ; then
+    export vgrid=45
+    # Get the observation GCIP icing data
+    $USHverf_g2g/verf_g2g_get_wafs.sh $vmodel $vday $vmodel
+  fi
+
+  models=`echo $line |awk -F"|" '{print $2}'`
+  for model in $models ; do
+    # Get the input model forecast data
+    $USHverf_g2g/verf_g2g_get_wafs.sh $model $vday $vmodel
+    # Verification of the model output against observation data:
+    $USHverf_g2g/verf_g2g_wafs.sh $vday $model $vmodel
+  done # model in $models
+
+done # vmodel
+
+#####################################################################
+# GOOD RUN
+set +x
+echo "**************$job COMPLETED NORMALLY on `date`"
+set -x
+#####################################################################
+
+msg="HAS COMPLETED NORMALLY!"
+echo $msg
+postmsg "$jlogfile" "$msg"
+
+############## END OF SCRIPT #######################
+

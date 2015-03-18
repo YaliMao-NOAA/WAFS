@@ -106,10 +106,20 @@ c
         end if  
 
         if ( grib2file(1:13).eq.'fcst.grib.NAR'.or.
-     +       grib2file(1:13).eq.'fcst.grib.SRE' ) then   ! NARREMEAN/SREFMEAN  uses Template 4.2
+     +       grib2file(1:13).eq.'fcst.grib.SRE' ) then ! NARREMEAN/SREFMEAN  uses Template 4.2
            jpdtn=2 
         end if
-  
+
+        if ( jpd1==19 .and. jpd2==20 .and. grib2file(1:4)=='fcst' ) then
+           if(index(grib2file, 'MEAN') > 0 .or.
+     +          index(grib2file, 'MAX') > 0 ) then
+           ! WAFS icing verification, forecast mean/max Template 4.15, others 4.0
+              jpdtn = 15
+           else
+              jpdtn = 0
+           end if
+        end if
+
 
         jp =  jpd10                                   !Binbin: these 2 lines are used to
         if(jpd10.eq.100.or.jpd10.eq.104) jp=100   !deal with both jpds=100 and jpds=104(sigma level)

@@ -1,0 +1,138 @@
+#!/bin/sh
+set -xa
+
+#################################################################
+# 9/20/2009, Julia Zhu   Scripts are modified to be sharable
+#                        between EMC and NCO
+#         Please note that variable "RUN_ENVIR" is set and used
+#         in the development enviroment only.
+# 3/10/2015, Yali Mao    For WAFS Icing temperature UV verification
+#################################################################
+export RUN_ENVIR=${RUN_ENVIR:-prod}
+export SENDECF=${SENDECF:-YES}
+
+###############################
+# Specify RUN name
+###############################
+export NET=verf
+export RUN=wafs
+
+###############################################################
+# This block can be modified for different Production test
+# environment. This is used for operational testings
+###############################################################
+if [ "$RUN_ENVIR" = prod ]; then
+#if [ "$RUN_ENVIR" = prod -a $envir != prod ]; then
+  export jlogfile=${jlogfile:-/com/logs/jlogfiles/jlogfile.$$}
+fi
+
+# ###################################
+# SET SHELL PROCESSING VARIABLES
+# ###################################
+export PS4='$SECONDS + '
+date
+
+###########################################################
+# obtain unique process id (pid) and make temp directories
+###########################################################
+export pid=$$
+export DATA_IN=${DATA_IN:-/tmpnwprd}
+#export DATA=$DATA_IN/verf_g2g_wafs_${cyc}_${envir}.$$
+export DATA=$DATA_IN/verf_g2g_wafs_${envir}.$$
+
+rm -rf $DATA
+mkdir -p $DATA
+cd $DATA
+
+####################################
+# File To Log Msgs
+####################################
+export jlogfile=${jlogfile:-/com/logs/jlogfiles/jlogfile.$$}
+
+####################################
+# Determine Job Output Name on System
+####################################
+export outid="LL$job"
+export jobid="${outid}.o${pid}"
+export pgmout="OUTPUT.${pid}"
+
+# must exist; otherwise the following $DATA/PDY won't work
+export cycle=t${cyc}z
+
+##################################################
+# SAVEGES  - Copy Files From TMPDIR to $GESdir
+# SENDECF  - Flag Events on ECF
+# SENDCOM  - Copy Files From TMPDIR to $COMOUT
+# SENDDBN  - Issue DBNet Client Calls
+##################################################
+export SENDCOM=${SENDCOM:-YES}
+export SENDDBN=${SENDDBN:-YES}
+export SENDECF=${SENDECF:-YES}
+
+export HOMEverf_g2g=${HOMEverf_g2g:-/nw${envir}/verf_g2g.${model_ver}}
+export EXECverf_g2g=${EXECverf_g2g:-$HOMEverf_g2g/exec}
+export FIXverf_g2g=${FIXverf_g2g:-$HOMEverf_g2g/fix}
+export PARMverf_g2g=${PARMverf_g2g:-$HOMEverf_g2g/parm}
+export USHverf_g2g=${USHverf_g2g:-$HOMEverf_g2g/ush}
+export SCRIPTSverf_g2g=${SCRIPTSverf_g2g:-$HOMEverf_g2g/scripts}
+
+###################################
+# Set up the UTILITIES
+###################################
+export EXECutil=/nwprod/util/exec
+export HOMEutil=${HOMEutil:-/nw${envir}/util.${util_ver}}
+export USHutil=${USHutil:-$HOMEutil/ush}
+export EXECutil=${EXECutil:-$HOMEutil/exec}
+
+# Run setup to initialize working directory and utility scripts
+sh $USHutil/setup.sh
+
+# Run setpdy and initialize PDY variables
+sh $USHutil/setpdy.sh
+. $DATA/PDY
+
+export vday=${vday:-$PDYm1}
+
+##################################
+# Define COMIN/COMOUT variables
+##################################
+export COM_IN=${COM_IN:-/com/$NET/${envir}}
+export COM_OUT=${COM_OUT:-/com/$NET/${envir}}
+
+export FCSTDIR=${FCSTDIR:-$COM_OUT/${RUN}}
+export OBSVDIR=${OBSVDIR:-$COM_OUT/${RUN}}
+
+export COMIN=$COM_IN/${RUN}.$vday
+export COMOUT=$COM_OUT/${RUN}.$vday
+export COMVSDB=${COMVSDB:-/com/verf/${envir}/vsdb/grid2grid}
+
+# Global WAFS icing forecast, $PDY will be appended.
+export COMINUS=${COMINUS:-/com/gfs/${envir}/gfs}
+export COMINUK=${COMINUK:-/dcom/us007003}
+export COMINBLND=${COMINBLND:-/com/gfs/${envir}/gfs}
+#This is an experimental version of GFIP, $PDY will be appended.
+export COMINGFIP=${COMINGFIP:-/ptmpp1/Yali.Mao/gfip}
+# Regional icing forecast, $PDY will be appended.
+export COMINFIP=${COMINFIP:-/dcomdev/us007003}
+# Validation/Observation data
+export CIPDIR=${CIPDIR:-/dcomdev/us007003}
+export GCIPDIR=${GCIPDIR:-/ptmpp1/Yali.Mao}
+
+mkdir -p -m 775 $COMOUT $COMVSDB/${RUN}
+
+env
+
+#######################################################################
+# Execute the script.
+sh $SCRIPTSverf_g2g/exverf_g2g_wafs.sh.ecf $vday
+
+msg="JOB $job HAS COMPLETED NORMALLY."
+postmsg "$jlogfile" "$msg"
+
+#cd $DATA_IN
+#if [ ${RM_TMPDIR:-NO} = YES ]; then
+#  rm -rf $DATA
+#fi
+
+date
+

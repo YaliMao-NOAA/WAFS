@@ -163,6 +163,11 @@ elif [ $k4 -eq 6 ] && [ $k5 -eq 1 ] ; then
    echo ":TCDC:entire atmosphere"
   fi
 
+#Icing potential
+elif [ $k4 -eq 19 ] && [ $k5 -eq 20 ] ; then
+  if [ $k6 -eq 100 ] ; then
+   echo ":ICIP:$p mb"
+  fi
 else
  
   echo "Variable not defined, add it into get_field_string function!"
@@ -177,7 +182,9 @@ wgrb=/nwprod/util/exec
 gribindex=${gribindex:-/nwprod/util/exec/grbindex}
 cp $PARMverf_g2g/verf_g2g.grid104 grid#104
 cp $PARMverf_g2g/verf_g2g.regions regions
-
+# for WAFS, UK MET-office defined Area-2 from North to South
+# Grids marked as 34, 4319 gridpoints out of 288*145.
+cp $PARMverf_g2g/verf_g2g.grid45 grid#45
 
 rm -f g2g.ctl
 

@@ -65,13 +65,13 @@ czhou      regnam(iar) = nam24(6:8)
           IF (ig104(75,55).eq.0) THEN
 czhou            READ (20,'(20I4)') ig104
 Czhou           PRINT*,'IG104: ',IG104
-            do i = 1, 32
+            do i = 1, 34
              READ (21,'(4X,A3)') regions(i)
             end do
             close(21)
          PRINT*,'REGIONS: ',REGIONS
           END IF
-          DO nr = 1, 32                             !g2g: add N. hemisphere (NHM),  S. hemisphere(SHM) 
+          DO nr = 1, 34                            !g2g: add N. hemisphere (NHM),  S. hemisphere(SHM) 
             IF (regnam(iar).eq.regions(nr)) THEN
               numreg(iar) = nr
               mode(iar) = 2

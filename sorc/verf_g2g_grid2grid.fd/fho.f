@@ -8,6 +8,7 @@ c    all variables, all levels, all requested sub-regions, then write them
 c    into the vsdb file
 c    Author: Binbin Zhou
 c            March, 2005
+c    Modification: Y. Mao,  20150517, add numreg 34 for WAFS Area2
 
       INCLUDE 'parm.inc'
       
@@ -121,7 +122,6 @@ C
       DATA namversion /'V01'/
       DATA bmiss /10E10/
       DATA rmiss /99999./
-
 
       write(*,*) 'In gtFHO:',imodel,ist,numfcst,numvfyobs,numarea,
      +  numvarbl,numlevel,ngrid
@@ -256,7 +256,7 @@ c                    !write(*,*)'f,o,h=', f, o, h
 
                  write(*,*) 'mode(iar)=',mode(iar)
 
-                  if (numreg(iar).le.30) then                    !         sub-region
+                  if (numreg(iar).le.30 .or. numreg(iar)==34) then  ! sub-region
 
                     do 502 i = 1,ngrid
 

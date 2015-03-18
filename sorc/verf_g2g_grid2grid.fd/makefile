@@ -25,4 +25,9 @@ OBJ=${SRCS:.f=.o}
 
 verf_g2g_grid2grid: $(OBJ)
 	$(FC) $(FFLAGS) -o $(@) grid2grid.f  $(OBJ)  $(LIBS)
+	mkdir -p ../../exec/
+	mv  $(@) ../../exec/.
+
+clean:
+	@rm -f $(OBJ)
 ########################################################
