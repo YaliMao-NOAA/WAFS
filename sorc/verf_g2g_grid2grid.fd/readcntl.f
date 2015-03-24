@@ -1,7 +1,7 @@
 c
 c
 c    11/2012 B.Zhou Move from CCS to Zeus/WCOSS, ST_RMBL modified
-c
+c    03/2015 Y Mao add CFHO for ROC, borrowing sfho variables.
 
       SUBROUTINE readcntl(numodel,numfcst,numvfdate,numvfyobs,numarea,
      +            numstat,numvarbl,numlevel,numvector)
@@ -518,7 +518,7 @@ C  Modified as:
 
         end if
 
-        if (num.gt.7) then        !has FHO or AFHO or EFHO or SFHO
+        if (num.gt.7) then        !has FHO or AFHO or EFHO or SFHO or CFHO
           nchrfho(1) = len_trim(substr(7))
           fho(1) = substr(7)(1:nchrfho(1))
           
@@ -538,7 +538,8 @@ C  Modified as:
               end if
             end do
 
-         else if (fho(1)(1:1).eq.'S'  ) then   !SFHO
+         else if (fho(1)(1:1).eq.'S'  .or. 
+     +            fho(1)(1:1).eq.'C') then !SFHO or CFHO
           sfhomrk(1) = num - 7
           do nx = 8, num
             nchrsfhothr(1,nx-7) = len_trim(substr(nx))
@@ -672,8 +673,8 @@ C  Modified as:
               end if
              end do
 
-            else if (fho(n)(1:1).eq.'S'  ) then    ! SFHO
-
+            else if (fho(n)(1:1).eq.'S' .or.
+     +            fho(n)(1:1).eq.'C') then !SFHO or CFHO
              sfhomrk(n) =  num - 6
              do nx = 7, num
               nchrsfhothr(n,nx-6) = len_trim(substr(nx))

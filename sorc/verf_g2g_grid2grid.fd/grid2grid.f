@@ -1045,7 +1045,12 @@ c      ----- stats without anomly --------------------------------------
            write(*,*) 'PFHO done'
         end if
 
-
+         if(trim(namstat(ist)).eq.'CFHO') then
+           call gtCFHO(nvsdb, imodel,ist,numfcst,numvfyobs,numarea,
+     +          numvarbl,numlevel,ngrid,levels,tendencymrk,updown,
+     +          hasdata,fcstdata, obsvdata)
+           write(*,*) 'CFHO done'
+        end if
 
 
         if(trim(namstat(ist)).eq.'EFHO') then  !Note: EFHO and FHO can not put into same user control file at same time (20090717)

@@ -20,6 +20,7 @@ SRCS=   gtgdef.f readcntl.f setarea.f \
 	esl1l2.f evl1l2.f rhnt.f rhet.f sl1l2_S1.f efho.f \
 	EFS.f getHiresClimData.f \
 	DIST.f PROB.f naefs.f fho_fss.f FSS.f \
+        getcfho.f cfho.f \
 	readGRIB2.f
 OBJ=${SRCS:.f=.o}
 
