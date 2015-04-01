@@ -45,7 +45,7 @@ HLEVELS="914 1828 3048 4267 5486 7315"
 
 if [ $model_name = cip ] ; then    # Observation CIP data
    # re-organize CIP data for each HH, outputs are adds.cip.t${hh}z.f00
-   export ADDSDIR=${CIPDIR:-/dcomdev/us007003/}
+   export ADDSDIR=${CIPDIR:-/dcom/us007003/}
    ksh $USHverf_g2g/verf_g2g_icing_convertadds.sh CIP PRB $vday "$HLEVELS"
    #CIP is on hybrid levels, needs to be converted on pressure levels:
    for hh in $HHOBS ; do
@@ -109,7 +109,7 @@ elif [[ $model_name =~ 'blnd' || $model_name =~ 'us' || $model_name =~ 'uk' || $
 
 elif [ $model_name = fip ] ; then
    # re-organize FIP data for each HH and FH, outputs are adds.fip.t${hh}z.f$fh
-   export ADDSDIR=${COMINFIP:-/dcomdev/us007003}
+   export ADDSDIR=${COMINFIP:-/dcom/us007003}
    ksh $USHverf_g2g/verf_g2g_icing_convertadds.sh FIP PRB $vday "$HLEVELS"
    #FIP is on hybrid levels, needs to be converted on pressure levels:
    for hh in $HHOBS ; do

@@ -1,7 +1,7 @@
 c
 c
 c    11/2012 B.Zhou Move from CCS to Zeus/WCOSS, ST_RMBL modified
-c    03/2015 Y Mao add CFHO for ROC, borrowing sfho variables.
+c    03/2015 Y Mao add CFHO for ROC
 
       SUBROUTINE readcntl(numodel,numfcst,numvfdate,numvfyobs,numarea,
      +            numstat,numvarbl,numlevel,numvector)
@@ -523,7 +523,8 @@ C  Modified as:
           fho(1) = substr(7)(1:nchrfho(1))
           
          if(fho(1)(1:1).eq.'F' .or.
-     +      fho(1)(1:1).eq.'E' ) then      !FHO or EFHO
+     +      fho(1)(1:1).eq.'E' .or.
+     +      fho(1)(1:1).eq.'C') then           !FHO or EFHO or CFHO
           fhomrk(1) = num - 7
           do nx = 8, num 
             nchrfhothr(1,nx-7) = len_trim(substr(nx))
@@ -538,8 +539,7 @@ C  Modified as:
               end if
             end do
 
-         else if (fho(1)(1:1).eq.'S'  .or. 
-     +            fho(1)(1:1).eq.'C') then !SFHO or CFHO
+         else if (fho(1)(1:1).eq.'S') then !SFHO
           sfhomrk(1) = num - 7
           do nx = 8, num
             nchrsfhothr(1,nx-7) = len_trim(substr(nx))
@@ -656,7 +656,8 @@ C  Modified as:
              nchrfho(n) = len_trim(substr(6))
              fho(n) = substr(6)(1:nchrfho(n))
             if(fho(n)(1:1).eq.'F' .or.
-     +         fho(n)(1:1).eq.'E' ) then     !FHO or EFHO
+     +         fho(n)(1:1).eq.'E' .or.
+     +         fho(n)(1:1).eq.'C') then !FHO or EFHO or CFHO
             
              fhomrk(n) =  num - 6
              do nx = 7, num
@@ -673,8 +674,7 @@ C  Modified as:
               end if
              end do
 
-            else if (fho(n)(1:1).eq.'S' .or.
-     +            fho(n)(1:1).eq.'C') then !SFHO or CFHO
+            else if (fho(n)(1:1).eq.'S') then !SFHO
              sfhomrk(n) =  num - 6
              do nx = 7, num
               nchrsfhothr(n,nx-6) = len_trim(substr(nx))
@@ -805,6 +805,10 @@ C  Modified as:
 
        if(k4(n).eq.4.and.k5(n).eq.8.and.k6(n).eq.103) continue_mrk(n)=4  !for hibrid scan reflectivity 
 
+
+       if(k4(n).eq.19.and.k5(n).eq.20.and.k6(n).eq.100 .and.
+     +      index(fho(n), "CFHO") > 0)
+     +      continue_mrk(n)=8   !for icing ROC
       end do
 
         !set anomly mark

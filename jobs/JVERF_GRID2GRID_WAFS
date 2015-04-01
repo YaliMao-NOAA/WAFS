@@ -113,9 +113,9 @@ export COMINBLND=${COMINBLND:-/com/gfs/${envir}/gfs}
 #This is an experimental version of GFIP, $PDY will be appended.
 export COMINGFIP=${COMINGFIP:-/ptmpp1/Yali.Mao/gfip}
 # Regional icing forecast, $PDY will be appended.
-export COMINFIP=${COMINFIP:-/dcomdev/us007003}
+export COMINFIP=${COMINFIP:-/dcom/us007003}
 # Validation/Observation data
-export CIPDIR=${CIPDIR:-/dcomdev/us007003}
+export CIPDIR=${CIPDIR:-/dcom/us007003}
 export GCIPDIR=${GCIPDIR:-/ptmpp1/Yali.Mao}
 
 mkdir -p -m 775 $COMOUT $COMVSDB/${RUN}

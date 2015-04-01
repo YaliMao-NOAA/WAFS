@@ -174,6 +174,7 @@ c         end do
           do 70 iar = 1, numarea
            do 60 ivr = 1, numvarbl
              if(fhomrk(ivr).eq.0) goto 60
+             if(continue_mrk(ivr) == 8) cycle ! don't continue if icing ROC             
              do 55 ifo = 1, fhomrk(ivr)
                do 50 ilv = 1, levels(ivr)
                 if(nodata(ifh,ivr,ilv).eq.1) goto 50
@@ -691,6 +692,7 @@ c     +        fcstdata(ifh,ivr,ilv,i).le.-9999.0) ) goto 507  !for echo-top
         do 71 iar = 1, numarea
          do 61 ivr = 1, numvarbl
           if(fhomrk(ivr).eq.0) goto 61
+          if(continue_mrk(ivr) == 8) cycle ! don't continue if icing ROC             
           do 56 ifo = 1, fhomrk(ivr)
             do 51 ilv = 1, levels(ivr)
              if(nodata(ifh,ivr,ilv).eq.1) goto 51
@@ -742,6 +744,7 @@ c     +        fcstdata(ifh,ivr,ilv,i).le.-9999.0) ) goto 507  !for echo-top
                 ivfdate = ifh
               do 160 ivr = 1, numvarbl
                if(fhomrk(ivr).eq.0) goto 160
+               if(continue_mrk(ivr) == 8) cycle ! don't continue if icing ROC             
                do 150 ifo = 1, fhomrk(ivr)
                  do 150 ilv = 1, levels(ivr)
                   if(nodata(ifh,ivr,ilv).eq.1) goto 150
