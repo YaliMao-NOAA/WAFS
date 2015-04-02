@@ -24,37 +24,39 @@ FCSTDIR=${FCSTDIR:-/com/verf/prod/wafs}
 
 #vgrid was  set by exverf_g2g_wafs.sh.ecf
 if [[ $obsv = 'cip' || $obsv = 'gcip' || $obsv = 'gcipconus' ]] ; then
-   export fcstdir=$FCSTDIR
-   export fhead=$model
-   export fgrbtype=grd$vgrid.f
-   export ftm=.grib2
-   export mdl=`echo $model | tr '[a-z]' '[A-Z]'`
-
-   
-   export obsvdir=$OBSVDIR
-   export ohead=$obsv
-   export ogrbtype=grd$vgrid
-   export otm=
-   export otail=.f00.grib2
-   export obsvdata=`echo $obsv | tr '[a-z]' '[A-Z]'`
-
    HHs="00 03 06 09 12 15 18 21"
-   CNTLtemplate=verf_g2g_wafs.${obsv}
-
-  #(2) Prepare OBS and FCST input files and run grid2grid to generate VSDB files
-  for HH in $HHs ; do
-     cp $PARMverf_g2g/$CNTLtemplate .
-     sed -e "s/MODNAM/${mdl}_$vgrid/g" -e "s/VDATE/${PAST1}${HH}/g" \
-         -e "s/OBSTYPE/$obsvdata/g" $CNTLtemplate >user.ctl
-
-     $USHverf_g2g/verf_g2g_prepg2g.sh < user.ctl >output.prepg2g.${obsv}.${model}
-
-     $USHverf_g2g/verf_g2g_fitsg2g.sh<temp
-
-     echo "verf_g2g_ref.sh done for " ${PAST1}${HH} $vgrid
-  done
-
+else # for GFS verification T U V
+   HHs="00 06 12 18"
 fi
+
+export fcstdir=$FCSTDIR
+export fhead=$model
+export fgrbtype=grd$vgrid.f
+export ftm=.grib2
+export mdl=`echo $model | tr '[a-z]' '[A-Z]'`
+   
+export obsvdir=$OBSVDIR
+export ohead=$obsv
+export ogrbtype=grd$vgrid
+export otm=
+export otail=.f00.grib2
+export obsvdata=`echo $obsv | tr '[a-z]' '[A-Z]'`
+
+CNTLtemplate=verf_g2g_wafs.${obsv}
+
+#(2) Prepare OBS and FCST input files and run grid2grid to generate VSDB files
+for HH in $HHs ; do
+  cp $PARMverf_g2g/$CNTLtemplate .
+  sed -e "s/MODNAM/${mdl}_$vgrid/g" -e "s/VDATE/${PAST1}${HH}/g" \
+      -e "s/OBSTYPE/$obsvdata/g" $CNTLtemplate >user.ctl
+
+  $USHverf_g2g/verf_g2g_prepg2g.sh < user.ctl >output.prepg2g.${obsv}.${model}
+
+  $USHverf_g2g/verf_g2g_fitsg2g.sh<temp
+
+  echo "verf_g2g_ref.sh done for " ${PAST1}${HH} $vgrid
+done
+
 
 # Combine the vsdb files for each model
 if [ ! -d $COMVSDB/wafs ] ; then

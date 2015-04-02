@@ -8,7 +8,7 @@ c    into the vsdb file
 c
 c March, 2005, Author: Binbin Zhou
 c April, 2007, Changed weighting method for variances, Fanglin Yang
-                                                                                                                 
+c    Modification: Y. Mao,  20150317, add numreg 34 for WAFS Area2
 
 
       INCLUDE 'parm.inc'
@@ -219,7 +219,7 @@ c      end do
 
                   end do
                 else if (mode(iar).eq.2) then                    ! GRID#104  (mode 2)
-                 if (numreg(iar).le.30) then                    !         sub-region
+                 if (numreg(iar).le.30 .or. numreg(iar)==34) then  ! sub-region
                    do i = 1,ngrid
                     if(region_id(i).eq.numreg(iar)) then
 

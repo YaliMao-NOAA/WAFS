@@ -35,6 +35,10 @@ do
     export vgrid=45
     # Get the observation GCIP icing data
     $USHverf_g2g/verf_g2g_get_wafs.sh $vmodel $vday $vmodel
+  elif [ $vmodel = 'gfs' ] ; then
+    export vgrid=45
+    # Get the analysis GFS T,U,V data
+    $USHverf_g2g/verf_g2g_get_wafs.sh $vmodel $vday $vmodel
   fi
 
   models=`echo $line |awk -F"|" '{print $2}'`

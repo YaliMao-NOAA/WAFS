@@ -2,6 +2,7 @@ c
 c
 c    11/2012 B.Zhou Move from CCS to Zeus/WCOSS, ST_RMBL modified
 c    03/2015 Y Mao add CFHO for ROC
+c                  change wind speed k5 and k4 to set vectormrk.
 
       SUBROUTINE readcntl(numodel,numfcst,numvfdate,numvfyobs,numarea,
      +            numstat,numvarbl,numlevel,numvector)
@@ -862,7 +863,8 @@ c	END DO
 
        DO ivr = 1, numvarbl
 c        IF (nchrvarbl(ivr).eq.4.and.namvarbl(ivr).eq.'VWND') THEN
-        IF (k5(ivr).eq.32) THEN
+c       Wind speed k4=2 k5=1 in grib2, k5=32 in grib1 - Y Mao
+        IF (k4(ivr).eq.2 .and. k5(ivr).eq.1) THEN
           numvector = numvector + 1
           vectormrk(ivr) = 1
         END IF

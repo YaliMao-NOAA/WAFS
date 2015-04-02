@@ -16,7 +16,7 @@ valid=$3
 
 if [[ $valid = 'cip'  || $valid = 'gcipconus' ]] ; then
    matchgrid="-new_grid_winds earth -new_grid lambert:-95:25 -126.138:451:13545 16.281:337:13545"
-elif [ $valid = 'gcip' ] ; then 
+elif [[ $valid = 'gcip' || $valid = 'gfs' ]] ; then 
    # Global project: G45
    # Bonus: make sure all data on the same orientation from North to South
    # orietation=`$EXECutil/wgrib2 $imfile -scan | grep :scan=4`
@@ -25,15 +25,23 @@ elif [ $valid = 'gcip' ] ; then
 fi
 
 # observation cycle
-HHOBS="00 03 06 09 12 15 18 21"
+HHOBS3="00 03 06 09 12 15 18 21"# every 3 hours, for icing
+HHOBS6="00 06 12 18"		# every 6 hours, for T U V wind
+
 # forecast cycle for cip
 HHFCSTcip="00 03 06 09 12 15 18 21"
 # forecast hour for cip
 FHOURScip="03 06 09 12"
+
 # forecast cycle for gcip
 HHFCSTgcip="00 06 12 18"
 # forecast hour for gcip
 FHOURSgcip="06 09 12 15 18 21 24 27 30 33 36"
+
+# forecast cycle for GFS t u v
+HHFCSTgfs="00 06 12 18"
+# forecast hour for gcip
+FHOURSgfs="06 12 18 24 30 36"
 
 # Thinned vertical levels
 #---------------------
@@ -43,33 +51,39 @@ FHOURSgcip="06 09 12 15 18 21 24 27 30 33 36"
 PLEVELS="900  800  700  600  500  400"
 HLEVELS="914 1828 3048 4267 5486 7315"
 
-if [ $model_name = cip ] ; then    # Observation CIP data
-   # re-organize CIP data for each HH, outputs are adds.cip.t${hh}z.f00
-   export ADDSDIR=${CIPDIR:-/dcom/us007003/}
-   ksh $USHverf_g2g/verf_g2g_icing_convertadds.sh CIP PRB $vday "$HLEVELS"
-   #CIP is on hybrid levels, needs to be converted on pressure levels:
-   for hh in $HHOBS ; do
+
+#------------------------------------
+#   WAFS icing verification
+if [[ $valid =~ cip ]] ; then
+#------------------------------------
+
+  if [ $model_name = cip ] ; then    # Observation CIP data, every 3 hours
+    # re-organize CIP data for each HH, outputs are adds.cip.t${hh}z.f00
+    export ADDSDIR=${CIPDIR:-/dcom/us007003/}
+    ksh $USHverf_g2g/verf_g2g_icing_convertadds.sh CIP PRB $vday "$HLEVELS"
+    #CIP is on hybrid levels, needs to be converted on pressure levels:
+    for hh in $HHOBS3 ; do
       imfile=adds.cip.t${hh}z.f00
       $HOMEverf_g2g/exec/verf_g2g_icing_convert $imfile $COMOUT/${model_name}.t${hh}z.grd$vgrid.f00.grib2 19 233
       echo "{model_name}.t${hh}z.grd$vgrid.f00.grib2 done"
       rm -f $imfile
-   done
+    done
 
-elif [[ $model_name =~ gcip ]] ; then  # Observation GCIP data
-   for hh in $HHOBS ; do
-     imfile=$GCIPDIR/gcip.$vday/gfs.t${hh}z.gcip_grb2f00
-     for lvl in $PLEVELS ; do
-       $EXECutil/wgrib2 $imfile -match ":ICIP:$lvl mb:" $matchgrid x.$lvl
-       cat x.$lvl >>  $COMOUT/${model_name}.t${hh}z.grd$vgrid.f00.grib2
-       echo "{model_name}.t${hh}z.grd$vgrid.f00.grib2 done"
-     done #lvl
-   done #hh
-   rm -f x.*
+  elif [[ $model_name =~ gcip ]] ; then  # Observation GCIP data, every 3 hours
+    for hh in $HHOBS3 ; do
+      imfile=$GCIPDIR/gcip.$vday/gfs.t${hh}z.gcip_grb2f00
+      for lvl in $PLEVELS ; do
+        $EXECutil/wgrib2 $imfile -match ":ICIP:$lvl mb:" $matchgrid x.$lvl
+	cat x.$lvl >>  $COMOUT/${model_name}.t${hh}z.grd$vgrid.f00.grib2
+	echo "{model_name}.t${hh}z.grd$vgrid.f00.grib2 done"
+      done #lvl
+    done #hh
+    rm -f x.*
 
-elif [[ $model_name =~ 'blnd' || $model_name =~ 'us' || $model_name =~ 'uk' || $model_name =~ 'gfip' ]] ; then
+  elif [[ $model_name =~ 'blnd' || $model_name =~ 'us' || $model_name =~ 'uk' || $model_name =~ 'gfip' ]] ; then
 
-   for hh in $HHFCSTgcip ; do
-   for fh in $FHOURSgcip  ; do
+    for hh in $HHFCSTgcip ; do
+    for fh in $FHOURSgcip  ; do
       outfile=$COMOUT/${model_name}.t${hh}z.grd$vgrid.f$fh.grib2
       if [[ -s $outfile ]] ; then
 	  continue
@@ -102,18 +116,18 @@ elif [[ $model_name =~ 'blnd' || $model_name =~ 'us' || $model_name =~ 'uk' || $
         cat x.$lvl >> $outfile
       done
       rm -f x.*
-   done
-   done
+    done
+    done
 
-   echo "copying of $model_name done"
+    echo "copying of $model_name done"
 
-elif [ $model_name = fip ] ; then
-   # re-organize FIP data for each HH and FH, outputs are adds.fip.t${hh}z.f$fh
-   export ADDSDIR=${COMINFIP:-/dcom/us007003}
-   ksh $USHverf_g2g/verf_g2g_icing_convertadds.sh FIP PRB $vday "$HLEVELS"
-   #FIP is on hybrid levels, needs to be converted on pressure levels:
-   for hh in $HHOBS ; do
-   for fh in $FHOURScip ; do
+  elif [ $model_name = fip ] ; then
+    # re-organize FIP data for each HH and FH, outputs are adds.fip.t${hh}z.f$fh
+    export ADDSDIR=${COMINFIP:-/dcom/us007003}
+    ksh $USHverf_g2g/verf_g2g_icing_convertadds.sh FIP PRB $vday "$HLEVELS"
+    #FIP is on hybrid levels, needs to be converted on pressure levels:
+    for hh in $HHOBS3 ; do
+    for fh in $FHOURScip ; do
       outfile=$COMOUT/${model_name}.t${hh}z.grd$vgrid.f$fh.grib2
       if [[ -s $outfile ]] ; then
 	  continue
@@ -122,11 +136,48 @@ elif [ $model_name = fip ] ; then
       imfile=adds.fip.t${hh}z.f$fh
       $HOMEverf_g2g/exec/verf_g2g_icing_convert $imfile $outfile 19 233
       rm $imfile
-   done
-   done
+    done
+    done
 
-   echo "copying of $model_name done"
+    echo "copying of $model_name done"
+  fi
+
+#------------------------------------
+#   WAFS T U V verification
+elif [ $valid = gfs ] ; then
+#------------------------------------
+
+  if [ $model_name = gfs ] ; then	# analysis GFS data, every 6 hours
+    for hh in $HHOBS6 ; do
+      imfile=$COMINUS.$vday/gfs.t${hh}z.master.grb2anl
+      for lvl in $PLEVELS ; do
+        $EXECutil/wgrib2 $imfile -match ":TMP:$lvl mb:" $matchgrid  t.$lvl
+        $EXECutil/wgrib2 $imfile -match  "GRD:$lvl mb:" $matchgrid uv.$lvl
+	cat t.$lvl uv.$lvl >>  $COMOUT/${model_name}.t${hh}z.grd$vgrid.f00.grib2
+	echo "${model_name}.t${hh}z.grd$vgrid.f00.grib2 done"
+      done #lvl
+    done #hh
+    rm -f t.$lvl uv.$lvl
+
+  else					# forecast GFS data T U V
+    for hh in $HHFCSTgfs ; do
+    for fh in $FHOURSgfs  ; do
+      outfile=$COMOUT/${model_name}.t${hh}z.grd$vgrid.f$fh.grib2
+      if [[ -s $outfile ]] ; then
+	  continue
+      fi
+      imfile=$COMINUS.$vday/gfs.t${hh}z.master.grb2f$fh
+      for lvl in $PLEVELS ; do
+        $EXECutil/wgrib2 $imfile -match ":TMP:$lvl mb:" $matchgrid  t.$lvl
+        $EXECutil/wgrib2 $imfile -match  "GRD:$lvl mb:" $matchgrid uv.$lvl
+	cat t.$lvl uv.$lvl >> $outfile
+      done
+      rm -f t.$lvl uv.$lvl
+    done
+    done
+    echo "copying of $model_name done"
+  fi
+
+#------------------------------------
 fi
-
-
-
+#------------------------------------
