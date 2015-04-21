@@ -17,6 +17,15 @@ postmsg "$jlogfile" "$msg"
 
 export vday=$1
 
+export VHoursIcing="06 09 12 15 18 21 24 27 30 33 36"
+export VLevelIcing="900  800  700  600  500  400"
+export VHoursTwind="06 12 18 24 30 36"
+export VLevelTwind="100 150 200 250 300 400 500 600 700 850"
+
+# observation cycle
+export HHOBS3="00 03 06 09 12 15 18 21"	# every 3 hours, for icing
+export HHOBS6="00 06 12 18"		# every 6 hours, for T U V wind
+
 # Read in the model information
 cp $PARMverf_g2g/verf_g2g_wafs.modelinfo g2g.modelinfo
 

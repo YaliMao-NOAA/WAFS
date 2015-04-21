@@ -29,6 +29,10 @@ fi
 # ###################################
 # SET SHELL PROCESSING VARIABLES
 # ###################################
+# The actual value doesn't matter for verification.
+# But it must be set
+export cyc=${cyc:-12}
+
 export PS4='$SECONDS + '
 date
 

@@ -24,10 +24,25 @@ FCSTDIR=${FCSTDIR:-/com/verf/prod/wafs}
 
 #vgrid was  set by exverf_g2g_wafs.sh.ecf
 if [[ $obsv = 'cip' || $obsv = 'gcip' || $obsv = 'gcipconus' ]] ; then
-   HHs="00 03 06 09 12 15 18 21"
+   HHSobsv=$HHOBS3
+   HHSfcst=$VHoursIcing
+   LEVELs=$VLevelIcing
+   
 else # for GFS verification T U V
-   HHs="00 06 12 18"
+   HHSobsv=$HHOBS6
+   HHSfcst=$VHoursTwind
+   LEVELs=$VLevelTwind
 fi
+# forecast hours
+nCounts=`echo $HHSfcst | wc -w`
+nCounts=`printf "%2s" $nCounts`
+tabsFcst=`echo "$HHSfcst" | sed -e 's/\s\+/\\\n       /g' `
+tabsFcst="$nCounts  $tabsFcst"
+# levels
+nCounts=`echo $LEVELs | wc -w`
+nCounts=`printf "%2s" $nCounts`
+tabsLevels=`echo "$LEVELs" | sed -e 's/\s\+/\\\n       P/g' `
+tabsLevels="$nCounts  P$tabsLevels"
 
 export fcstdir=$FCSTDIR
 export fhead=$model
@@ -45,9 +60,10 @@ export obsvdata=`echo $obsv | tr '[a-z]' '[A-Z]'`
 CNTLtemplate=verf_g2g_wafs.${obsv}
 
 #(2) Prepare OBS and FCST input files and run grid2grid to generate VSDB files
-for HH in $HHs ; do
+for HH in $HHSobsv ; do
   cp $PARMverf_g2g/$CNTLtemplate .
   sed -e "s/MODNAM/${mdl}_$vgrid/g" -e "s/VDATE/${PAST1}${HH}/g" \
+      -e "s/FHRs/$tabsFcst/g" -e "s/PRSs/$tabsLevels/g" \
       -e "s/OBSTYPE/$obsvdata/g" $CNTLtemplate >user.ctl
 
   $USHverf_g2g/verf_g2g_prepg2g.sh < user.ctl >output.prepg2g.${obsv}.${model}
@@ -64,7 +80,7 @@ if [ ! -d $COMVSDB/wafs ] ; then
 fi
 rm -rf ${model}_${PAST1}.vsdb
 MODEL=`echo $model | tr '[a-z]' '[A-Z]'`
-for HH in $HHs ; do
+for HH in $HHSobsv ; do
   cat ${MODEL}_${vgrid}_${PAST1}${HH}.vsdb >> $COMVSDB/wafs/${model}_${obsv}_${PAST1}.vsdb
 done
 
