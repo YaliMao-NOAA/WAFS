@@ -1,5 +1,5 @@
 #!/bin/ksh
-#set -x
+set -x
 
 #-----------------------------------------------------------------------------
 #--compute scalar variable pattern correlation, bias, mean squared error (MSE), 
@@ -26,14 +26,14 @@
 #-------------------------------------------------------
 
 
-export exedir=${exedir:-/stmp/$LOGNAME/vsdb_stats}
+export exedir=${exedir:-/ptmpp1/$LOGNAME/vsdb_stats}
 if [ ! -s $exedir ]; then mkdir -p $exedir; fi
 cd $exedir
 
 export vsdb_data=${vsdb_data:-/climate/save/wx24fy/VRFY/vsdb_data06}
 export NWPROD=${NWPROD:-/nwprod}
 export ndate=${ndate:-$NWPROD/util/exec/ndate}
-export FC=${FC:-xlf90}
+export FC=${FC:-ifort}
 export FFLAG=${FFLAG:-" "}
 
 
@@ -41,31 +41,30 @@ export FFLAG=${FFLAG:-" "}
 export vtype=${1:-pres}
 
 ## verification variable parameters: e.g. HGT G2/NHX 
-export vnam=${2:-HGT}
-export reg=${3:-G2/NHX}
-export levlist=${4:-"P1000 P925 P850 P700 P500 P400 P300 P250 P200 P150 P100 P50 P20 P10"}
+export vnam=${2:-T}
+export reg=${3:-G45}
+export levlist=${4:-"P850 P700 P600 P500 P400 P300 P250 P200 P150 P100"}
        nlev=`echo $levlist |wc -w`
        rm fort.99; echo $levlist | sed "s?P??g"  > fort.99
 
 ## verification ending date and number of days back 
-export edate=${5:-20120831}
+export edate=${5:-20150425}
 export ndays=${6:-31}
        nhours=`expr $ndays \* 24 - 24`
        tmp=`$ndate -$nhours ${edate}00 `
        sdate=`echo $tmp | cut -c 1-8`
 
-## forecast cycles to be vefified: 00Z, 06Z, 12Z, 18Z
+## forecast cycles to be vefified: 00Z, 06Z, 12Z, 18Z, all
 export cyclist=${7:-"00"}
        ncyc=`echo $cyclist | wc -w`
 
-## forecast length in days, excluding 00Z forecasts (gfs default=16, 384 hours) 
-export fdays=${8:-16}
-       fdaysp1=`expr $fdays + 1 `
-       vlength=`expr $fdays \* 24 `
+## forecast length in every 3/6 hours from f06, replacing origianl days
+export vlength=${8:-36}
 
 ## forecast output frequency requried for verification
-export fhout=${9:-6}
-       nfcst=`expr $vlength \/ $fhout + 1`
+export fhout=${9:-3}
+# WAFS: no f03 forecast, starting from f06
+       nfcst=`expr $(( vlength - 06 )) \/ $fhout + 1`
 
 ## create output name (first remove / from parameter names)
 vnam1=`echo $vnam | sed "s?/??g" |sed "s?_WV1?WV?g"`  
@@ -77,9 +76,12 @@ outname=${10:-$outname1}
 maskmiss=${maskmiss:-${11:-"1"}}
 
 ## model names and number of models
-export mdlist=${mdlist:-${12:-"gfs fim"}}
+export mdlist=${mdlist:-${12:-"twind"}}
 nmd0=`echo $mdlist | wc -w`
 nmdcyc=`expr $nmd0 \* $ncyc `
+
+## observation data
+export obsvlist=${obsvlist:-${13:-"gfs"}}
 
 set -A mdname $mdlist
 set -A cycname $cyclist
@@ -104,32 +106,83 @@ if [ -s ${outname}.ctl ]; then rm ${outname}.ctl ;fi
 
 for model in $mdlist; do
 mdl=`echo $model |tr "[a-z]" "[A-Z]" `
+for obsv in $obsvlist ; do
+obsv1=`echo $obsv |tr "[a-z]" "[A-Z]" `
 for cyc in $cyclist; do
+  vhr=$cyc
+  if [ $cyc = 'all' ] ; then  
+    if [ $fhout -eq 6 ] ; then
+      vhrlist=${vhrlist:-"00 06 12 18" }
+    else
+      vhrlist=${vhrlist:-"00 03 06 09 12 15 18 21"}
+    fi
+  fi
 
-cdate=$sdate
-while [ $cdate -le $edate ]; do
-  fhour=00; vhr=$cyc
-  while [ $fhour -le $vlength ]; do
-    datadir=${vsdb_data}/${vtype}/${vhr}Z/${model}
-    vsdbname=${datadir}/${model}_${cdate}.vsdb
-    for lev1 in $levlist ; do
-      string=" $mdl $fhour ${cdate}${vhr} $mdl $reg SL1L2 $vnam $lev1 "
-      mycheck=$( grep "$string"  $vsdbname )
-      if [ $? -ne 0 ]; then      
-        echo "missing" >>$outname.txt
-      else
-         grep "$string"  $vsdbname | cat >>$outname.txt
-      fi
+  cdate=$sdate
+  while [ $cdate -le $edate ]; do
+
+    fhour=06; 
+    while [ $fhour -le $vlength ]; do
+      vsdbname=${vsdb_data}/${model}_${obsv}_${cdate}.vsdb
+      for lev1 in $levlist ; do
+        if [ $cyc = 'all' ] ; then
+	  # get average of all verification cycles and append to $outname.txt
+	  set -A x
+	  n=0
+	  for vhr in $vhrlist ; do
+	    string=" $fhour ${cdate}${vhr} $obsv1 $reg SL1L2 $vnam $lev1 "
+	    mycheck=$( grep "$string"  $vsdbname )
+	    if [ $? -eq 0 ]; then      
+	      tmpresult=`grep "$string"  $vsdbname | head -n 1 | cat`
+	      header=`echo $tmpresult | cut -d'=' -f1`
+	      values=`echo $tmpresult | cut -d'=' -f2`
+	      set -A y $values
+	      m=1
+	      msize=`echo $values | wc -w`
+	      while [ $m -lt $msize ] ; do
+		tmpv=$(( y[0] * y[$m] ))
+		x[$m]=$(( x[$m]  + $tmpv ))
+		m=$(( m + 1 ))
+	      done
+	      x[0]=$(( x[0] + y[0] ))
+	      n=$(( n + 1 ))
+	    fi
+	  done
+	  if [ $n -eq 0 ] ; then
+	    echo "missing" >>$outname.txt
+	  else
+	    n=$(( n - 1 ))
+	    m=1
+            while [ $m -lt $msize ] ; do
+              x[$m]=$(( x[$m]  / x[0] ))
+              m=$(( m + 1 ))
+            done
+            x[0]=$(( x[0] / $n ))
+	  fi
+	else
+	  string=" $fhour ${cdate}${vhr} $obsv1 $reg SL1L2 $vnam $lev1 "
+	  mycheck=$( grep "$string"  $vsdbname )
+	  if [ $? -ne 0 ]; then      
+            echo "missing" >>$outname.txt
+	  else
+            grep "$string"  $vsdbname | head -n 1 | cat >>$outname.txt
+	  fi
+	fi
+      done
+      fhour=` expr $fhour + $fhout `
+      if [ $fhour -lt 10 ] ; then fhour=0$fhour ; fi
     done
-    fhour=` expr $fhour + $fhout `
-    if [ $fhour -lt 10 ]; then fhour=0$fhour ; fi
+
+    cdate=`$ndate +24 ${cdate}00 | cut -c 1-8 `
+  done   ;#end of cdate
+
+  if [ $cyc != 'all' ] ; then
     vhr=` expr $vhr + $fhout `
-    if [ $vhr -ge 24 ]; then vhr=`expr $vhr - 24 `; fi
-    if [ $vhr -lt 10 ]; then vhr=0$vhr ; fi
-  done
-cdate=`$ndate +24 ${cdate}00 | cut -c 1-8 `
-done   ;#end of cdate
+    if [ $vhr -ge 24 ] ; then vhr=`expr $vhr - 24 `; fi
+    if [ $vhr -lt 10 ] ; then vhr=0$vhr ; fi
+  fi
 done   ;#end of cycle
+done   ;#end of obsv
 done   ;#end of model
 
 

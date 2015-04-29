@@ -1,5 +1,5 @@
 #!/bin/ksh
-#set -x
+set -xa
 
 #-----------------------------------------------------------------------------
 #--compute vector wind pattern correlation, bias, mean squared error (MSE),
@@ -34,7 +34,7 @@ cd $exedir
 export vsdb_data=${vsdb_data:-/climate/save/wx24fy/VRFY/vsdb_data}
 export NWPROD=${NWPROD:-/nwprod}
 export ndate=${ndate:-$NWPROD/util/exec/ndate}
-export FC=${FC:-xlf90}
+export FC=${FC:-ifort}
 export FFLAG=${FFLAG:-" "}
 
 
@@ -43,14 +43,13 @@ export vtype=${1:-pres}
 
 ## verification variable parameters: e.g. WIND G2/TRO 
 export vnam=${2:-WIND}
-export reg=${3:-G2/TRO}
-#export levlist=${4:-"P1000 P925 P850 P700 P500 P400 P300 P250 P200 P150 P100 P50 P20 P10"}
-export levlist=${4:-"P1000  P500 P200  P10"}
+export reg=${3:-G45}
+export levlist=${4:-"P850 P700 P600 P500 P400 P300 P250 P200 P150 P100"}
        nlev=`echo $levlist |wc -w`
        rm fort.99; echo $levlist | sed "s?P??g"  > fort.99
 
 ## verification ending date and number of days back 
-export edate=${5:-20120731}
+export edate=${5:-20150425}
 export ndays=${6:-31}
        nhours=`expr $ndays \* 24 - 24`
        tmp=`$ndate -$nhours ${edate}00 `
@@ -60,14 +59,13 @@ export ndays=${6:-31}
 export cyclist=${7:-"00"}
        ncyc=`echo $cyclist | wc -w`
 
-## forecast length in days, excluding 00Z forecasts (gfs default=16, 384 hours) 
-export fdays=${8:-16}
-       fdaysp1=`expr $fdays + 1 `
-       vlength=`expr $fdays \* 24 `
+## forecast length in every 3 hours from f06, replacing origianl days
+export vlength=${8:-36}
 
 ## forecast output frequency requried for verification
-export fhout=${9:-6}
-       nfcst=`expr $vlength \/ $fhout + 1`
+export fhout=${9:-3}
+# WAFS: no f03 forecast, starting from f06
+       nfcst=`expr $(( vlength - 06 )) \/ $fhout + 1`
 
 ## create output name (first remove / from parameter names)
 vnam1=`echo $vnam | sed "s?/??g" |sed "s?_WV1?WV?g"`  
@@ -79,9 +77,12 @@ outname=${10:-$outname1}
 maskmiss=${maskmiss:-${11:-"1"}}
 
 ## model names and number of models
-export mdlist=${mdlist:-${12:-"gfs"}}
+export mdlist=${mdlist:-${12:-"twind"}}
 nmd0=`echo $mdlist | wc -w`
 nmdcyc=`expr $nmd0 \* $ncyc `
+
+## observation data
+export obsvlist=${obsvlist:-${13:-"gfs"}}
 
 set -A mdname $mdlist
 set -A cycname $cyclist
@@ -106,34 +107,42 @@ if [ -s ${outname}.ctl ]; then rm ${outname}.ctl ;fi
 
 for model in $mdlist; do
 mdl=`echo $model |tr "[a-z]" "[A-Z]" `
+for obsv in $obsvlist ; do
+obsv1=`echo $obsv |tr "[a-z]" "[A-Z]" `
 for cyc in $cyclist; do
+  vhr=$cyc
+  if [ $cyc = 'all' ] ; then  vhr=".." ; fi
 
-cdate=$sdate
-while [ $cdate -le $edate ]; do
-  fhour=00; vhr=$cyc
-  while [ $fhour -le $vlength ]; do
-    datadir=${vsdb_data}/${vtype}/${vhr}Z/${model}
-    vsdbname=${datadir}/${model}_${cdate}.vsdb
-    for lev1 in $levlist ; do
-      string=" $mdl $fhour ${cdate}${vhr} $mdl $reg VL1L2 $vnam $lev1 "
-      mycheck=$( grep "$string"  $vsdbname )
-      if [ $? -ne 0 ]; then
-        echo "missing" >>$outname.txt
-      else
-        grep "$string" $vsdbname |cat >>$outname.txt
-      fi
+  cdate=$sdate
+  while [ $cdate -le $edate ]; do
+
+    fhour=06; 
+    while [ $fhour -le $vlength ]; do
+      vsdbname=${vsdb_data}/${model}_${obsv}_${cdate}.vsdb
+      for lev1 in $levlist ; do
+	string=" $fhour ${cdate}${vhr} $obsv1 $reg VL1L2 $vnam $lev1 "
+	mycheck=$( grep "$string"  $vsdbname )
+	if [ $? -ne 0 ]; then      
+          echo "missing" >>$outname.txt
+	else
+          grep "$string"  $vsdbname | head -n 1 | cat >>$outname.txt
+	fi
+      done
+      fhour=` expr $fhour + $fhout `
+      if [ $fhour -lt 10 ] ; then fhour=0$fhour ; fi
     done
-    fhour=` expr $fhour + $fhout `
-    if [ $fhour -lt 10 ]; then fhour=0$fhour ; fi
-    vhr=` expr $vhr + $fhout `
-    if [ $vhr -ge 24 ]; then vhr=`expr $vhr - 24 `; fi
-    if [ $vhr -lt 10 ]; then vhr=0$vhr ; fi
-  done
-cdate=`$ndate +24 ${cdate}00 | cut -c 1-8 `
-done   ;#end of cdate
-done   ;#end of cycle
-done   ;#end of model
 
+    cdate=`$ndate +24 ${cdate}00 | cut -c 1-8 `
+  done   ;#end of cdate
+
+  if [ $cyc != 'all' ] ; then
+    vhr=` expr $vhr + $fhout `
+    if [ $vhr -ge 24 ] ; then vhr=`expr $vhr - 24 `; fi
+    if [ $vhr -lt 10 ] ; then vhr=0$vhr ; fi
+  fi
+done   ;#end of cycle
+done   ;#end of obsv
+done   ;#end of model
 
 #------------------------------------------------------------
 # compute scores and save output in binary format for GrADS 

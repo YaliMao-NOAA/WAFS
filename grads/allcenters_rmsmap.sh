@@ -1,5 +1,18 @@
-#!/bin/ksh 
-#set -x
+#!/bin/ksh
+
+#BSUB -oo 
+#BSUB -eo 
+#BSUB -n 48
+#BSUB -J 
+#BSUB -W 00:10
+#BSUB -q "debug"
+#BSUB -R span[ptile=8]
+#BSUB -x
+#PBS -l vmem=32G
+#BSUB -a poe
+#BSUB -P GFS-T2O
+
+set -x
 
 #---------------------------------------------------------------------------------------------------
 #---------------------------------------------------------------------------------------------------
@@ -13,80 +26,67 @@
 #---------------------------------------------------------------------------------------------------
 date
 
+## -- script directories
+export vsdbhome=                 ;#script home, CHANGE TO YOUR SCRIPT HOLDER 
+export sorcdir=
+
 ## -- verification dates
-CDATE=$(date +%Y%m%d)
-export edate=${edate:-${1:-$CDATE}}      ;#end of verification date
-export ndays=${ndays:-${2:-31}}          ;#number of days back for verification
-export fdays=${fdays:-${3:-10}}          ;#forecast length in days to be verified 
-
-
-## -- verification parameters
-export fcycle=${fcycle:-"00"}               ;#forecast cycles
-export vhrlist=${vhrlist:-"00 06 12 18"}    ;#verification hours for each day
-export vtype=${vtype:-pres}
-export vnamlist=${vnamlist:-"HGT WIND"}
-export mdlist=${mdlist:-"gfs ecm"}
-export levlist=${levlist:-"P1000 P925 P850 P700 P500 P400 P300 P250 P200 P150 P100 P50"}
-       nlev=`echo $levlist |wc -w`
-export reglist=${reglist:-"G2/TRO"}
-
-export webhost=${webhost:-"emcrzdm.ncep.noaa.gov"}
-export webhostid=${webhostid:-"$LOGNAME"}
-export vsdb_data=${vsdb_data:-/climate/save/wx24fy/VRFY/vsdb_data}
-export sorcdir=${sorcdir:-/global/save/wx24fy/VRFY/vsdb/map_util}
-export ftpdir=${ftpdir:-/home/people/emc/www/htdocs/gmb/$webhostid/vsdb}
-export doftp=${doftp:-"YES"}         ;#ftp maps to web site
-export mapdir=${mapdir:-/stmp/$LOGNAME/vsdb_exp/maps}
-export makemap=${makemap:-"YES"}     ;#whether or not to make maps
-export copymap=${copymap:-"NO"}      ;#copy maps to a central directory
-export archmon=${archmon:-"NO"}      ;# archive monthly means 
-export rundir=${rundir:-/stmp/$LOGNAME/vsdb_stats0}
+export sdate=			#start of verification date
+export edate=      		#end   of verification date
+export vlength=			#forecast length in hours to be verified 
+export fcycle=			#forecast cycles
+y1=`echo $sdate |cut -c 1-4 `
+m1=`echo $sdate |cut -c 5-6 `
+d1=`echo $sdate |cut -c 7-8 `
+y2=`echo $edate   |cut -c 1-4 `
+m2=`echo $edate   |cut -c 5-6 `
+d2=`echo $edate   |cut -c 7-8 `
+ndays=`$sorcdir/days.sh -a $y2 $m2 $d2 - $y1 $m1 $d1`
+export ndays=`expr $ndays + 1 ` #number of days back for verification
 export xtick=`expr $ndays \/ 8 `
-export scoredir=${scoredir:-$rundir/score}
-if [ ! -s $scoredir ]; then mkdir -p $scoredir ;fi
+
+## -- data and output directories
+export vsdb_data=
+export makemap=     		     ;#whether or not to make maps
+export copymap=${copymap:-"NO"}      ;#copy maps to a central directory
+export mapdir=
+export scorecard=                    ;#create scorecard text files
+export scoredir=                     ;#place to save scorecard out
+scoretext=0; if [ $scorecard = "YES" ] ; then scoretext=1 ;fi
+export archmon=${archmon:-"NO"}      ;#archive monthly means 
+
+## -- verification parameters (dynamic ones)
+export vhrlist=			     #verification hours for each day
+export obsvlist=
+export mdlist=
+export reglist=
+export rundir= 			     ;#splitted into observations and regions
+export vtype=
+export vnamlist=
+export levlist=
+       nlev=`echo $levlist |wc -w`
+       levlist1=`echo $levlist | sed "s?P??g"`
+
 
 ##determine forecast output frequency required for verification
 export nvhr=`echo $vhrlist |wc -w`   ;#number of verification hours
 export fhout=`expr 24 \/ $nvhr `     ;#forecast output frequency
-export vlength=`expr $fdays \* 24 `
-export nfcst=`expr $vlength \/ $fhout + 1 `
+export nfcst=`expr $vlength \/ $fhout `
 
 ## remove missing data from all models to unify sample size, 0-->NO, 1-->Yes
 export maskmiss=${maskmiss:-1}
 
 export NWPROD=${NWPROD:-/nwprod}
 export ndate=${ndate:-$NWPROD/util/exec/ndate}
-export FC=${FC:-xlf90}
-export FFLAG=${FFLAG:-" "}
-export GRADSBIN=${GRADSBIN:-/usrx/local/grads/bin}
-export imgconvert=${IMGCONVERT:-convert} 
+export FC=${FC:-ifort}                                                    ;#compiler
+export FFLAG=${FFLAG:-"-O2 -convert big_endian -FR"}                      ;#compiler options
+export GRADSBIN=${GRADSBIN:-/usrx/local/GrADS/2.0.2/bin}                  ;#grads executable
+export IMGCONVERT=${IMGCONVERT:-/usr/bin/convert}                         ;#image magic converter 
 
-export vsdbhome=${vsdbhome:-/global/save/$LOGNAME/VRFY/vsdb}
-export SUBJOB=${SUBJOB:-$vsdbhome/bin/sub_wcoss}
-export ACCOUNT=${ACCOUNT:-GFS-MTN}
-export CUE2RUN=${CUE2RUN:-shared}
-export CUE2FTP=${CUE2FTP:-${CUE2RUN:-transfer}}
-export GROUP=${GROUP:-g01}
-
-##Create scorecard database
-export scorecard=${scorecard:-"NO"}
-scoretext=0; if [ $scorecard = "YES" ] ; then scoretext=1 ;fi
-
-
-user=`whoami`
-export rundir=${rundir:-/ptmpp1/$user/vsdb_stats.working}
-
-#export vnamlist="HGT HGT_WV1/0-3 HGT_WV1/4-9 HGT_WV1/10-20"
-export vnamlist="WIND T ICIP"
-export vtype=${vtype:-pres}
 
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
-for vnam in $vnamlist; do
-   vnam1=`echo $vnam | sed "s?/??g" |sed "s?_WV1?WV?g"`
-   export exedir=${rundir}/${vtype}/${vnam1}
-   if [ -s $exedir ]; then rm -rf $exedir ; fi
-   mkdir ${vnam1} ; cd $exedir || exit
+for obsv in $obsvlist ; do
 
 
 for reg  in $reglist ; do
@@ -99,36 +99,50 @@ for reg  in $reglist ; do
   tmp=`$ndate -$nhours ${edate}00 `
   sdate=`echo $tmp | cut -c 1-8`
   reg1=`echo $reg | sed "s?/??g"`
+
+
+#--------------------------------------------------------------------------
+#--------------------------------------------------------------------------
+for vnam in $vnamlist; do
+  vnam1=`echo $vnam | sed "s?/??g" |sed "s?_WV1?WV?g"`
+  export exedir=${rundir}/${vnam1}
+  if [ -s $exedir ]; then rm -rf $exedir ; fi
+  mkdir -p $exedir ; cd $exedir || exit
+
   outname1=${vnam1}_${reg1}_${sdate}${edate}
   yyyymm=`echo $edate |cut -c 1-6`                                
-  if [ $ncyc -gt 1 ]; then
+  if [ $ncyc -gt 1 ] ; then
    outmon=${vnam1}_${reg1}_${yyyymm}
   else
    outmon=${vnam1}_${reg1}_${fcycle}Z${yyyymm}
   fi
 
 # -- search data for all models; write out binary data, create grads control file
-  if [ $vnam = "WIND" ]; then
-   $sorcdir/gen_wind_pres.sh $vtype $vnam $reg "$levlist" $edate $ndays "${fcycle}" $fdays $fhout $outname1 $maskmiss "$mdlist"
+  if [ $vnam = "WIND" ] ; then
+   $sorcdir/gen_wind_pres.sh $vtype $vnam $reg "$levlist" $edate $ndays "${fcycle}" $vlength $fhout $outname1 $maskmiss "$mdlist" $obsv
+  elif [ $vnam = "ICIP" ] ; then
+   $sorcdir/gen_roc_pres.sh $vtype $vnam $reg "$levlist" $edate $ndays "${fcycle}" $vlength $fhout $outname1 $maskmiss "$mdlist" $obsv
   else
-   $sorcdir/gen_scal_pres.sh $vtype $vnam $reg "$levlist" $edate $ndays "${fcycle}" $fdays $fhout $outname1 $maskmiss "$mdlist"
+   $sorcdir/gen_scal_pres.sh $vtype $vnam $reg "$levlist" $edate $ndays "${fcycle}" $vlength $fhout $outname1 $maskmiss "$mdlist" $obsv
   fi
 
-
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-if [ $makemap = "YES" ]; then
+if [ $makemap = "YES" ] ; then
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 # -- create grads scripts, allows up to 10 models 
 nmd0=`echo $mdlist | wc -w`  ;#count number of models
 nmd=`expr $nmd0 \* $ncyc `
 
-set -A mdname0  $mdlist
-set -A mdnamec0  `echo $mdlist |tr "[a-z]" "[A-Z]" `
+# for display reason, change twind to gfs
+mdlistc=`echo $mdlist | sed "s?twind?gfs?g"`
+
+set -A mdname0  $mdlistc
+set -A mdnamec0  `echo $mdlistc |tr "[a-z]" "[A-Z]" `
 set -A cycname  $fcycle
 
 n=0; mn=0
-while [ $n -lt $nmd0 ]; do
+while [ $n -lt $nmd0 ] ; do
  m=0
  while [ $m -lt $ncyc ]; do
   if [ $ncyc -gt 1 ]; then
@@ -147,7 +161,7 @@ done
 namedaily=${vnam1}_${reg1}
 
 murphy=${murphy:-"YES"}
-if [ $murphy = "YES" ]; then
+if [ $murphy = "YES" ] ; then
  varlist="rms bias pcor emd epv rsd msess"
 else
  varlist="rms bias"
@@ -168,7 +182,7 @@ if [ $var = "rsd" ];  then title="Fcst/Anal Ratio of Standard Deviation"     ;fi
 # ----- PLOT TYPE 1:  maps of $var as a function of calendar day and pressure for each forecast time ----
 cat >${var}p_${outname1}.gs <<EOF1 
 'reinit'; 'set font 1'
-'run $sorcdir/grads/white.gs'
+'run $sorcdir/white.gs'
 'open ${outname1}.ctl'
 mdc.1=${mdnamec[0]}
 if($nmd >1); mdc.2=${mdnamec[1]} ;endif
@@ -192,12 +206,13 @@ if($nmd >9); mdc.10=${mdnamec[9]} ;endif
   if($nmd >8); nframe2=5;  nframe3=10; ylen=-1.7; endif
 
 *------------------------
-fhour=0 ;*start from fcst00
+fhour=06 ;*start from fcst06
 while ( fhour <= ${vlength} )
-if (fhour=24|fhour=72|fhour=120|fhour=144|fhour=192|fhour=240)
+if (fhour=06|fhour=09|fhour=12|fhour=15|fhour=18|fhour=21|fhour=24|fhour=27|fhour=30|fhour=33|fhour=36)
 *------------------------
   'c'
-  day=fhour/24
+  fcstsave=fhour
+  if(fhour < 10); fcstsave='0'%fcstsave;endif
   laty=fhour/${fhout}+1
   'set x 1'       
   'set y '%laty
@@ -292,7 +307,7 @@ if (fhour=24|fhour=72|fhour=120|fhour=144|fhour=192|fhour=240)
     titly=ymax-0.3
     'set parea 'xmin' 'xmax' 'ymin' 'ymax
 
-    'run $sorcdir/grads/rgbset.gs'
+    'run $sorcdir/rgbset.gs'
     'set xlopts 1 4 0.0'
     'set ylopts 1 4 0.0'
       if($nmd <=2)
@@ -332,7 +347,7 @@ if (fhour=24|fhour=72|fhour=120|fhour=144|fhour=192|fhour=240)
     if(i=1 & $var = msess );'set clevs     -0.1  0    0.1   0.2   0.3   0.4   0.5  0.6    0.7   0.8    0.9  '  ;endif
     if(i=1 & $var != bias );'set rbcols 41   42    43    44    45   46  47  48    49   55     56   57';endif
 *   'set ylevs 1000 925 850 700 500 400 300 250 200 150 100 50 20 10'              
-    'set ylevs 1000 850 700 500 400 300 200 100 70 50 30 20 10'              
+    'set ylevs $levlist1'
     'set xlint $xtick'
     if(i=1 | $var = bias )
      'd ${var}(x='%i')'
@@ -368,20 +383,20 @@ if (fhour=24|fhour=72|fhour=120|fhour=144|fhour=192|fhour=240)
   'set strsiz 0.15 0.15'
   'draw string 4.5 10.45 ${vnam}: ${title}'
   'set strsiz 0.15 0.15'
-  if ( $ncyc >1 )
-   'draw string 4.5 10.20 ${reg}, Fcst fh'%fhour
+  if ( $ncyc >1 | $fcycle = all )
+   'draw string 4.5 10.20 ${reg}, Fcst fh'fcstsave
   else
-   'draw string 4.5 10.20 ${reg} ${fcycle}Z, Fcst fh'%fhour
+   'draw string 4.5 10.20 ${reg} ${fcycle}Z, Fcst fh'fcstsave
   endif
   'set string 1 bc 5'
   'set strsiz 0.15 0.15'
   if($nmd >2)
-    'run $sorcdir/grads/cbarn.gs 0.95 0 4.5 0.25'
+    'run $sorcdir/cbarn.gs 0.95 0 4.5 0.25'
    else
-    'run $sorcdir/grads/cbarn.gs 0.95 0 4.5 2.90'
+    'run $sorcdir/cbarn.gs 0.95 0 4.5 2.90'
    endif
 
-  'printim ${var}p_day'%day'_${namedaily}.png x700 y700'
+  'printim ${var}p_f'fcstsave'_${namedaily}.png x700 y700'
   'set vpage off'
 *--------
 endif
@@ -398,7 +413,7 @@ ndaysp1=`expr $ndays + 1`
 fdaysp1=`expr $fdays + 1`
 cat >${var}pmean_${outname1}.gs <<EOF1 
 'reinit'; 'set font 1'
-'run $sorcdir/grads/white.gs'
+'run $sorcdir/white.gs'
 'open ${outname1}.ctl'
 mdc.1=${mdnamec[0]}
 if($nmd >1); mdc.2=${mdnamec[1]} ;endif
@@ -510,7 +525,7 @@ if($nmd >9); mdc.10=${mdnamec[9]} ;endif
     titly=ymax-0.3
     'set parea 'xmin' 'xmax' 'ymin' 'ymax
 
-    'run $sorcdir/grads/rgbset.gs'
+    'run $sorcdir/rgbset.gs'
     'set xlopts 1 4 0.0'
     'set ylopts 1 4 0.0'
       if($nmd <=2)
@@ -551,7 +566,7 @@ if($nmd >9); mdc.10=${mdnamec[9]} ;endif
     if(i=1 & $var != bias );'set rbcols 41   42    43    44    45   46  47  48    49   55     56   57';endif
 *   'set ylevs 1000 925 850 700 500 400 300 250 200 150 100 50 20 10'              
 *   'set ylevs 1000 850 700 500 400 300 200 100 50 20 10'              
-    'set ylevs 1000 850 700 500 400 300 200 100 70 50 30 20 10'              
+    'set ylevs $levlist1'
     'set xlint 48'
     if(i=1 | $var = bias )
      'd ${var}(x='%i')'
@@ -589,7 +604,7 @@ if($nmd >9); mdc.10=${mdnamec[9]} ;endif
   'set strsiz 0.15 0.15'
   'draw string 4.5 10.45 ${vnam}: ${title}'
   'set strsiz 0.15 0.15'
-  if ( $ncyc >1 )
+  if ( $ncyc >1 | $fcycle = all )
    'draw string 4.5 10.20 $sdate-$edate Mean, ${reg}'
   else
    'draw string 4.5 10.20 $sdate-$edate Mean, ${reg} ${fcycle}Z'
@@ -599,10 +614,10 @@ if($nmd >9); mdc.10=${mdnamec[9]} ;endif
   'set strsiz 0.15 0.15'
   if($nmd >2)
     'draw string 4.8 0.7 Forecast Hour'
-    'run $sorcdir/grads/cbarn.gs 0.95 0 4.5 0.25'
+    'run $sorcdir/cbarn.gs 0.95 0 4.5 0.25'
    else
     'draw string 4.3 3.5 Forecast Hour'
-    'run $sorcdir/grads/cbarn.gs 0.95 0 4.5 2.90'
+    'run $sorcdir/cbarn.gs 0.95 0 4.5 2.90'
    endif
 
   'printim ${var}pmean_${namedaily}.png x700 y700'
@@ -618,7 +633,7 @@ $GRADSBIN/grads -bcp "run ${var}pmean_${outname1}.gs"
 #  hour as a function of calendar day
 
 #vlisttmp="$levlist"
-vlisttmp="P1000 P850 P700 P500 P200 P100 P50 P20 P10"
+vlisttmp="$levlist"
 if [ $vnam = "O3" ]; then vlisttmp="P100 P70 P50 P30 P20 P10" ; fi
 
 for lev  in $vlisttmp  ; do
@@ -650,10 +665,11 @@ if($nmd >9); mdc.10=${mdnamec[9]} ;endif
 *------------------------
 fhour=0 ;*start from fcst00
 while ( fhour <= ${vlength} )
-if (fhour=24|fhour=72|fhour=120|fhour=144|fhour=192|fhour=240)
+if (fhour=06|fhour=09|fhour=12|fhour=15|fhour=18|fhour=21|fhour=24|fhour=27|fhour=30|fhour=33|fhour=36)
 *------------------------
   'c'
-  day=fhour/24
+  fcstsave=fhour
+  if(fhour < 10); fcstsave='0'%fcstsave;endif
   laty=fhour/${fhout}+1
   'set x 1'
   'set t 1 $ndays' 
@@ -723,7 +739,7 @@ if (fhour=24|fhour=72|fhour=120|fhour=144|fhour=192|fhour=240)
      endif
 * Create verification scorecard text files
      if ( $scoretext = 1 ) 
-       '${vsdbhome}/map_util/grads/fprintf.gs 'sc.i' score_${var}_${namedaily1}_'mdc.i'_day'%day'.txt %-7.6f'
+       '${sorcdir}/fprintf.gs 'sc.i' score_${var}_${namedaily1}_'mdc.i'_f'fcstsave'.txt %-7.6f'
      endif
    i=i+1
    endwhile
@@ -732,15 +748,15 @@ if (fhour=24|fhour=72|fhour=120|fhour=144|fhour=192|fhour=240)
   'set strsiz 0.14 0.14'
   'draw string 'titlx' 'titly' ${vnam}: ${title} '
   'set strsiz 0.14 0.14'
-  if ( $ncyc >1 )
-   'draw string 'titlx2' 'titly2' ${lev} ${reg}, fh'%fhour
+  if ( $ncyc >1 | $fcycle = all )
+   'draw string 'titlx2' 'titly2' ${lev} ${reg}, fh'fcstsave
   else
-   'draw string 'titlx2' 'titly2' ${lev} ${reg} ${fcycle}Z, fh'%fhour
+   'draw string 'titlx2' 'titly2' ${lev} ${reg} ${fcycle}Z, fh'fcstsave
   endif
   'set strsiz 0.15 0.15'
   'draw string 'xlabx' 'xlaby' Verification Date'
 
-  'printim ${var}_day'%day'_${namedaily1}.png x800 y800'
+  'printim ${var}_f'fcstsave'_${namedaily1}.png x800 y800'
   'set vpage off'
 *--------
 endif
@@ -844,7 +860,7 @@ if($nmd >9); mdc.10=${mdnamec[9]} ;endif
   'set strsiz 0.13 0.13'
   'draw string 'titlx' 'titly' ${vnam}: ${title}'
   'set strsiz 0.13 0.13'
-  if ( $ncyc >1 )
+  if ( $ncyc >1 | $fcycle = all )
    'draw string 'titlx2' 'titly2' ${lev} ${reg}, $sdate-$edate Mean'
   else
    'draw string 'titlx2' 'titly2' ${lev} ${reg} ${fcycle}Z, $sdate-$edate Mean'
@@ -939,7 +955,7 @@ if($nmd >9); mdc.10=${mdnamec[9]} ;endif
    while (n<=ct)
      tv.n=subwrd(ln,n)
      say tv.n
-     '${vsdbhome}/map_util/grads/fprintf.gs 'tv.n' score_${var}_conflimit_'${namedaily1}'_'mdc.i'_day'n-1'.txt %-7.6f'
+     '${sorcdir}/fprintf.gs 'tv.n' score_${var}_conflimit_'${namedaily1}'_'mdc.i'_day'n-1'.txt %-7.6f'
     n=n+1
    endwhile
   endif
@@ -999,12 +1015,12 @@ export LIBPATH=$LIBPATH:/usrx/local/imajik/lib
 #-- maps
 # nn=0
 #  while [ $nn -le $fdays ]; do
-  for nn in 1 3 5 6 8 10; do
-   $imgconvert -crop 0.2x0.2 ${var}p_day${nn}_${namedaily}.png ${var}p_day${nn}_${namedaily}.png
-   if [ $archmon = "YES" ]; then cp ${var}p_day${nn}_${namedaily}.png  ${var}p_day${nn}_${outmon}.png; fi
+  for nn in 06 09 12 15 18 21 24 27 30 33 36 ; do
+   $IMGCONVERT -crop 0.2x0.2 ${var}p_f${nn}_${namedaily}.png ${var}p_f${nn}_${namedaily}.png
+   if [ $archmon = "YES" ]; then cp ${var}p_f${nn}_${namedaily}.png  ${var}p_f${nn}_${outmon}.png; fi
 #   nn=`expr $nn + 1 `
   done
-   $imgconvert -crop 0.2x0.2 ${var}pmean_${namedaily}.png ${var}pmean_${namedaily}.png
+   $IMGCONVERT -crop 0.2x0.2 ${var}pmean_${namedaily}.png ${var}pmean_${namedaily}.png
    if [ $archmon = "YES" ]; then cp ${var}pmean_${namedaily}.png  ${var}pmean_${outmon}.png; fi
 
 #-- line plots
@@ -1013,12 +1029,12 @@ for lev  in $levlist ; do
   outmon1=${vnam1}_${lev}_${reg1}_${yyyymm}
 # nn=0
 # while [ $nn -le $fdays ]; do
-  for nn in 1 3 5 6 8 10; do
-   $imgconvert -crop 0.2x0.2 ${var}_day${nn}_${namedaily1}.png ${var}_day${nn}_${namedaily1}.png
-   if [ $archmon = "YES" ]; then cp ${var}_day${nn}_${namedaily1}.png  ${var}_day${nn}_${outmon1}.png; fi
+  for nn in 06 09 12 15 18 21 24 27 30 33 36 ; do
+   $IMGCONVERT -crop 0.2x0.2 ${var}_f${nn}_${namedaily1}.png ${var}_f${nn}_${namedaily1}.png
+   if [ $archmon = "YES" ]; then cp ${var}_f${nn}_${namedaily1}.png  ${var}_f${nn}_${outmon1}.png; fi
 #  nn=`expr $nn + 1 `
   done
-  $imgconvert -crop 0.2x0.2 ${var}dieoff_${namedaily1}.png   ${var}dieoff_${namedaily1}.png
+  $IMGCONVERT -crop 0.2x0.2 ${var}dieoff_${namedaily1}.png   ${var}dieoff_${namedaily1}.png
   if [ $archmon = "YES" ]; then cp ${var}dieoff_${namedaily1}.png ${var}dieoff_${outmon1}.png; fi
 done  ;# end lev for line plots
 #---
@@ -1033,6 +1049,7 @@ done   ;#variable for making plots
 fi    ;#end makemap
 #--------------------------------------------------------------------------
 done  ;# end reg
+done  ;# end obsv
 #--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
 
@@ -1065,8 +1082,8 @@ cat << EOF >ftp_$vnam1$var
   cd $ftpdir/allmodel/daily
     mkdir ${var}
     cd ${var}
-    mput ${var}_day*.png
-    mput ${var}p_day*.png
+    mput ${var}_f*.png
+    mput ${var}p_f*.png
     mput ${var}pmean_*.png 
     mput ${var}dieoff_*.png
   quit
@@ -1091,8 +1108,8 @@ cat << EOF >ftpmon_$vnam1$var
   cd $ftpdir/allmodel/arch_mon/${var}
   mkdir $yyyy
   cd $yyyy
-    mput ${var}_day*${yyyymm}.png
-    mput ${var}p_day*${yyyymm}.png
+    mput ${var}_f*${yyyymm}.png
+    mput ${var}p_f*${yyyymm}.png
     mput ${var}pmean_*${yyyymm}.png 
     mput ${var}dieoff_*${yyyymm}.png
     mput mean${var}*.txt
@@ -1101,8 +1118,8 @@ EOF
 if [ $doftp = "YES" -a $CUE2RUN = $CUE2FTP ]; then 
  sftp  ${webhostid}@${webhost} <ftpmon_$vnam1$var 
  if [ $? -ne 0 ]; then
-  scp -rp ${var}_day*${yyyymm}.png   ${webhostid}@${webhost}:$ftpdir/allmodel/arch_mon/${var}/$yyyy/.
-  scp -rp ${var}p_day*${yyyymm}.png  ${webhostid}@${webhost}:$ftpdir/allmodel/arch_mon/${var}/$yyyy/.
+  scp -rp ${var}_f*${yyyymm}.png   ${webhostid}@${webhost}:$ftpdir/allmodel/arch_mon/${var}/$yyyy/.
+  scp -rp ${var}p_f*${yyyymm}.png  ${webhostid}@${webhost}:$ftpdir/allmodel/arch_mon/${var}/$yyyy/.
   scp -rp ${var}pmean_*${yyyymm}.png ${webhostid}@${webhost}:$ftpdir/allmodel/arch_mon/${var}/$yyyy/.
   scp -rp ${var}dieoff_*${yyyymm}.png ${webhostid}@${webhost}:$ftpdir/allmodel/arch_mon/${var}/$yyyy/.
   scp -rp mean${var}*.txt            ${webhostid}@${webhost}:$ftpdir/allmodel/arch_mon/${var}/$yyyy/.
@@ -1130,7 +1147,7 @@ done  ;# end vnam
 
 #--------------------------------------------
 ##--send plots to web server using dedicated transfer node (required by NCEP WCOSS computers)
-if [ $makemap = "YES" -a $doftp = "YES" -a $CUE2RUN != $CUE2FTP ]; then
+if [ $makemap = "YES" -a $doftp = "YES" -a $CUE2RUN != $CUE2FTP ] ; then
 #--------------------------------------------
 cd $rundir
 cat << EOF >ftpcard$$.sh
@@ -1141,8 +1158,8 @@ for vnam in $vnamlist; do
  exedir=${rundir}/${vtype}/\$vnam1
  cd \$exedir 
  for var in $varlist ; do
-   if [ -s ftp_\$vnam1\$var ]; then sftp  ${webhostid}@${webhost} <ftp_\$vnam1\$var ; fi
-   if [ -s ftpmon_\$vnam1\$var ]; then sftp  ${webhostid}@${webhost} <ftpmon_\$vnam1\$var ; fi
+   if [ -s ftp_\$vnam1\$var ] ; then sftp  ${webhostid}@${webhost} <ftp_\$vnam1\$var ; fi
+   if [ -s ftpmon_\$vnam1\$var ] ; then sftp  ${webhostid}@${webhost} <ftpmon_\$vnam1\$var ; fi
  done
 done
 EOF
@@ -1153,4 +1170,3 @@ fi
 
 date
 exit
-
