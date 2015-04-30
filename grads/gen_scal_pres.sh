@@ -80,8 +80,9 @@ export mdlist=${mdlist:-${12:-"twind"}}
 nmd0=`echo $mdlist | wc -w`
 nmdcyc=`expr $nmd0 \* $ncyc `
 
-## observation data
-export obsvlist=${obsvlist:-${13:-"gfs"}}
+## observation data (only one observation per run)
+export obsv=${obsv:-${13:-"gfs"}}
+obsv1=`echo $obsv |tr "[a-z]" "[A-Z]" `
 
 set -A mdname $mdlist
 set -A cycname $cyclist
@@ -106,85 +107,38 @@ if [ -s ${outname}.ctl ]; then rm ${outname}.ctl ;fi
 
 for model in $mdlist; do
 mdl=`echo $model |tr "[a-z]" "[A-Z]" `
-for obsv in $obsvlist ; do
-obsv1=`echo $obsv |tr "[a-z]" "[A-Z]" `
 for cyc in $cyclist; do
-  vhr=$cyc
-  if [ $cyc = 'all' ] ; then  
-    if [ $fhout -eq 6 ] ; then
-      vhrlist=${vhrlist:-"00 06 12 18" }
-    else
-      vhrlist=${vhrlist:-"00 03 06 09 12 15 18 21"}
-    fi
-  fi
 
   cdate=$sdate
   while [ $cdate -le $edate ]; do
 
-    fhour=06; 
+    fhour=06;    vhr=$(( cyc + fhour ))
+    if [ $vhr -ge 24 ]; then vhr=`expr $vhr - 24 `; fi
+    vhr=`printf "%02d" $vhr`
+
     while [ $fhour -le $vlength ]; do
       vsdbname=${vsdb_data}/${model}_${obsv}_${cdate}.vsdb
+
       for lev1 in $levlist ; do
-        if [ $cyc = 'all' ] ; then
-	  # get average of all verification cycles and append to $outname.txt
-	  set -A x
-	  n=0
-	  for vhr in $vhrlist ; do
-	    string=" $fhour ${cdate}${vhr} $obsv1 $reg SL1L2 $vnam $lev1 "
-	    mycheck=$( grep "$string"  $vsdbname )
-	    if [ $? -eq 0 ]; then      
-	      tmpresult=`grep "$string"  $vsdbname | head -n 1 | cat`
-	      header=`echo $tmpresult | cut -d'=' -f1`
-	      values=`echo $tmpresult | cut -d'=' -f2`
-	      set -A y $values
-	      m=1
-	      msize=`echo $values | wc -w`
-	      while [ $m -lt $msize ] ; do
-		tmpv=$(( y[0] * y[$m] ))
-		x[$m]=$(( x[$m]  + $tmpv ))
-		m=$(( m + 1 ))
-	      done
-	      x[0]=$(( x[0] + y[0] ))
-	      n=$(( n + 1 ))
-	    fi
-	  done
-	  if [ $n -eq 0 ] ; then
-	    echo "missing" >>$outname.txt
-	  else
-	    n=$(( n - 1 ))
-	    m=1
-            while [ $m -lt $msize ] ; do
-              x[$m]=$(( x[$m]  / x[0] ))
-              m=$(( m + 1 ))
-            done
-            x[0]=$(( x[0] / $n ))
-	  fi
+	string=" $fhour ${cdate}${vhr} $obsv1 $reg VL1L2 $vnam $lev1 "
+	mycheck=$( grep "$string"  $vsdbname )
+	if [ $? -ne 0 ]; then      
+          echo "missing" >>$outname.txt
 	else
-	  string=" $fhour ${cdate}${vhr} $obsv1 $reg SL1L2 $vnam $lev1 "
-	  mycheck=$( grep "$string"  $vsdbname )
-	  if [ $? -ne 0 ]; then      
-            echo "missing" >>$outname.txt
-	  else
-            grep "$string"  $vsdbname | head -n 1 | cat >>$outname.txt
-	  fi
+          grep "$string"  $vsdbname | tail -n 1 | cat >>$outname.txt
 	fi
       done
-      fhour=` expr $fhour + $fhout `
-      if [ $fhour -lt 10 ] ; then fhour=0$fhour ; fi
-    done
+
+      fhour=` expr $fhour + $fhout ` ; fhour=`printf "%02d" $fhour`
+      vhr=` expr $vhr + $fhout `
+      if [ $vhr -ge 24 ]; then vhr=`expr $vhr - 24 `; fi
+      vhr=`printf "%02d" $vhr`
+    done # fhour
 
     cdate=`$ndate +24 ${cdate}00 | cut -c 1-8 `
   done   ;#end of cdate
-
-  if [ $cyc != 'all' ] ; then
-    vhr=` expr $vhr + $fhout `
-    if [ $vhr -ge 24 ] ; then vhr=`expr $vhr - 24 `; fi
-    if [ $vhr -lt 10 ] ; then vhr=0$vhr ; fi
-  fi
 done   ;#end of cycle
-done   ;#end of obsv
 done   ;#end of model
-
 
 #------------------------------------------------------------
 # compute scores and save output in binary format for GrADS 
@@ -589,7 +543,7 @@ undef -99.9
 options big_endian sequential 
 title scores
 xdef    $nmdcyc linear 1  1
-ydef    $nfcst linear 0 $fhout
+ydef    $nfcst linear 06 $fhout
 zdef    $nlev levels  `echo $levlist | sed "s?P??g"`
 tdef    $ndaysp1 Linear $DD$MON$YYYY 1dy
 vars    8

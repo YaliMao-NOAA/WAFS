@@ -26,9 +26,26 @@ set -x
 #---------------------------------------------------------------------------------------------------
 date
 
-## -- script directories
 export vsdbhome=                 ;#script home, CHANGE TO YOUR SCRIPT HOLDER 
-export sorcdir=
+export srcgrads=$vsdbhome/grads
+export NWPROD=
+export PTMP=
+export ndate=$NWPROD/util/exec/ndate
+export GRADSBIN=                 	 ;#grads executable
+export IMGCONVERT=                       ;#image magic converter 
+export FC=                               ;#compiler
+export FFLAG=                            ;#compiler options
+
+## -- data and output directories
+export vsdb_data=
+export makemap=     		     ;#whether or not to make maps
+export copymap=${copymap:-"NO"}      ;#copy maps to a central directory
+export mapdir=
+export scorecard=                    ;#create scorecard text files
+export scoredir=                     ;#place to save scorecard out
+scoretext=0; if [ $scorecard = "YES" ] ; then scoretext=1 ;fi
+export archmon=${archmon:-"NO"}      ;#archive monthly means 
+export murphy=${murphy:-"NO"}
 
 ## -- verification dates
 export sdate=			#start of verification date
@@ -41,76 +58,62 @@ d1=`echo $sdate |cut -c 7-8 `
 y2=`echo $edate   |cut -c 1-4 `
 m2=`echo $edate   |cut -c 5-6 `
 d2=`echo $edate   |cut -c 7-8 `
-ndays=`$sorcdir/days.sh -a $y2 $m2 $d2 - $y1 $m1 $d1`
+ndays=`$srcgrads/days.sh -a $y2 $m2 $d2 - $y1 $m1 $d1`
 export ndays=`expr $ndays + 1 ` #number of days back for verification
 export xtick=`expr $ndays \/ 8 `
 
-## -- data and output directories
-export vsdb_data=
-export makemap=     		     ;#whether or not to make maps
-export copymap=${copymap:-"NO"}      ;#copy maps to a central directory
-export mapdir=
-export scorecard=                    ;#create scorecard text files
-export scoredir=                     ;#place to save scorecard out
-scoretext=0; if [ $scorecard = "YES" ] ; then scoretext=1 ;fi
-export archmon=${archmon:-"NO"}      ;#archive monthly means 
-
 ## -- verification parameters (dynamic ones)
-export vhrlist=			     #verification hours for each day
 export obsvlist=
 export mdlist=
 export reglist=
 export rundir= 			     ;#splitted into observations and regions
+export vhrlist=			     ;#verification hours for each day
 export vtype=
 export vnamlist=
 export levlist=
        nlev=`echo $levlist |wc -w`
        levlist1=`echo $levlist | sed "s?P??g"`
 
-
 ##determine forecast output frequency required for verification
 export nvhr=`echo $vhrlist |wc -w`   ;#number of verification hours
 export fhout=`expr 24 \/ $nvhr `     ;#forecast output frequency
 export nfcst=`expr $vlength \/ $fhout `
 
+ncyc=`echo $fcycle | wc -w`             ;#count number of cycles
+
+
+# WAFS: no f03 forecast, starting from f06
+fhour=06
+fhoursmap="fhour=$fhour"
+while [ $fhour -le $vlength ] ; do
+    fhour=`printf "%02d" $fhour`
+    fhoursmap="${fhoursmap}|fhour=$fhour"
+    fhour=` expr $fhour + $fhout`
+done
+
 ## remove missing data from all models to unify sample size, 0-->NO, 1-->Yes
 export maskmiss=${maskmiss:-1}
 
-export NWPROD=${NWPROD:-/nwprod}
-export ndate=${ndate:-$NWPROD/util/exec/ndate}
-export FC=${FC:-ifort}                                                    ;#compiler
-export FFLAG=${FFLAG:-"-O2 -convert big_endian -FR"}                      ;#compiler options
-export GRADSBIN=${GRADSBIN:-/usrx/local/GrADS/2.0.2/bin}                  ;#grads executable
-export IMGCONVERT=${IMGCONVERT:-/usr/bin/convert}                         ;#image magic converter 
-
-
-#--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
 for obsv in $obsvlist ; do
+#--------------------------------------------------------------------------
 
-
+#--------------------------------------------------------------------------
 for reg  in $reglist ; do
 #--------------------------------------------------------------------------
-#--------------------------------------------------------------------------
-
-# -- generate output names 
-  ncyc=`echo $fcycle | wc -w`             ;#count number of cycles
-  nhours=`expr $ndays \* 24 - 24`
-  tmp=`$ndate -$nhours ${edate}00 `
-  sdate=`echo $tmp | cut -c 1-8`
   reg1=`echo $reg | sed "s?/??g"`
 
-
-#--------------------------------------------------------------------------
 #--------------------------------------------------------------------------
 for vnam in $vnamlist; do
+#--------------------------------------------------------------------------
   vnam1=`echo $vnam | sed "s?/??g" |sed "s?_WV1?WV?g"`
   export exedir=${rundir}/${vnam1}
   if [ -s $exedir ]; then rm -rf $exedir ; fi
   mkdir -p $exedir ; cd $exedir || exit
 
+# -- generate output names 
   outname1=${vnam1}_${reg1}_${sdate}${edate}
-  yyyymm=`echo $edate |cut -c 1-6`                                
+  yyyymm=`echo $edate |cut -c 1-6`
   if [ $ncyc -gt 1 ] ; then
    outmon=${vnam1}_${reg1}_${yyyymm}
   else
@@ -119,11 +122,11 @@ for vnam in $vnamlist; do
 
 # -- search data for all models; write out binary data, create grads control file
   if [ $vnam = "WIND" ] ; then
-   $sorcdir/gen_wind_pres.sh $vtype $vnam $reg "$levlist" $edate $ndays "${fcycle}" $vlength $fhout $outname1 $maskmiss "$mdlist" $obsv
+   $srcgrads/gen_wind_pres.sh $vtype $vnam $reg "$levlist" $edate $ndays "${fcycle}" $vlength $fhout $outname1 $maskmiss "$mdlist" $obsv
   elif [ $vnam = "ICIP" ] ; then
-   $sorcdir/gen_roc_pres.sh $vtype $vnam $reg "$levlist" $edate $ndays "${fcycle}" $vlength $fhout $outname1 $maskmiss "$mdlist" $obsv
+   $srcgrads/gen_roc_pres.sh  $vtype $vnam $reg "$levlist" $edate $ndays "${fcycle}" $vlength $fhout $outname1 $maskmiss "$mdlist" $obsv
   else
-   $sorcdir/gen_scal_pres.sh $vtype $vnam $reg "$levlist" $edate $ndays "${fcycle}" $vlength $fhout $outname1 $maskmiss "$mdlist" $obsv
+   $srcgrads/gen_scal_pres.sh $vtype $vnam $reg "$levlist" $edate $ndays "${fcycle}" $vlength $fhout $outname1 $maskmiss "$mdlist" $obsv
   fi
 
 #^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -160,11 +163,10 @@ done
 
 namedaily=${vnam1}_${reg1}
 
-murphy=${murphy:-"YES"}
 if [ $murphy = "YES" ] ; then
  varlist="rms bias pcor emd epv rsd msess"
 else
- varlist="rms bias"
+ varlist="rms"
 fi
 
 #============================================
@@ -182,7 +184,7 @@ if [ $var = "rsd" ];  then title="Fcst/Anal Ratio of Standard Deviation"     ;fi
 # ----- PLOT TYPE 1:  maps of $var as a function of calendar day and pressure for each forecast time ----
 cat >${var}p_${outname1}.gs <<EOF1 
 'reinit'; 'set font 1'
-'run $sorcdir/white.gs'
+'run $srcgrads/white.gs'
 'open ${outname1}.ctl'
 mdc.1=${mdnamec[0]}
 if($nmd >1); mdc.2=${mdnamec[1]} ;endif
@@ -206,14 +208,15 @@ if($nmd >9); mdc.10=${mdnamec[9]} ;endif
   if($nmd >8); nframe2=5;  nframe3=10; ylen=-1.7; endif
 
 *------------------------
-fhour=06 ;*start from fcst06
+fhour0=6 ;*start from fcst06
+fhour=fhour0
 while ( fhour <= ${vlength} )
-if (fhour=06|fhour=09|fhour=12|fhour=15|fhour=18|fhour=21|fhour=24|fhour=27|fhour=30|fhour=33|fhour=36)
+if ($fhoursmap)
 *------------------------
   'c'
   fcstsave=fhour
   if(fhour < 10); fcstsave='0'%fcstsave;endif
-  laty=fhour/${fhout}+1
+  laty=(fhour-fhour0)/${fhout}+1
   'set x 1'       
   'set y '%laty
   'set t 1 $ndays' 
@@ -307,7 +310,7 @@ if (fhour=06|fhour=09|fhour=12|fhour=15|fhour=18|fhour=21|fhour=24|fhour=27|fhou
     titly=ymax-0.3
     'set parea 'xmin' 'xmax' 'ymin' 'ymax
 
-    'run $sorcdir/rgbset.gs'
+    'run $srcgrads/rgbset.gs'
     'set xlopts 1 4 0.0'
     'set ylopts 1 4 0.0'
       if($nmd <=2)
@@ -383,7 +386,7 @@ if (fhour=06|fhour=09|fhour=12|fhour=15|fhour=18|fhour=21|fhour=24|fhour=27|fhou
   'set strsiz 0.15 0.15'
   'draw string 4.5 10.45 ${vnam}: ${title}'
   'set strsiz 0.15 0.15'
-  if ( $ncyc >1 | $fcycle = all )
+  if ( $ncyc >1 )
    'draw string 4.5 10.20 ${reg}, Fcst fh'fcstsave
   else
    'draw string 4.5 10.20 ${reg} ${fcycle}Z, Fcst fh'fcstsave
@@ -391,9 +394,9 @@ if (fhour=06|fhour=09|fhour=12|fhour=15|fhour=18|fhour=21|fhour=24|fhour=27|fhou
   'set string 1 bc 5'
   'set strsiz 0.15 0.15'
   if($nmd >2)
-    'run $sorcdir/cbarn.gs 0.95 0 4.5 0.25'
+    'run $srcgrads/cbarn.gs 0.95 0 4.5 0.25'
    else
-    'run $sorcdir/cbarn.gs 0.95 0 4.5 2.90'
+    'run $srcgrads/cbarn.gs 0.95 0 4.5 2.90'
    endif
 
   'printim ${var}p_f'fcstsave'_${namedaily}.png x700 y700'
@@ -413,7 +416,7 @@ ndaysp1=`expr $ndays + 1`
 fdaysp1=`expr $fdays + 1`
 cat >${var}pmean_${outname1}.gs <<EOF1 
 'reinit'; 'set font 1'
-'run $sorcdir/white.gs'
+'run $srcgrads/white.gs'
 'open ${outname1}.ctl'
 mdc.1=${mdnamec[0]}
 if($nmd >1); mdc.2=${mdnamec[1]} ;endif
@@ -525,7 +528,7 @@ if($nmd >9); mdc.10=${mdnamec[9]} ;endif
     titly=ymax-0.3
     'set parea 'xmin' 'xmax' 'ymin' 'ymax
 
-    'run $sorcdir/rgbset.gs'
+    'run $srcgrads/rgbset.gs'
     'set xlopts 1 4 0.0'
     'set ylopts 1 4 0.0'
       if($nmd <=2)
@@ -604,7 +607,7 @@ if($nmd >9); mdc.10=${mdnamec[9]} ;endif
   'set strsiz 0.15 0.15'
   'draw string 4.5 10.45 ${vnam}: ${title}'
   'set strsiz 0.15 0.15'
-  if ( $ncyc >1 | $fcycle = all )
+  if ( $ncyc >1 )
    'draw string 4.5 10.20 $sdate-$edate Mean, ${reg}'
   else
    'draw string 4.5 10.20 $sdate-$edate Mean, ${reg} ${fcycle}Z'
@@ -614,10 +617,10 @@ if($nmd >9); mdc.10=${mdnamec[9]} ;endif
   'set strsiz 0.15 0.15'
   if($nmd >2)
     'draw string 4.8 0.7 Forecast Hour'
-    'run $sorcdir/cbarn.gs 0.95 0 4.5 0.25'
+    'run $srcgrads/cbarn.gs 0.95 0 4.5 0.25'
    else
     'draw string 4.3 3.5 Forecast Hour'
-    'run $sorcdir/cbarn.gs 0.95 0 4.5 2.90'
+    'run $srcgrads/cbarn.gs 0.95 0 4.5 2.90'
    endif
 
   'printim ${var}pmean_${namedaily}.png x700 y700'
@@ -663,14 +666,15 @@ if($nmd >9); mdc.10=${mdnamec[9]} ;endif
   cco.1=1; cco.2=2; cco.3=3; cco.4=4; cco.5=8; cco.6=15; cco.7=9; cco.8=5; cco.9=6; cco.10=7
 
 *------------------------
-fhour=0 ;*start from fcst00
+fhour0=6 ;*start from fcst06
+fhour=fhour0
 while ( fhour <= ${vlength} )
 if (fhour=06|fhour=09|fhour=12|fhour=15|fhour=18|fhour=21|fhour=24|fhour=27|fhour=30|fhour=33|fhour=36)
 *------------------------
   'c'
   fcstsave=fhour
   if(fhour < 10); fcstsave='0'%fcstsave;endif
-  laty=fhour/${fhout}+1
+  laty=(fhour-fhour0)/${fhout}+1
   'set x 1'
   'set t 1 $ndays' 
   'set y '%laty 
@@ -739,7 +743,7 @@ if (fhour=06|fhour=09|fhour=12|fhour=15|fhour=18|fhour=21|fhour=24|fhour=27|fhou
      endif
 * Create verification scorecard text files
      if ( $scoretext = 1 ) 
-       '${sorcdir}/fprintf.gs 'sc.i' score_${var}_${namedaily1}_'mdc.i'_f'fcstsave'.txt %-7.6f'
+       '${srcgrads}/fprintf.gs 'sc.i' score_${var}_${namedaily1}_'mdc.i'_f'fcstsave'.txt %-7.6f'
      endif
    i=i+1
    endwhile
@@ -748,7 +752,7 @@ if (fhour=06|fhour=09|fhour=12|fhour=15|fhour=18|fhour=21|fhour=24|fhour=27|fhou
   'set strsiz 0.14 0.14'
   'draw string 'titlx' 'titly' ${vnam}: ${title} '
   'set strsiz 0.14 0.14'
-  if ( $ncyc >1 | $fcycle = all )
+  if ( $ncyc >1 )
    'draw string 'titlx2' 'titly2' ${lev} ${reg}, fh'fcstsave
   else
    'draw string 'titlx2' 'titly2' ${lev} ${reg} ${fcycle}Z, fh'fcstsave
@@ -860,7 +864,7 @@ if($nmd >9); mdc.10=${mdnamec[9]} ;endif
   'set strsiz 0.13 0.13'
   'draw string 'titlx' 'titly' ${vnam}: ${title}'
   'set strsiz 0.13 0.13'
-  if ( $ncyc >1 | $fcycle = all )
+  if ( $ncyc >1 )
    'draw string 'titlx2' 'titly2' ${lev} ${reg}, $sdate-$edate Mean'
   else
    'draw string 'titlx2' 'titly2' ${lev} ${reg} ${fcycle}Z, $sdate-$edate Mean'
@@ -955,7 +959,7 @@ if($nmd >9); mdc.10=${mdnamec[9]} ;endif
    while (n<=ct)
      tv.n=subwrd(ln,n)
      say tv.n
-     '${sorcdir}/fprintf.gs 'tv.n' score_${var}_conflimit_'${namedaily1}'_'mdc.i'_day'n-1'.txt %-7.6f'
+     '${srcgrads}/fprintf.gs 'tv.n' score_${var}_conflimit_'${namedaily1}'_'mdc.i'_day'n-1'.txt %-7.6f'
     n=n+1
    endwhile
   endif

@@ -1,5 +1,5 @@
 #!/bin/ksh
-set -x
+set -xa
 
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
@@ -13,41 +13,59 @@ set -x
 
 LOGNAME=`whoami`
 
-## -- script directories
-export vsdbhome=${vsdbhome:-/global/save/$LOGNAME/project/verif_g2g.v3.0.0} ;#script home
-export sorcdir=$vsdbhome/grads
-
-## -- verification dates
-export sdate=${sdate:-${1:-20150412}}                ;#forecast starting date
-export edate=${edate:-${2:-20150425}}                ;#forecast ending date
-export vlength=${vlength:-${3:-36}}                  ;#forecast length in hour
-export fcycle=${fcycle:-${cyclist:-${4:-"all"}}}     ;#forecast cycles
-export observations=${observations:-${5:-"gfs gcip gcipconus cip"}}
-
-export rundir0=${rundir:-/ptmpp1/${LOGNAME}/vsdb_plot}    ;#temporary workplace
-# data source
-export vsdbsave=${vsdbsave:-/global/save/$LOGNAME/vsdb/grid2grid}    ;#vsdb stats archive directory
+############# Set up environments ##################
+chost=`echo $(hostname) |cut -c 1-1`
+echo $chost
+if [[ $chost == 't' || $chost == 'g' ]] ; then
+  machine=WCOSS
+elif [[ $chost == 'f' ]] ; then
+  machine=ZEUS
+fi
+if [ $machine = WCOSS ] ; then
+ vsdbsave=/global/save/$LOGNAME/vsdb/grid2grid                  ;#where vsdb database is saved
+ export vsdbhome=/global/save/Yali.Mao/project/verif_g2g.v3.0.0 ;#script home
+ export NWPROD=/nwprod
+ export PTMP=/ptmpp1                                            ;#temporary directory                          
+ export GRADSBIN=/usrx/local/GrADS/2.0.2/bin                    ;#GrADS executables       
+ export IMGCONVERT=/usrx/local/ImageMagick/6.8.3-3/bin/convert                ;#image magic converter
+ export FC=/usrx/local/intel/composer_xe_2011_sp1.11.339/bin/intel64/ifort    ;#intel compiler
+ export FFLAG="-O2 -convert big_endian -FR"                     ;#intel compiler options
+elif [ $machine = ZEUS ] ; then
+ vsdbsave=/scratch2/portfolios/NCEPDEV/global/save/$LOGNAME/vsdb/grid2grid       ;#where vsdb database is saved
+ export vsdbhome=/scratch2/portfolios/NCEPDEV/global/save/Yali.Mao/project/verif_g2g.v3.0.0 ;#script home
+ export NWPROD=/scratch2/portfolios/NCEPDEV/global/save/Fanglin.Yang/VRFY/vsdb/nwprod
+ export PTMP=/scratch2/portfolios/NCEPDEV/ptmp              ;#temporary directory                          
+#export GRADSBIN=/apps/grads/2.0.1/bin                      ;#GrADS executables       
+ export GRADSBIN=/apps/grads/2.0.a9/bin                     ;#GrADS executables       
+ export IMGCONVERT=/apps/ImageMagick/ImageMagick-6.7.6-8/bin/convert  ;#image magic converter
+ export FC=/apps/intel/composerxe-2011.4.191/composerxe-2011.4.191/bin/intel64/ifort ;#intel compiler
+ export FFLAG="-O2 -convert big_endian -FR"                 ;#intel compiler options
+fi
 
 ## -- data and output directories
-# tempory data target
-export vsdb_data=${vsdb_data:-$rundir0/vsdb_data}
+#gather vsdb stats and put in a central location
+rundir0=${rundir:-$PTMP/${LOGNAME}/vsdb_plot}    ;#temporary workplace
+vsdball=$rundir0/vsdb_data
+mkdir -p $vsdball; cd $vsdball || exit 8
+if [ -s  ${vsdball}/wafs ] ; then rm ${vsdball}/wafs ; fi
+ln -fs $vsdbsave/wafs  ${vsdball}/.
+export vsdb_data=$vsdball/wafs                            ;#where all vsdb data are
 export makemap=${makemap:-"YES"}                          ;#whether or not to make maps
 export mapdir=${mapdir:-${rundir0}/web}                   ;#place where maps are saved locally
 export scorecard=${scorecard:-YES}                        ;#create scorecard text files
 export scoredir=${scoredir:-$rundir0/score}               ;#place to save scorecard output
 mkdir -p $rundir0 $mapdir $scoredir
 
-#--------------------------------------
-##---gather vsdb stats and put in a central location
-vsdball=$vsdb_data
-mkdir -p $vsdball; cd $vsdball ||exit 8
-if [ -s  ${vsdball}/wafs ] ; then rm ${vsdball}/wafs ; fi
-ln -fs $vsdbsave/wafs  ${vsdball}/.
-export vsdb_data=$vsdball/wafs
+## -- verification dates
+export sdate=${sdate:-${1:-20150412}}        	          ;#forecast starting date
+export edate=${edate:-${2:-20150425}}                 	  ;#forecast ending date
+export vlength=${vlength:-${3:-36}}                 	  ;#forecast length in hour
+export fcycle=${fcycle:-${cyclist:-${4:-"00 06 12 18"}}}  ;#forecast cycles
+export observations=${observations:-${5:-"gfs gcip gcipconus cip"}}
 
 ## -- verification parameters (dynamic ones)
 
-errdir=/ptmpp1/$LOGNAME
+errdir=$PTMP/$LOGNAME
 #=====================================================
 ##--split observation data to speed up computation
 for obsv in $observations ; do
@@ -101,8 +119,10 @@ for region in  $regions ; do
     cp $vsdbhome/grads/$plotscript .
 
     # change all related variables
-    genericlist="vsdbhome sorcdir sdate edate vlength fcycle vsdb_data makemap mapdir scorecard scoredir mdlist"
-    specificlist="obsvlist reglist rundir vhrlist vtype vnamlist levlist"
+    genericlist="vsdbhome NWPROD PTMP GRADSBIN IMGCONVERT FC FFLAG"
+    genericlist="$genericlist vsdb_data makemap mapdir scorecard scoredir"
+    genericlist="$genericlist sdate edate vlength fcycle"
+    specificlist="obsvlist mdlist reglist rundir vhrlist vtype vnamlist levlist"
     for var in $genericlist $specificlist ; do
       value=`eval echo '$'$var`
       sed -e "s|export $var=|export $var=\"$value\"|g" \

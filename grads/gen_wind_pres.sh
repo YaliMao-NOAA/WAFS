@@ -59,7 +59,7 @@ export ndays=${6:-31}
 export cyclist=${7:-"00"}
        ncyc=`echo $cyclist | wc -w`
 
-## forecast length in every 3 hours from f06, replacing origianl days
+## forecast length in every 3/6 hours from f06, replacing original days
 export vlength=${8:-36}
 
 ## forecast output frequency requried for verification
@@ -81,8 +81,9 @@ export mdlist=${mdlist:-${12:-"twind"}}
 nmd0=`echo $mdlist | wc -w`
 nmdcyc=`expr $nmd0 \* $ncyc `
 
-## observation data
-export obsvlist=${obsvlist:-${13:-"gfs"}}
+## observation data (only one observation per run)
+export obsv=${obsv:-${13:-"gfs"}}
+obsv1=`echo $obsv |tr "[a-z]" "[A-Z]" `
 
 set -A mdname $mdlist
 set -A cycname $cyclist
@@ -107,41 +108,37 @@ if [ -s ${outname}.ctl ]; then rm ${outname}.ctl ;fi
 
 for model in $mdlist; do
 mdl=`echo $model |tr "[a-z]" "[A-Z]" `
-for obsv in $obsvlist ; do
-obsv1=`echo $obsv |tr "[a-z]" "[A-Z]" `
 for cyc in $cyclist; do
-  vhr=$cyc
-  if [ $cyc = 'all' ] ; then  vhr=".." ; fi
 
   cdate=$sdate
   while [ $cdate -le $edate ]; do
 
-    fhour=06; 
+    fhour=06;    vhr=$(( cyc + fhour ))
+    if [ $vhr -ge 24 ]; then vhr=`expr $vhr - 24 `; fi
+    vhr=`printf "%02d" $vhr`
+
     while [ $fhour -le $vlength ]; do
       vsdbname=${vsdb_data}/${model}_${obsv}_${cdate}.vsdb
+
       for lev1 in $levlist ; do
 	string=" $fhour ${cdate}${vhr} $obsv1 $reg VL1L2 $vnam $lev1 "
 	mycheck=$( grep "$string"  $vsdbname )
 	if [ $? -ne 0 ]; then      
           echo "missing" >>$outname.txt
 	else
-          grep "$string"  $vsdbname | head -n 1 | cat >>$outname.txt
+          grep "$string"  $vsdbname | tail -n 1 | cat >>$outname.txt
 	fi
       done
-      fhour=` expr $fhour + $fhout `
-      if [ $fhour -lt 10 ] ; then fhour=0$fhour ; fi
-    done
+
+      fhour=` expr $fhour + $fhout ` ; fhour=`printf "%02d" $fhour`
+      vhr=` expr $vhr + $fhout `
+      if [ $vhr -ge 24 ]; then vhr=`expr $vhr - 24 `; fi
+      vhr=`printf "%02d" $vhr`
+    done # fhour
 
     cdate=`$ndate +24 ${cdate}00 | cut -c 1-8 `
   done   ;#end of cdate
-
-  if [ $cyc != 'all' ] ; then
-    vhr=` expr $vhr + $fhout `
-    if [ $vhr -ge 24 ] ; then vhr=`expr $vhr - 24 `; fi
-    if [ $vhr -lt 10 ] ; then vhr=0$vhr ; fi
-  fi
 done   ;#end of cycle
-done   ;#end of obsv
 done   ;#end of model
 
 #------------------------------------------------------------
@@ -547,7 +544,7 @@ undef -99.9
 options big_endian sequential 
 title scores
 xdef   $nmdcyc linear 1  1
-ydef    $nfcst linear 0 $fhout
+ydef    $nfcst linear 06 $fhout
 zdef    $nlev levels  `echo $levlist | sed "s?P??g"`
 tdef    $ndaysp1 Linear $DD$MON$YYYY 1dy
 vars    8
