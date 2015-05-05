@@ -272,7 +272,9 @@ export lat_weight=${lat_weight:-"no"}
 
 
        if [ ${f[$t]} -lt 10 ] ; then
-         f[$t]='0'${f[$t]}
+#         f[$t]='0'${f[$t]}
+#         in case the original input is 06, instead of 6.
+	  f[$t]=`printf "%02d" ${f[$t]}`
        fi
        filefcst[$t]=$fcstdir.${fday[$t]}/$fhead.t${tf}z.${fgrbtype}${f[$t]}$ftm
 
@@ -380,7 +382,9 @@ export lat_weight=${lat_weight:-"no"}
      obsv24[0]=$pass24                        #observed time(valid time)
 
      if [ b[0] -lt 10 ] ; then
-       b[0]='0'${b[0]}
+#       b[0]='0'${b[0]}
+#         in case the original input is 06, instead of 6.
+	b[0]=`printf "%02d" ${b[0]}`
      fi
 
      to=`echo ${pass} | cut -c 9-10`       #obsv cycle 
@@ -463,7 +467,9 @@ echo ${fday[0]}${tf}${b[0]}" "${oday[0]}${to}00" "${fday[0]}${tf}${b03[0]}" "${o
        obsv24[$t]=$pass24
 
        if [ b[$t] -lt 10 ] ; then
-         b[$t]='0'${b[$t]}
+#         b[$t]='0'${b[$t]}
+#         in case the original input is 06, instead of 6.
+         b[$t]=`printf "%02d" ${b[$t]}`
        fi
 
        to=`echo ${pass} | cut -c 9-10`
