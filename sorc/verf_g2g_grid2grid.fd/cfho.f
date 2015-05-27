@@ -45,8 +45,8 @@ c                        so for a ROC curve, n >= 5
 
 
 
-      real*8, allocatable, dimension(:,:,:,:,:,:) :: sumh,sumf,summ,
-     +                                             sumr,weigh
+      real*8, allocatable, dimension(:,:,:,:,:,:) :: sumf,sumo,sumh,
+     +                                             count,weigh
 
       CHARACTER*3 namversion
       CHARACTER*132 vdbhdr132, input, substr (3)
@@ -146,15 +146,15 @@ c     Decode threshold symbol for observations
       
 
       allocate(sumf(numfcst,numvarbl,numlevel,numarea,numvfyobs,10))
-      allocate(summ(numfcst,numvarbl,numlevel,numarea,numvfyobs,10))
+      allocate(sumo(numfcst,numvarbl,numlevel,numarea,numvfyobs,10))
       allocate(sumh(numfcst,numvarbl,numlevel,numarea,numvfyobs,10))
-      allocate(sumr(numfcst,numvarbl,numlevel,numarea,numvfyobs,10))
+      allocate(count(numfcst,numvarbl,numlevel,numarea,numvfyobs,10))
       allocate(weigh(numfcst,numvarbl,numlevel,numarea,numvfyobs,10))
 
-          sumr = 0.0
+          count = 0.0
           weigh = 0.0
           sumf = 0.0
-          summ = 0.0
+          sumo = 0.0
           sumh = 0.0
 
       do ivr = 1, numvarbl
@@ -190,7 +190,7 @@ c            Decode threshold symbol for observations
              nth_ob=len_trim(fho(ivr))
              symb_ob=fho(ivr)(5:5)
              read(fho(ivr)(6:nth_ob),*)threshold_ob
-             do 55 ifo = 1, fhomrk(ivr)-1
+             do 55 ifo = 1, fhomrk(ivr)
                do 50 ilv = 1, levels(ivr)
                 if(nodata(ifh,ivr,ilv).eq.1) goto 50
 
@@ -235,16 +235,24 @@ c     +        fcstdata(ifh,ivr,ilv,i).le.-9999.0) ) goto 501  !for echo-top
                     if(tendencymrk(ivr).eq.0) then
                        call getcfho(fcstdata(ifh,ivr,ilv,i),
      +                   obsvdata(ifh,ivr,ilv,i),threshold_ob,
-     +                   rfhothr(ivr,ifo),rfhothr(ivr,ifo+1),
-     +                   symb_ob,h,f)
+     +                   rfhothr(ivr,ifo),
+     +                   symb_ob,f,h,o)
                     end if
 
-                    sumf(ifh,ivr,ilv,iar,iob,ifo) = 
+                    sumf(ifh,ivr,ilv,iar,iob,ifo) =
      +              sumf(ifh,ivr,ilv,iar,iob,ifo) + f*area_factor(i)
+
+                    sumo(ifh,ivr,ilv,iar,iob,ifo) =
+     +              sumo(ifh,ivr,ilv,iar,iob,ifo) + o*area_factor(i)
 
                     sumh(ifh,ivr,ilv,iar,iob,ifo) =
      +              sumh(ifh,ivr,ilv,iar,iob,ifo) + h*area_factor(i)
-                   
+
+                    count(ifh,ivr,ilv,iar,iob,ifo) =
+     +              count(ifh,ivr,ilv,iar,iob,ifo) + 1.0
+                    weigh(ifh,ivr,ilv,iar,iob,ifo) =
+     +              weigh(ifh,ivr,ilv,iar,iob,ifo) + area_factor(i)
+
 501               continue  
                 else if (mode(iar).eq.2) then                    ! GRID#104  (mode 2)
 
@@ -292,15 +300,23 @@ c     +                   obsvdata(ifh,ivr,ilv,i)
                        if(tendencymrk(ivr).eq.0) then
                        call getcfho(fcstdata(ifh,ivr,ilv,i),
      +                      obsvdata(ifh,ivr,ilv,i),threshold_ob,
-     +                      rfhothr(ivr,ifo),rfhothr(ivr,ifo+1),
-     +                      symb_ob,h,f)
+     +                      rfhothr(ivr,ifo),
+     +                      symb_ob,f,h,o)
                        end if
-                                                                                                                                                                 
-                       sumf(ifh,ivr,ilv,iar,iob,ifo) =
-     +                 sumf(ifh,ivr,ilv,iar,iob,ifo) + f*area_factor(i)
-                                                                                                                                                                 
-                       sumh(ifh,ivr,ilv,iar,iob,ifo) =
-     +                 sumh(ifh,ivr,ilv,iar,iob,ifo) + h*area_factor(i)
+
+                    sumf(ifh,ivr,ilv,iar,iob,ifo) =
+     +              sumf(ifh,ivr,ilv,iar,iob,ifo) + f*area_factor(i)
+
+                    sumo(ifh,ivr,ilv,iar,iob,ifo) =
+     +              sumo(ifh,ivr,ilv,iar,iob,ifo) + o*area_factor(i)
+
+                    sumh(ifh,ivr,ilv,iar,iob,ifo) =
+     +              sumh(ifh,ivr,ilv,iar,iob,ifo) + h*area_factor(i)
+
+                    count(ifh,ivr,ilv,iar,iob,ifo) =
+     +              count(ifh,ivr,ilv,iar,iob,ifo) + 1.0
+                    weigh(ifh,ivr,ilv,iar,iob,ifo) =
+     +              weigh(ifh,ivr,ilv,iar,iob,ifo) + area_factor(i)
 
                  end if                                                                    
 502                  continue  
@@ -334,17 +350,23 @@ c     +                   obsvdata(ifh,ivr,ilv,i)
                       if(tendencymrk(ivr).eq.0) then
                          call getcfho(fcstdata(ifh,ivr,ilv,i),
      +                        obsvdata(ifh,ivr,ilv,i),threshold_ob,
-     +                        rfhothr(ivr,ifo),rfhothr(ivr,ifo+1),
-     +                        symb_ob,h,f)
+     +                        rfhothr(ivr,ifo),
+     +                        symb_ob,f,h,o)
                       end if
-                          
-                       sumf(ifh,ivr,ilv,iar,iob,ifo) =
-     +                 sumf(ifh,ivr,ilv,iar,iob,ifo) +
-     +                       f*area_factor(i)
-                          
-                       sumh(ifh,ivr,ilv,iar,iob,ifo) =
-     +                 sumh(ifh,ivr,ilv,iar,iob,ifo) +
-     +                       h*area_factor(i)
+
+                    sumf(ifh,ivr,ilv,iar,iob,ifo) =
+     +              sumf(ifh,ivr,ilv,iar,iob,ifo) + f*area_factor(i)
+
+                    sumo(ifh,ivr,ilv,iar,iob,ifo) =
+     +              sumo(ifh,ivr,ilv,iar,iob,ifo) + o*area_factor(i)
+
+                    sumh(ifh,ivr,ilv,iar,iob,ifo) =
+     +              sumh(ifh,ivr,ilv,iar,iob,ifo) + h*area_factor(i)
+
+                    count(ifh,ivr,ilv,iar,iob,ifo) =
+     +              count(ifh,ivr,ilv,iar,iob,ifo) + 1.0
+                    weigh(ifh,ivr,ilv,iar,iob,ifo) =
+     +              weigh(ifh,ivr,ilv,iar,iob,ifo) + area_factor(i)
 
                       end if
 503                 continue   
@@ -382,17 +404,23 @@ c     +                   obsvdata(ifh,ivr,ilv,i)
                        if(tendencymrk(ivr).eq.0) then
                           call getcfho(fcstdata(ifh,ivr,ilv,i),
      +                         obsvdata(ifh,ivr,ilv,i),threshold_ob,
-     +                         rfhothr(ivr,ifo),rfhothr(ivr,ifo+1),
-     +                         symb_ob,h,f)
+     +                         rfhothr(ivr,ifo),
+     +                         symb_ob,f,h,o)
                        end if
-                          
-                       sumf(ifh,ivr,ilv,iar,iob,ifo) =
-     +                 sumf(ifh,ivr,ilv,iar,iob,ifo) +
-     +                       f*area_factor(i)
-                          
-                       sumh(ifh,ivr,ilv,iar,iob,ifo) =
-     +                 sumh(ifh,ivr,ilv,iar,iob,ifo) +
-     +                       h*area_factor(i)
+
+                    sumf(ifh,ivr,ilv,iar,iob,ifo) =
+     +              sumf(ifh,ivr,ilv,iar,iob,ifo) + f*area_factor(i)
+
+                    sumo(ifh,ivr,ilv,iar,iob,ifo) =
+     +              sumo(ifh,ivr,ilv,iar,iob,ifo) + o*area_factor(i)
+
+                    sumh(ifh,ivr,ilv,iar,iob,ifo) =
+     +              sumh(ifh,ivr,ilv,iar,iob,ifo) + h*area_factor(i)
+
+                    count(ifh,ivr,ilv,iar,iob,ifo) =
+     +              count(ifh,ivr,ilv,iar,iob,ifo) + 1.0
+                    weigh(ifh,ivr,ilv,iar,iob,ifo) =
+     +              weigh(ifh,ivr,ilv,iar,iob,ifo) + area_factor(i)
  
                       end if
 504                  continue            
@@ -437,17 +465,23 @@ c     +                   obsvdata(ifh,ivr,ilv,i)
                       if(tendencymrk(ivr).eq.0) then
                          call getcfho(fcstdata(ifh,ivr,ilv,i),
      +                        obsvdata(ifh,ivr,ilv,i),threshold_ob,
-     +                        rfhothr(ivr,ifo),rfhothr(ivr,ifo+1),
-     +                        symb_ob,h,f)
+     +                        rfhothr(ivr,ifo),
+     +                        symb_ob,f,h,o)
                       endif
-                          
-                       sumf(ifh,ivr,ilv,iar,iob,ifo) =
-     +                 sumf(ifh,ivr,ilv,iar,iob,ifo) +
-     +                       f*area_factor(i)
-                          
-                       sumh(ifh,ivr,ilv,iar,iob,ifo) =
-     +                 sumh(ifh,ivr,ilv,iar,iob,ifo) +
-     +                       h*area_factor(i)
+
+                    sumf(ifh,ivr,ilv,iar,iob,ifo) =
+     +              sumf(ifh,ivr,ilv,iar,iob,ifo) + f*area_factor(i)
+
+                    sumo(ifh,ivr,ilv,iar,iob,ifo) =
+     +              sumo(ifh,ivr,ilv,iar,iob,ifo) + o*area_factor(i)
+
+                    sumh(ifh,ivr,ilv,iar,iob,ifo) =
+     +              sumh(ifh,ivr,ilv,iar,iob,ifo) + h*area_factor(i)
+
+                    count(ifh,ivr,ilv,iar,iob,ifo) =
+     +              count(ifh,ivr,ilv,iar,iob,ifo) + 1.0
+                    weigh(ifh,ivr,ilv,iar,iob,ifo) =
+     +              weigh(ifh,ivr,ilv,iar,iob,ifo) + area_factor(i)
 
                          end if
  505                  continue
@@ -486,18 +520,24 @@ c     +                   obsvdata(ifh,ivr,ilv,i)
                       if(tendencymrk(ivr).eq.0) then
                          call getcfho(fcstdata(ifh,ivr,ilv,i),
      +                        obsvdata(ifh,ivr,ilv,i),threshold_ob,
-     +                        rfhothr(ivr,ifo),rfhothr(ivr,ifo+1),
-     +                        symb_ob,h,f)
+     +                        rfhothr(ivr,ifo),
+     +                        symb_ob,f,h,o)
                           
                       end if
-                          
-                       sumf(ifh,ivr,ilv,iar,iob,ifo) =
-     +                 sumf(ifh,ivr,ilv,iar,iob,ifo) +
-     +                       f*area_factor(i)
-                          
-                       sumh(ifh,ivr,ilv,iar,iob,ifo) =
-     +                 sumh(ifh,ivr,ilv,iar,iob,ifo) +
-     +                       h*area_factor(i)
+
+                    sumf(ifh,ivr,ilv,iar,iob,ifo) =
+     +              sumf(ifh,ivr,ilv,iar,iob,ifo) + f*area_factor(i)
+
+                    sumo(ifh,ivr,ilv,iar,iob,ifo) =
+     +              sumo(ifh,ivr,ilv,iar,iob,ifo) + o*area_factor(i)
+
+                    sumh(ifh,ivr,ilv,iar,iob,ifo) =
+     +              sumh(ifh,ivr,ilv,iar,iob,ifo) + h*area_factor(i)
+
+                    count(ifh,ivr,ilv,iar,iob,ifo) =
+     +              count(ifh,ivr,ilv,iar,iob,ifo) + 1.0
+                    weigh(ifh,ivr,ilv,iar,iob,ifo) =
+     +              weigh(ifh,ivr,ilv,iar,iob,ifo) + area_factor(i)
 
                          end if
 506                   continue  
@@ -558,16 +598,23 @@ c     +        fcstdata(ifh,ivr,ilv,i).le.-9999.0) ) goto 507  !for echo-top
                       if(tendencymrk(ivr).eq.0) then
                          call getcfho(fcstdata(ifh,ivr,ilv,i),
      +                        obsvdata(ifh,ivr,ilv,i),threshold_ob,
-     +                        rfhothr(ivr,ifo),rfhothr(ivr,ifo+1),
-     +                        symb_ob,h,f)
+     +                        rfhothr(ivr,ifo),
+     +                        symb_ob,f,h,o)
                        end if
 
-                       sumf(ifh,ivr,ilv,iar,iob,ifo) =
-     +                 sumf(ifh,ivr,ilv,iar,iob,ifo) +
-     +                       f*area_factor(i)
-                          
-                       sumh(ifh,ivr,ilv,iar,iob,ifo) =
-     +                 sumh(ifh,ivr,ilv,iar,iob,ifo) + h*area_factor(i)
+                    sumf(ifh,ivr,ilv,iar,iob,ifo) =
+     +              sumf(ifh,ivr,ilv,iar,iob,ifo) + f*area_factor(i)
+
+                    sumo(ifh,ivr,ilv,iar,iob,ifo) =
+     +              sumo(ifh,ivr,ilv,iar,iob,ifo) + o*area_factor(i)
+
+                    sumh(ifh,ivr,ilv,iar,iob,ifo) =
+     +              sumh(ifh,ivr,ilv,iar,iob,ifo) + h*area_factor(i)
+
+                    count(ifh,ivr,ilv,iar,iob,ifo) =
+     +              count(ifh,ivr,ilv,iar,iob,ifo) + 1.0
+                    weigh(ifh,ivr,ilv,iar,iob,ifo) =
+     +              weigh(ifh,ivr,ilv,iar,iob,ifo) + area_factor(i)
 
                          end if
 507                  continue  
@@ -589,24 +636,33 @@ c     +        fcstdata(ifh,ivr,ilv,i).le.-9999.0) ) goto 507  !for echo-top
        do 81 iob = 1, numvfyobs
         do 71 iar = 1, numarea
          do 61 ivr = 1, numvarbl
+          do 56 ifo = 1, fhomrk(ivr)
             do 51 ilv = 1, levels(ivr)
              if(nodata(ifh,ivr,ilv).eq.1) goto 51
              if(fhomrk(ivr).lt.5) goto 61
              if(continue_mrk(ivr) /= 8) cycle ! only continue for icing ROC             
-             ! get the real a b c d
-             call getROC(fhomrk(ivr)-1, 
-     +                   sumh(ifh,ivr,ilv,iar,iob,1:fhomrk(ivr)-1),
-     +                   sumf(ifh,ivr,ilv,iar,iob,1:fhomrk(ivr)-1),
-     +                   summ(ifh,ivr,ilv,iar,iob,1:fhomrk(ivr)-1),
-     +                   sumr(ifh,ivr,ilv,iar,iob,1:fhomrk(ivr)-1))
+             if(weigh(ifh,ivr,ilv,iar,iob,ifo).ne.0.0) then
+              sumf(ifh,ivr,ilv,iar,iob,ifo)=
+     +        sumf(ifh,ivr,ilv,iar,iob,ifo)/
+     +        weigh(ifh,ivr,ilv,iar,iob,ifo)
 
-             do 56 ifo = 1, fhomrk(ivr)-2
-               write(*,*) sumh(ifh,ivr,ilv,iar,iob,ifo),
-     +               sumf(ifh,ivr,ilv,iar,iob,ifo),
-     +               summ(ifh,ivr,ilv,iar,iob,ifo),
-     +               sumr(ifh,ivr,ilv,iar,iob,ifo)
- 56         continue
+              sumo(ifh,ivr,ilv,iar,iob,ifo)=
+     +        sumo(ifh,ivr,ilv,iar,iob,ifo)/
+     +        weigh(ifh,ivr,ilv,iar,iob,ifo)
+
+              sumh(ifh,ivr,ilv,iar,iob,ifo)=
+     +        sumh(ifh,ivr,ilv,iar,iob,ifo)/
+     +        weigh(ifh,ivr,ilv,iar,iob,ifo)
+
+              if(sumf(ifh,ivr,ilv,iar,iob,ifo).lt.0.0)
+     +           sumf(ifh,ivr,ilv,iar,iob,ifo)=0.0
+              if(sumo(ifh,ivr,ilv,iar,iob,ifo).lt.0.0)
+     +           sumo(ifh,ivr,ilv,iar,iob,ifo)=0.0
+              if(sumh(ifh,ivr,ilv,iar,iob,ifo).lt.0.0)
+     +           sumh(ifh,ivr,ilv,iar,iob,ifo)=0.0
+             end if
  51       continue
+ 56    continue
  61    continue
  71   continue
  81   continue
@@ -619,9 +675,10 @@ c     +        fcstdata(ifh,ivr,ilv,i).le.-9999.0) ) goto 507  !for echo-top
               do 160 ivr = 1, numvarbl
                if(fhomrk(ivr).lt.5) goto 160
                if(continue_mrk(ivr) /= 8) cycle ! only continue for icing ROC             
-               do 150 ifo = 1, fhomrk(ivr) - 2
+               do 150 ifo = 1, fhomrk(ivr)
                  do 150 ilv = 1, levels(ivr)
                   if(nodata(ifh,ivr,ilv).eq.1) goto 150
+                    IF (count(ifh,ivr,ilv,iar,iob,ifo).gt.0.0) THEN
                       iend = 3
                       vdbhdr132(1:iend) = namversion(:3)
                       iend = iend + 1
@@ -672,9 +729,9 @@ c     +        fcstdata(ifh,ivr,ilv,i).le.-9999.0) ) goto 507  !for echo-top
                       istrt = iend + 1
 c     based on ROC characters, thresholds will not include
 c     the first and last fhothr
-                      iend = iend + nchrfhothr(ivr,ifo+1)
+                      iend = iend + nchrfhothr(ivr,ifo)
                       vdbhdr132(istrt:iend) =
-     +                      fhothr(ivr,ifo+1)(:nchrfhothr(ivr,ifo+1))
+     +                      fhothr(ivr,ifo)(:nchrfhothr(ivr,ifo))
                      
                       iend = iend + 1
                       vdbhdr132(iend:iend) = blank
@@ -696,11 +753,12 @@ c     the first and last fhothr
                       vdbhdr132(iend:iend) = blank
                        if(hasdata(ifh,ivr,ilv).gt.0) then
                         WRITE (nvsdb,1000) vdbhdr132(:iend),
-     +                              sumh(ifh,ivr,ilv,iar,iob,ifo),
+     +                              count(ifh,ivr,ilv,iar,iob,ifo),
      +                              sumf(ifh,ivr,ilv,iar,iob,ifo),
-     +                              summ(ifh,ivr,ilv,iar,iob,ifo),
-     +                              sumr(ifh,ivr,ilv,iar,iob,ifo)
- 1000                   FORMAT (A,4F11.1)
+     +                              sumh(ifh,ivr,ilv,iar,iob,ifo),
+     +                              sumo(ifh,ivr,ilv,iar,iob,ifo)
+ 1000                   FORMAT (A,F12.0,3E18.9)
+                       end if
                     END IF
 150             continue
 155            continue
@@ -710,9 +768,9 @@ c     the first and last fhothr
 190        continue
 
            deallocate(sumf)
-           deallocate(summ)
+           deallocate(sumo)
            deallocate(sumh)
-           deallocate(sumr)
+           deallocate(count)
            deallocate(weigh)
 
            return
