@@ -233,10 +233,10 @@ c     +        fcstdata(ifh,ivr,ilv,i).le.-9999.0) ) goto 501  !for echo-top
      +       fcstdata(ifh,ivr,ilv,i).le.0.0) ) goto 501 ! for ceiling
 
                     if(tendencymrk(ivr).eq.0) then
-                       call getcfho(fcstdata(ifh,ivr,ilv,i),
-     +                   obsvdata(ifh,ivr,ilv,i),threshold_ob,
-     +                   rfhothr(ivr,ifo),
-     +                   symb_ob,f,h,o)
+                       call getcfho(
+     +                        obsvdata(ifh,ivr,ilv,i),threshold_ob,
+     +                        fcstdata(ifh,ivr,ilv,i),rfhothr(ivr,ifo),
+     +                        symb_ob,f,h,o)
                     end if
 
                     sumf(ifh,ivr,ilv,iar,iob,ifo) =
@@ -298,10 +298,10 @@ c            write(*,*) 'test:',i,fcstdata(ifh,ivr,ilv,i),
 c     +                   obsvdata(ifh,ivr,ilv,i)
 
                        if(tendencymrk(ivr).eq.0) then
-                       call getcfho(fcstdata(ifh,ivr,ilv,i),
-     +                      obsvdata(ifh,ivr,ilv,i),threshold_ob,
-     +                      rfhothr(ivr,ifo),
-     +                      symb_ob,f,h,o)
+                       call getcfho(
+     +                        obsvdata(ifh,ivr,ilv,i),threshold_ob,
+     +                        fcstdata(ifh,ivr,ilv,i),rfhothr(ivr,ifo),
+     +                        symb_ob,f,h,o)
                        end if
 
                     sumf(ifh,ivr,ilv,iar,iob,ifo) =
@@ -348,9 +348,9 @@ c     +                   obsvdata(ifh,ivr,ilv,i)
 
                       if(region_latlon(1,i).gt.0.0) then
                       if(tendencymrk(ivr).eq.0) then
-                         call getcfho(fcstdata(ifh,ivr,ilv,i),
+                         call getcfho(
      +                        obsvdata(ifh,ivr,ilv,i),threshold_ob,
-     +                        rfhothr(ivr,ifo),
+     +                        fcstdata(ifh,ivr,ilv,i),rfhothr(ivr,ifo),
      +                        symb_ob,f,h,o)
                       end if
 
@@ -402,10 +402,10 @@ c     +                   obsvdata(ifh,ivr,ilv,i)
 
                       if(region_latlon(1,i).lt.0.0) then
                        if(tendencymrk(ivr).eq.0) then
-                          call getcfho(fcstdata(ifh,ivr,ilv,i),
-     +                         obsvdata(ifh,ivr,ilv,i),threshold_ob,
-     +                         rfhothr(ivr,ifo),
-     +                         symb_ob,f,h,o)
+                         call getcfho(
+     +                        obsvdata(ifh,ivr,ilv,i),threshold_ob,
+     +                        fcstdata(ifh,ivr,ilv,i),rfhothr(ivr,ifo),
+     +                        symb_ob,f,h,o)
                        end if
 
                     sumf(ifh,ivr,ilv,iar,iob,ifo) =
@@ -463,9 +463,9 @@ c     +                   obsvdata(ifh,ivr,ilv,i)
      +                                                                   !  x(ptr1(1), ptr1(2))  
      +                                                                   !  where ptr1(1) = ptr2(1) 
                       if(tendencymrk(ivr).eq.0) then
-                         call getcfho(fcstdata(ifh,ivr,ilv,i),
+                         call getcfho(
      +                        obsvdata(ifh,ivr,ilv,i),threshold_ob,
-     +                        rfhothr(ivr,ifo),
+     +                        fcstdata(ifh,ivr,ilv,i),rfhothr(ivr,ifo),
      +                        symb_ob,f,h,o)
                       endif
 
@@ -518,9 +518,9 @@ c     +                   obsvdata(ifh,ivr,ilv,i)
      +                     region_latlon(2,i).le.ptr2(1,iar)) then       ! (ptr1(1), ptr1(2))   (ptr2(1), ptr2(2))
                                                                          !  where ptr1(2) = ptr2(2)  
                       if(tendencymrk(ivr).eq.0) then
-                         call getcfho(fcstdata(ifh,ivr,ilv,i),
+                         call getcfho(
      +                        obsvdata(ifh,ivr,ilv,i),threshold_ob,
-     +                        rfhothr(ivr,ifo),
+     +                        fcstdata(ifh,ivr,ilv,i),rfhothr(ivr,ifo),
      +                        symb_ob,f,h,o)
                           
                       end if
@@ -596,9 +596,9 @@ c     +        fcstdata(ifh,ivr,ilv,i).le.-9999.0) ) goto 507  !for echo-top
      +                                                                !  (ptr1(1), ptr1(2))
 
                       if(tendencymrk(ivr).eq.0) then
-                         call getcfho(fcstdata(ifh,ivr,ilv,i),
+                         call getcfho(
      +                        obsvdata(ifh,ivr,ilv,i),threshold_ob,
-     +                        rfhothr(ivr,ifo),
+     +                        fcstdata(ifh,ivr,ilv,i),rfhothr(ivr,ifo),
      +                        symb_ob,f,h,o)
                        end if
 

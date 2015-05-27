@@ -22,7 +22,7 @@ c   Author: Binbin Zhou
 c           Mar, 2005
 c   Modified: 03/2015 Y Mao: for icing ROC
 
-        subroutine getcfho(x, y, xthr, ythr, symbol, f, h, o)
+        subroutine getcfho(x, xthr, y, ythr, symbol, f, h, o)
         real, intent(in) :: x, y, xthr, ythr
         character(len=10), intent(in) :: symbol
         real, intent(out) :: f, h, o
