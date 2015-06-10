@@ -12,6 +12,9 @@ set -xa
 #----------------------------------------------------------------------
 
 LOGNAME=`whoami`
+WEBSERVER="ymao@emcrzdm"
+WEBDIR="/home/www/emc/htdocs/gmb/icao"
+doftp="YES"
 
 ############# Set up environments ##################
 chost=`echo $(hostname) |cut -c 1-1`
@@ -23,6 +26,7 @@ elif [[ $chost == 'f' ]] ; then
 fi
 if [ $machine = WCOSS ] ; then
  vsdbsave=/global/save/$LOGNAME/vsdb/grid2grid                  ;#where vsdb database is saved
+# vsdbsave=/ptmpp1/Yali.Mao/vsdb/grid2grid
  export vsdbhome=/global/save/Yali.Mao/project/verif_g2g.v3.0.0 ;#script home
  export NWPROD=/nwprod
  export PTMP=/ptmpp1                                            ;#temporary directory                          
@@ -30,6 +34,7 @@ if [ $machine = WCOSS ] ; then
  export IMGCONVERT=/usrx/local/ImageMagick/6.8.3-3/bin/convert                ;#image magic converter
  export FC=/usrx/local/intel/composer_xe_2011_sp1.11.339/bin/intel64/ifort    ;#intel compiler
  export FFLAG="-O2 -convert big_endian -FR"                     ;#intel compiler options
+ export PYTHON=/usr/bin/python
 elif [ $machine = ZEUS ] ; then
  vsdbsave=/scratch2/portfolios/NCEPDEV/global/save/$LOGNAME/vsdb/grid2grid       ;#where vsdb database is saved
  export vsdbhome=/scratch2/portfolios/NCEPDEV/global/save/Yali.Mao/project/verif_g2g.v3.0.0 ;#script home
@@ -40,6 +45,7 @@ elif [ $machine = ZEUS ] ; then
  export IMGCONVERT=/apps/ImageMagick/ImageMagick-6.7.6-8/bin/convert  ;#image magic converter
  export FC=/apps/intel/composerxe-2011.4.191/composerxe-2011.4.191/bin/intel64/ifort ;#intel compiler
  export FFLAG="-O2 -convert big_endian -FR"                 ;#intel compiler options
+ export PYTHON=/usr/bin/python
 fi
 
 ## -- data and output directories
@@ -57,42 +63,46 @@ export scoredir=${scoredir:-$rundir0/score}               ;#place to save scorec
 mkdir -p $rundir0 $mapdir $scoredir
 
 ## -- verification dates
-export sdate=${sdate:-${1:-20150412}}        	          ;#forecast starting date
-export edate=${edate:-${2:-20150425}}                 	  ;#forecast ending date
+export sdate=${sdate:-${1:-20150522}}        	          ;#forecast starting date
+export edate=${edate:-${2:-20150525}}                 	  ;#forecast ending date
 export vlength=${vlength:-${3:-36}}                 	  ;#forecast length in hour
-export fcycle=${fcycle:-${cyclist:-${4:-"00 06 12 18"}}}  ;#forecast cycles
-export observations=${observations:-${5:-"gfs gcip gcipconus cip"}}
+#  observation choices: gfs gcip gcipconus cip
+export observation=${observation:-${4:-"gfs"}}
+if [ $observation = gfs ] ; then
+  fcycle="00 06 12 18" ;#forecast cycles for wind t
+else
+  fcycle="00 03 06 09 12 15 18 21" ;#forecast cycles for icip
+fi
+export fcycle=${5:-$fcycle}                                ;#forecast cycles
 
 ## -- verification parameters (dynamic ones)
 
 errdir=$PTMP/$LOGNAME
 #=====================================================
 ##--split observation data to speed up computation
-for obsv in $observations ; do
+for obsv in $observation ; do
   export obsvlist=$obsv
 
   if [[ $obsv == gcip || $obsv == gfs ]] ; then
     regions="G45 G45/NHM G45/TRP G45/SHM G45/AR2 G45/ASIA G45/NPCF G45/AUNZ G45/NAMR"
   else
-    regions=CONUS
+    regions="G130"
   fi
   if [[ $obsv == gfs ]] ; then
     models="twind"
   else
-    models="blndmax blndmean ukmax ukmean usfip usmax usmean"
+#    models="blndmax blndmean ukmax ukmean usmax usmean usfip"
+    models="blndmax blndmean ukmax ukmean usmax usmean"
   fi
 
-##--split models and regions to speed up computation
-#=====================================================
-for model in $models ; do
-  export mdlist=$model
+  export mdlist=$models
 
 for region in  $regions ; do
 #=====================================================
     reg1=`echo $region | sed "s?/??g"`
     export reglist="$region"
 
-    export rundir=${rundir0}/$obsv.$model.$reg1
+    export rundir=${rundir0}/$obsv.$reg1
     mkdir -p $rundir
 
 # ------------------------------------------------------------------------------
@@ -116,32 +126,34 @@ for region in  $regions ; do
 
     cd $rundir0
     plotscript=allcenters_rmsmap.sh
-    cp $vsdbhome/grads/$plotscript .
+    cp $vsdbhome/grads/$plotscript ./$plotscript.$obsv
 
-    # change all related variables
-    genericlist="vsdbhome NWPROD PTMP GRADSBIN IMGCONVERT FC FFLAG"
+    # change all related variables in allcenters_rmsmap.sh
+    genericlist="WEBSERVER WEBDIR doftp"
+    genericlist="$genericlist vsdbhome NWPROD PTMP GRADSBIN IMGCONVERT FC FFLAG PYTHON"
     genericlist="$genericlist vsdb_data makemap mapdir scorecard scoredir"
     genericlist="$genericlist sdate edate vlength fcycle"
     specificlist="obsvlist mdlist reglist rundir vhrlist vtype vnamlist levlist"
     for var in $genericlist $specificlist ; do
       value=`eval echo '$'$var`
       sed -e "s|export $var=|export $var=\"$value\"|g" \
-	  -i $plotscript
+	  -i $plotscript.$obsv
     done
 
     # change err and out file name and job name for a bsub
     sed -e "s|#BSUB -eo |#BSUB -eo $errdir/$bsubstring.err|g" \
 	-e "s|#BSUB -oo |#BSUB -oo $errdir/$bsubstring.out|g" \
 	-e "s|#BSUB -J |#BSUB -J $bsubstring|g" \
-	-i $plotscript
+	-i $plotscript.$obsv
 
-    ./$plotscript
+    ./$plotscript.$obsv
 
- #   bsub < $plotscript
+
+#    . ~/.bashrc
+#    bsub < $plotscript.$obsv
 
 #=====================================================
 done  #end of region
-done  #end of model 
 done  #end of obsv
 #====================================================
 
