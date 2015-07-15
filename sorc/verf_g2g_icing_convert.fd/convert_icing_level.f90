@@ -120,7 +120,7 @@ program main
         if(gfld%ipdtmpl(1)==icat .and. gfld%ipdtmpl(2)==iprm .and. gfld%ipdtmpl(10)==ilev) then
            level = gfld%ipdtmpl(12) / 10 ** gfld%ipdtmpl(11)
            do k = 1, NLEVELS
-              if(level == pLevels(k)) then
+              if(level/10 == pLevels(k)/10) then
                  print *, "Converted level=", level, "m"
                  data(:, k) = gfld%fld
                  exit

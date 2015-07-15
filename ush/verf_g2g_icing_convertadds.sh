@@ -62,7 +62,7 @@ for hh in $cycles ; do
        if [ $prod_uc = "FIP" ] ; then
          for fh in 3 6 9 12; do
            fh2=`printf "%02i" $fh`
-           search1=":d=$day$hh:IC${field}:$lvl"
+           search1=":d=$day$hh:IC${field}:$lvl[.| ]"
  	   search2=":$fh hour fcst:"
            $UTIL/wgrib2 $file -match "$search1" -match "$search2" -grib x.$lvl
            cat x.$lvl >> adds.${prod_lc}.t${hh}z.f${fh2}
