@@ -118,8 +118,8 @@ program main
 
         ! assign data(:,:) at the appropriate level
         if(gfld%ipdtmpl(1)==icat .and. gfld%ipdtmpl(2)==iprm .and. gfld%ipdtmpl(10)==ilev) then
+           level = gfld%ipdtmpl(12) / 10 ** gfld%ipdtmpl(11)
            do k = 1, NLEVELS
-              level = gfld%ipdtmpl(12) / 10 ** gfld%ipdtmpl(11)
               if(level == pLevels(k)) then
                  print *, "Converted level=", level, "m"
                  data(:, k) = gfld%fld
