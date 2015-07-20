@@ -1,17 +1,14 @@
 !###########################################################!
 ! in Grib2 version
 ! Convert icing on sigma level to pressure level
+!   probability: -> potential, (19 233) => (19 20)
+!     CIP: (potential*0.85=probability)
+!     FIP: (potential*(0.84-0.033*fhour)=probability)
+!   severity:    -> swap categories, sorted 'trace'
+! Outputs are on pressure level
 !
-! This program takes 3 products on sigma level (102)
-!   1) icing probabilty       (19 233)
-!   2) icing potential        (19 20)
-!   3) icing severity         (19 234)
-! will do the following:
-!   1) convert to potential (potential*0.85=probability)
-!      change (19 233) => (19 20)
-!      output on its corresponding pressure level
-!   2) output on its corresponding pressure level
-!   3) output on its corresponding pressure level
+! Notes: processing and writing data have to be in the same
+!   loop as reading to keep bitmap information of read-in gfld
 !
 !###########################################################!
 
@@ -23,9 +20,8 @@ program main
   ! The 6 vertical levels to be verficated.
   ! HybridLevels & PressHLevels are matching levels
   integer, parameter :: NLEVELS = 6
-  integer, target :: HybridLevels(NLEVELS) = (/ 7315,5486,4267,3048,1828,914 /) ! in meter \
-  integer, target :: PressHLevels(NLEVELS) = (/ 400, 500, 600, 700, 800, 900 /) ! in hPa   /
-  integer, pointer :: pLevles(:)
+  integer, target :: HybridLevels(NLEVELS) = (/ 7315,  5792,  4267,  3048,  1828,  914 /)  ! in meter \
+  integer, target :: PressHLevels(NLEVELS) = (/ 40000, 50000, 60000, 70000, 80000, 90000 /) ! in Pa   /
 
   ! parameter to read & write data
   integer :: icat, iprm, ilev
@@ -33,7 +29,7 @@ program main
   integer :: iunit, ounit
 
   ! input arguments
-  character(len=100) :: filename, output, ctmp
+  character(len=100) :: inputfile, outputfile, args
 
   ! for reading grib2 data
   integer, parameter :: msk1=32000
@@ -43,40 +39,44 @@ program main
   integer :: lengrib                  ! output of baread()
   integer :: listsec0(3), listsec1(13)! output of gb_info
   integer :: numfields, numlocal, maxlocal ! output of gb_info 
-  logical :: unpack=.true., expand           ! output of gf_getfld
+  logical :: unpack=.true., expand=.true.           ! output of gf_getfld
   type(gribfield) :: gfld
   integer :: iseek, n, k, level
 
   character(len=*), parameter :: myself = 'readGB2() '
 
   ! other variables
-  integer :: nxy, fhour, iret
-  integer, pointer :: pLevels(:)
-
-  pLevels => HybridLevels    ! read on sigma level
+  integer :: nxy, fhour, iret, i
+  integer, pointer :: piLevels(:), poLevels(:)
+  character(2) :: cunit
 
   ! ===========================================!
   ! take care of input arguments
 
-  call GET_COMMAND_ARGUMENT(1, filename)
-  call GET_COMMAND_ARGUMENT(2, output)
-  call GET_COMMAND_ARGUMENT(3, ctmp)
-  read(ctmp, *) icat
-  call GET_COMMAND_ARGUMENT(4, ctmp)
-  read(ctmp, *) iprm
+  call GET_COMMAND_ARGUMENT(1, inputfile)
+  call GET_COMMAND_ARGUMENT(2, outputfile)
+  call GET_COMMAND_ARGUMENT(3, args)
+  read(args, *) icat
+  call GET_COMMAND_ARGUMENT(4, args)
+  read(args, *) iprm
   if(icat /= 19) stop "convert_icing_level: only works for icing"
-  ilev = 102 ! on sigma level
+
+
+  ! ===========================================!
+  ! read, process and output data in Grib2
+
+  ilev = 100   ! all outputs on pressure level (corresponding to flight levels)
+  poLevels => PressHLevels   ! output on its corresponding pressure level
 
   iunit = 20
   ounit = 50
-
-  ! ===========================================!
-  ! read in data in Grib2
+  call baopenr(iunit, trim(inputfile), iret)
+  call BAOPENW(ounit,trim(outputfile),iret)
 
   iseek = 0
   currlen = 0
-  call baopenr(iunit, trim(filename), iret)
   loop_read: do
+
      call skgb(iunit, iseek, msk1, lskip, lgrib)
      if (lgrib == 0) exit    ! end loop at EOF or problem
      if (lgrib > currlen) then ! allocate cgrib if size is expanded.
@@ -101,7 +101,7 @@ program main
         stop 10
      endif
 
-     ! do the loop and read all data on each level
+!!! do the loop and read all data on each level
      loop_numfields: do n = 1, numfields
         call gf_getfld(cgrib, lengrib, n, unpack, expand, gfld, iret)
         if (iret /= 0) then
@@ -116,60 +116,71 @@ program main
            allocate(data(nxy, NLEVELS))
         end if
 
-        ! assign data(:,:) at the appropriate level
-        if(gfld%ipdtmpl(1)==icat .and. gfld%ipdtmpl(2)==iprm .and. gfld%ipdtmpl(10)==ilev) then
-           level = gfld%ipdtmpl(12) / 10 ** gfld%ipdtmpl(11)
-           do k = 1, NLEVELS
-              if(level/10 == pLevels(k)/10) then
-                 print *, "Converted level=", level, "m"
-                 data(:, k) = gfld%fld
-                 exit
-              end if
-           end do
-        end if
+        if_ipdtmpl: if(gfld%ipdtmpl(1)==icat .and. gfld%ipdtmpl(2)==iprm) then
 
+           if (gfld%ipdtmpl(10) == 100) then
+              ! on pressure level
+              piLevels => PressHLevels   ! read on pressure level
+              cunit = "pa"
+           elseif (gfld%ipdtmpl(10) == 102) then
+              ! on sigma level
+              piLevels => HybridLevels
+              cunit="m"
+           endif
+
+           level = gfld%ipdtmpl(12) / (10 ** gfld%ipdtmpl(11))
+           loop_NLEVELS: do k = 1, NLEVELS
+              if_level: if(level/10 == piLevels(k)/10) then
+                 print *, "Converted level=", level, " ", cunit
+                 data(:, k) = gfld%fld
+
+!!! assign data(:,:) at the appropriate level
+                 if (iprm == 233) then		 ! probability
+                    ! probability -> potential
+                    ! Currently icing potentials are produced, 
+                    ! while CIP and FIP produces probability, so conversion is needed.
+                    if (fhour == 0) then ! CIP
+                       data(:,k) = data(:,k) / 0.85
+                    else                 ! FIP
+                       data(:,k) = data(:,k) / (0.84-0.033*fhour)
+                    end if
+                 else if (iprm == 234) then          !severity
+                    do i = 1, nxy
+                       if(data(i,k) == 1. .or. data(i,k) == 2.) then
+                          data(i,k) = data(i,k) + 1
+                       elseif(data(i,k) == 4.) then
+                          data(i,k) = 1
+                       elseif(data(i,k) == 5.) then
+                          data(i,k) = 4
+                       end if
+                    end do
+
+                 end if
+
+
+!!! output data
+                 gfld%ipdtmpl(1)  = icat
+                 if (iprm == 233) gfld%ipdtmpl(2)=20	! all probability outputs match GFS's ice potential
+                 gfld%ipdtmpl(10) = ilev
+                 gfld%ipdtmpl(11) = 0    ! The last gf_getfld() may set gfld%ipdtmpl(11) to non-zero
+
+                 gfld%ipdtmpl(12) = poLevels(k)
+                 gfld%fld = data(:,k)
+                 call PUTGB2(ounit, gfld, iret)
+
+                 exit
+              end if if_level
+           end do loop_NLEVELS
+        end if if_ipdtmpl
+
+        call gf_free(gfld)
      end do loop_numfields
 
   end do loop_read
 
+  if(allocated(data)) deallocate(data)
+
   call baclose(iunit,iret)
-
-  ! probability -> potential
-  ! Currently icing potentials are produced, 
-  ! while CIP and FIP produces probability, so conversion is needed.
-  if (iprm == 233) then		 ! probability
-     if (fhour == 0) then ! CIP
-        data(:,:) = data(:,:) / 0.85
-     else                 ! FIP
-        data(:,:) = data(:,:) / (0.84-0.033*fhour)
-     end if
-  end if
-
-  !******************************************************
-  ! output data
-  !******************************************************
-  pLevels => PressHLevels   ! output on its corresponding pressure level
-
-  call BAOPENW(ounit,output,iret)
-
-  if (iprm == 233) iprm=20	! all outputs match GFS's ice potential
-  ilev = 100   ! all outputs on pressure level, corresponding to flight levels
-
-  gfld%ipdtmpl(1)  = icat
-  gfld%ipdtmpl(2)  = iprm
-  gfld%ipdtmpl(10) = ilev
-  gfld%ipdtmpl(11) = 0    ! The last gf_getfld() may set gfld%ipdtmpl(11) to non-zero
-
-  do k=1,NLEVELS
-     gfld%ipdtmpl(12) = pLevels(k) * 100 ! in Pa
-     gfld%fld = data(:,k)
-     call PUTGB2(ounit, gfld, iret)
-  end do
-
   call baclose(ounit,iret)
-
-  call gf_free(gfld)
-
-  deallocate(data)
 
 end program main
