@@ -7,8 +7,11 @@
 !   severity:    -> swap categories, sorted 'trace'
 ! Outputs are on pressure level
 !
-! Notes: processing and writing data have to be in the same
+! Notes: 
+!   1. processing and writing data have to be in the same
 !   loop as reading to keep bitmap information of read-in gfld
+!   2. process all levels if inputs are on pressure levels,
+!      while process limited levels if on sigma levels.
 !
 !###########################################################!
 
@@ -46,7 +49,7 @@ program main
   character(len=*), parameter :: myself = 'readGB2() '
 
   ! other variables
-  integer :: nxy, fhour, iret, i
+  integer :: nxy, fhour, iret, i, lplevels
   integer, pointer :: piLevels(:), poLevels(:)
   character(2) :: cunit
 
@@ -120,17 +123,18 @@ program main
 
            if (gfld%ipdtmpl(10) == 100) then
               ! on pressure level
-              piLevels => PressHLevels   ! read on pressure level
               cunit = "pa"
+              lplevels = 1             ! process all levels, false loop for pressure levels
            elseif (gfld%ipdtmpl(10) == 102) then
               ! on sigma level
-              piLevels => HybridLevels
               cunit="m"
+              lplevels = NLEVELS       ! process limited levels
            endif
 
            level = gfld%ipdtmpl(12) / (10 ** gfld%ipdtmpl(11))
-           loop_NLEVELS: do k = 1, NLEVELS
-              if_level: if(level/10 == piLevels(k)/10) then
+           loop_lplevels: do k = 1, lplevels
+              if_level: if((gfld%ipdtmpl(10) == 100) .or. &
+                            ((gfld%ipdtmpl(10) == 102) .and. (level/10 == HybridLevels(k)/10)) ) then
                  print *, "Converted level=", level, " ", cunit
                  data(:, k) = gfld%fld
 
@@ -161,16 +165,16 @@ program main
 !!! output data
                  gfld%ipdtmpl(1)  = icat
                  if (iprm == 233) gfld%ipdtmpl(2)=20	! all probability outputs match GFS's ice potential
-                 gfld%ipdtmpl(10) = ilev
                  gfld%ipdtmpl(11) = 0    ! The last gf_getfld() may set gfld%ipdtmpl(11) to non-zero
+                 if(gfld%ipdtmpl(10) == 102) gfld%ipdtmpl(12) = poLevels(k)
+                 gfld%ipdtmpl(10) = ilev
 
-                 gfld%ipdtmpl(12) = poLevels(k)
                  gfld%fld = data(:,k)
                  call PUTGB2(ounit, gfld, iret)
 
                  exit
               end if if_level
-           end do loop_NLEVELS
+           end do loop_lplevels
         end if if_ipdtmpl
 
         call gf_free(gfld)
