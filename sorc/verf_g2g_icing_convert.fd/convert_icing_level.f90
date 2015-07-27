@@ -23,16 +23,18 @@ program main
   ! The 6 vertical levels to be verficated.
   ! HybridLevels & PressHLevels are matching levels
   integer, parameter :: NLEVELS = 6
-  integer, target :: HybridLevels(NLEVELS) = (/ 7315,  5792,  4267,  3048,  1828,  914 /)  ! in meter \
-  integer, target :: PressHLevels(NLEVELS) = (/ 40000, 50000, 60000, 70000, 80000, 90000 /) ! in Pa   /
+  integer :: HybridLevels(NLEVELS) = (/ 7315,  5486,  4267,  3048,  1828,  914 /)  ! in meter \
+  integer :: PressHLevels(NLEVELS) = (/ 40000, 50000, 60000, 70000, 80000, 90000 /) ! in Pa   /
+
+  integer :: levels(NLEVELS)  ! will be assigned either HybridLevels or PressHLevels
 
   ! parameter to read & write data
-  integer :: icat, iprm, ilev
-  real, allocatable :: data(:,:) ! data(nxy, vertical_levels)
+  integer :: icat, iprm
+  real, allocatable :: data(:) ! data(nxy)
   integer :: iunit, ounit
 
-  ! input arguments
   character(len=100) :: inputfile, outputfile, args
+  character(len=1) :: selected ! 1 - on selected levels;  0 - on all levels of input
 
   ! for reading grib2 data
   integer, parameter :: msk1=32000
@@ -49,8 +51,8 @@ program main
   character(len=*), parameter :: myself = 'readGB2() '
 
   ! other variables
-  integer :: nxy, fhour, iret, i, lplevels
-  integer, pointer :: piLevels(:), poLevels(:)
+  integer :: nxy, fhour, iret, i
+  integer :: lplevels        ! either 1 or NLEVELS depending on 'selected'
   character(2) :: cunit
 
   ! ===========================================!
@@ -63,13 +65,15 @@ program main
   call GET_COMMAND_ARGUMENT(4, args)
   read(args, *) iprm
   if(icat /= 19) stop "convert_icing_level: only works for icing"
+  if ( COMMAND_ARGUMENT_COUNT() == 5) then
+     call GET_COMMAND_ARGUMENT(5, selected)
+  else
+     selected = '1'
+  end if
 
 
   ! ===========================================!
   ! read, process and output data in Grib2
-
-  ilev = 100   ! all outputs on pressure level (corresponding to flight levels)
-  poLevels => PressHLevels   ! output on its corresponding pressure level
 
   iunit = 20
   ounit = 50
@@ -112,31 +116,35 @@ program main
            cycle
         end if
 
-        ! allocate data(:,:) if necessory
+        ! allocate data(:) necessory
         if(.not. allocated(data)) then
            nxy = gfld%igdtmpl(8) * gfld%igdtmpl(9)
            fhour = gfld%ipdtmpl(9)
-           allocate(data(nxy, NLEVELS))
+           allocate(data(nxy))
         end if
 
         if_ipdtmpl: if(gfld%ipdtmpl(1)==icat .and. gfld%ipdtmpl(2)==iprm) then
 
-           if (gfld%ipdtmpl(10) == 100) then
-              ! on pressure level
+           if (gfld%ipdtmpl(10) == 100) then           ! on pressure level
               cunit = "pa"
-              lplevels = 1             ! process all levels, false loop for pressure levels
-           elseif (gfld%ipdtmpl(10) == 102) then
-              ! on sigma level
+              levels(:) = PressHLevels(:)
+           elseif (gfld%ipdtmpl(10) == 102) then       ! on sigma level
               cunit="m"
-              lplevels = NLEVELS       ! process limited levels
+              levels(:) = HybridLevels(:)
+           endif
+
+           if ( selected == '1' ) then
+              lplevels = NLEVELS       ! process limited levels 
+           else if( selected == '0' ) then
+              lplevels = 1             ! process all levels, false loop for pressure levels
            endif
 
            level = gfld%ipdtmpl(12) / (10 ** gfld%ipdtmpl(11))
            loop_lplevels: do k = 1, lplevels
-              if_level: if((gfld%ipdtmpl(10) == 100) .or. &
-                            ((gfld%ipdtmpl(10) == 102) .and. (level/10 == HybridLevels(k)/10)) ) then
-                 print *, "Converted level=", level, " ", cunit
-                 data(:, k) = gfld%fld
+              if_level: if((selected == '0') .or. &
+                           ((selected == '1') .and. (level/10 == levels(k)/10)) ) then
+                 print *, "Converted level=", level, gfld%ipdtmpl(12), " ", cunit
+                 data(:) = gfld%fld
 
 !!! assign data(:,:) at the appropriate level
                  if (iprm == 233) then		 ! probability
@@ -144,32 +152,35 @@ program main
                     ! Currently icing potentials are produced, 
                     ! while CIP and FIP produces probability, so conversion is needed.
                     if (fhour == 0) then ! CIP
-                       data(:,k) = data(:,k) / 0.85
+                       data(:) = data(:) / 0.85
                     else                 ! FIP
-                       data(:,k) = data(:,k) / (0.84-0.033*fhour)
+                       data(:) = data(:) / (0.84-0.033*fhour)
                     end if
                  else if (iprm == 234) then          !severity
                     do i = 1, nxy
-                       if(data(i,k) == 1. .or. data(i,k) == 2.) then
-                          data(i,k) = data(i,k) + 1
-                       elseif(data(i,k) == 4.) then
-                          data(i,k) = 1
-                       elseif(data(i,k) == 5.) then
-                          data(i,k) = 4
+                       if(data(i) == 1. .or. data(i) == 2.) then
+                          data(i) = data(i) + 1
+                       elseif(data(i) == 4.) then
+                          data(i) = 1
+                       elseif(data(i) == 5.) then
+                          data(i) = 4
                        end if
                     end do
 
                  end if
 
-
 !!! output data
                  gfld%ipdtmpl(1)  = icat
-                 if (iprm == 233) gfld%ipdtmpl(2)=20	! all probability outputs match GFS's ice potential
+                 if (iprm == 233) gfld%ipdtmpl(2)=20	! in Grib2 template, icing probability -> icing potential
                  gfld%ipdtmpl(11) = 0    ! The last gf_getfld() may set gfld%ipdtmpl(11) to non-zero
-                 if(gfld%ipdtmpl(10) == 102) gfld%ipdtmpl(12) = poLevels(k)
-                 gfld%ipdtmpl(10) = ilev
+                 if(selected == '1') then 
+                    gfld%ipdtmpl(10) = 100   ! all outputs on pressure level (corresponding to flight levels)
+                    gfld%ipdtmpl(12) = PressHLevels(k)
+                 else
+                    gfld%ipdtmpl(12) = level
+                 end if
 
-                 gfld%fld = data(:,k)
+                 gfld%fld = data(:)
                  call PUTGB2(ounit, gfld, iret)
 
                  exit
