@@ -742,7 +742,7 @@ if ($fhoursmap)
     'set gxout stat'
 *    'd ${var}(x='%i')'
     ii=$ncyc*(i-1)+1
-    'd (rms(x='%ii')+rms(x='%ii+2'))'
+    'd (rms(x='%ii')+rms(x='%ii+2'))/2'
 
     range=sublin(result,9); zmin=subwrd(range,5); zmax=subwrd(range,6)
     ln=sublin(result,7); wd=subwrd(ln,8); b=substr(wd,1,3)
@@ -768,7 +768,7 @@ if ($fhoursmap)
     'set gxout stat'  ;* first compute means and count good data numbers
 *    'd ${var}(x='%i')'
     ii=$ncyc*(i-1)+1
-    'd (rms(x='%ii')+rms(x='%ii+2'))'
+    'd (rms(x='%ii')+rms(x='%ii+2'))/2'
     ln=sublin(result,11); wd=subwrd(ln,2); a=substr(wd,1,5);sc.i=subwrd(ln,2)
     ln=sublin(result,7); wd=subwrd(ln,8); b=substr(wd,1,3)
     if ( b>0 )
@@ -793,7 +793,7 @@ if ($fhoursmap)
       'set xlint $xtick'
       'set cstyle 'cst.i; 'set cthick 'cth.i; 'set cmark 'cma.i; 'set ccolor 'cco.i
 *      'd ${var}(x='%i')'
-    'd (rms(x='%ii')+rms(x='%ii+2'))'
+    'd (rms(x='%ii')+rms(x='%ii+2'))/2'
      endif
 * Create verification scorecard text files
      if ( $scoretext = 1 ) 
@@ -1133,7 +1133,7 @@ if ($fhoursmap)
     'set gxout stat'
 *    'd ${var}(x='%i')'
     ii=$ncyc*(i-1)+1
-    'd (rms(x='%ii')+rms(x='%ii+2'))'
+    'd (rms(x='%ii')+rms(x='%ii+2'))/2'
 
     range=sublin(result,9); zmin=subwrd(range,5); zmax=subwrd(range,6)
     ln=sublin(result,7); wd=subwrd(ln,8); b=substr(wd,1,3)
@@ -1159,7 +1159,7 @@ if ($fhoursmap)
     'set gxout stat'  ;* first compute means and count good data numbers
 *    'd ${var}(x='%i')'
     ii=$ncyc*(i-1)+1
-    'd (rms(x='%ii')+rms(x='%ii+2'))'
+    'd (rms(x='%ii')+rms(x='%ii+2'))/2'
     ln=sublin(result,11); wd=subwrd(ln,2); a=substr(wd,1,5);sc.i=subwrd(ln,2)
     ln=sublin(result,7); wd=subwrd(ln,8); b=substr(wd,1,3)
     if ( b>0 )
@@ -1184,7 +1184,7 @@ if ($fhoursmap)
       'set xlint $xtick'
       'set cstyle 'cst.i; 'set cthick 'cth.i; 'set cmark 'cma.i; 'set ccolor 'cco.i
 *      'd ${var}(x='%i')'
-    'd (rms(x='%ii')+rms(x='%ii+2'))'
+    'd (rms(x='%ii')+rms(x='%ii+2'))/2'
      endif
 * Create verification scorecard text files
      if ( $scoretext = 1 ) 

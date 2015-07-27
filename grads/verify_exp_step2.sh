@@ -90,8 +90,10 @@ for obsv in $observation ; do
   fi
   if [[ $obsv == gfs ]] ; then
     models="twind"
-  else
+  elif [[ $obsv == gcip ]] ; then
 #    models="blndmax blndmean ukmax ukmean usmax usmean usfip"
+    models="blndmax blndmean"
+  else
     models="blndmax blndmean ukmax ukmean usmax usmean"
   fi
 
