@@ -16,6 +16,7 @@ msg="$job HAS BEGUN"
 postmsg "$jlogfile" "$msg"
 
 export vday=$1
+validationdata=$2
 
 export VHoursIcing="06 09 12 15 18 21 24 27 30 33 36"
 export VLevelIcing="900  800  700  600  500  400"
@@ -31,23 +32,35 @@ cp $PARMverf_g2g/verf_g2g_wafs.modelinfo g2g.modelinfo
 
 cat g2g.modelinfo |while read line
 do
+  vgrid=""
   vmodel=`echo $line |awk -F"|" '{print $1}'`
   if [[ $vmodel =~ ^# ]] ; then
     continue # skip a line starting with '#'
   fi
 
   if [[ $vmodel = 'cip' || $vmodel = 'gcipconus' ]] ; then
-    export vgrid=130
-    # Get the observation CIP icing data
-    $USHverf_g2g/verf_g2g_get_wafs.sh $vmodel $vday $vmodel
+    if [[ $vmodel = 'cip' &&  $validationdata =~ "|cip|" ]] || \
+       [[ $vmodel = 'gcipconus' &&  $validationdata =~ "|gcipconus|" ]] ; then
+      export vgrid=130
+      # Get the observation CIP icing data
+      $USHverf_g2g/verf_g2g_get_wafs.sh $vmodel $vday $vmodel
+    fi
   elif [ $vmodel = 'gcip' ] ; then
-    export vgrid=45
-    # Get the observation GCIP icing data
-    $USHverf_g2g/verf_g2g_get_wafs.sh $vmodel $vday $vmodel
+    if [[ $vmodel = 'gcip' &&  $validationdata =~ "|gcip|" ]] ; then
+      export vgrid=45
+      # Get the observation GCIP icing data
+      $USHverf_g2g/verf_g2g_get_wafs.sh $vmodel $vday $vmodel
+    fi
   elif [ $vmodel = 'gfs' ] ; then
-    export vgrid=45
-    # Get the analysis GFS T,U,V data
-    $USHverf_g2g/verf_g2g_get_wafs.sh $vmodel $vday $vmodel
+    if [[ $vmodel = 'gfs' &&  $validationdata =~ "|gfs|" ]] ; then
+      export vgrid=45
+      # Get the analysis GFS T,U,V data
+      $USHverf_g2g/verf_g2g_get_wafs.sh $vmodel $vday $vmodel
+    fi
+  fi
+
+  if [[ -z $vgrid ]] ; then
+    continue
   fi
 
   models=`echo $line |awk -F"|" '{print $2}'`

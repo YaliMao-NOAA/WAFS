@@ -63,7 +63,7 @@ export scoredir=${scoredir:-$rundir0/score}               ;#place to save scorec
 mkdir -p $rundir0 $mapdir $scoredir
 
 ## -- verification dates
-export sdate=${sdate:-${1:-20150522}}        	          ;#forecast starting date
+export sdate=${sdate:-${1:-20150421}}        	          ;#forecast starting date
 export edate=${edate:-${2:-20150525}}                 	  ;#forecast ending date
 export vlength=${vlength:-${3:-36}}                 	  ;#forecast length in hour
 #  observation choices: gfs gcip gcipconus cip
@@ -81,22 +81,28 @@ errdir=$PTMP/$LOGNAME
 #=====================================================
 ##--split observation data to speed up computation
 for obsv in $observation ; do
-  export obsvlist=$obsv
 
-  if [[ $obsv == gcip || $obsv == gfs ]] ; then
+  export obsvfolder=$obsv # keep gcipall for folder
+
+  if [[ $obsv == gcip || $obsv == gfs || $obsv == gcipall ]] ; then
     regions="G45 G45/NHM G45/TRP G45/SHM G45/AR2 G45/ASIA G45/NPCF G45/AUNZ G45/NAMR"
   else
     regions="G130"
   fi
+
   if [[ $obsv == gfs ]] ; then
     models="twind"
   elif [[ $obsv == gcip ]] ; then
 #    models="blndmax blndmean ukmax ukmean usmax usmean usfip"
     models="blndmax blndmean"
+  elif [[ $obsv == gcipall ]] ; then
+    obsv=gcip
+    models="ukmax ukmean usmax usmean blndmax blndmean"
   else
-    models="blndmax blndmean ukmax ukmean usmax usmean"
+    models="ukmax ukmean usmax usmean blndmax blndmean"
   fi
 
+  export obsvlist=$obsv # gcipall => gcip
   export mdlist=$models
 
 for region in  $regions ; do

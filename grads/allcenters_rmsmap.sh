@@ -1270,9 +1270,9 @@ fi    ;#end makemap
   ## send graphics to web site 
   #=======================================
   if [ $doftp = "YES" ]; then
-    ssh $WEBSERVER "mkdir -p $WEBDIR/$obsv"
-    scp -p `ls *png` ${WEBSERVER}:$WEBDIR/$obsv/.
-    scp -p `ls *html` ${WEBSERVER}:$WEBDIR/$obsv/.
+    ssh $WEBSERVER "mkdir -p $WEBDIR/$obsvfolder"
+    scp -p `ls *png` ${WEBSERVER}:$WEBDIR/$obsvfolder/.
+    scp -p `ls *html` ${WEBSERVER}:$WEBDIR/$obsvfolder/.
   fi
 
 #--------------------------------------------------------------------------

@@ -128,7 +128,8 @@ env
 
 #######################################################################
 # Execute the script.
-sh $SCRIPTSverf_g2g/exverf_g2g_wafs.sh.ecf $vday
+export VMODELS=${VMODELS:-"|cip|gcipconus|gcip|gfs|"}
+sh $SCRIPTSverf_g2g/exverf_g2g_wafs.sh.ecf $vday $VMODELS
 
 msg="JOB $job HAS COMPLETED NORMALLY."
 postmsg "$jlogfile" "$msg"

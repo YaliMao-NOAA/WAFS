@@ -385,7 +385,7 @@ cat >convert.f <<EOF
              write(20,"(F6.2,4I10,2F8.4,F12.2)") fthrds(l),int(aa),int(bb),int(ac-aa),int(bd-bb),aa/ac, bb/bd, (aa+bb)/ac
            endif
           else
-           write(20, *) "na na na na na 0.0 0.0"
+           write(20, *) "na na na na na 0.0 0.0 0.0 "
           endif
          enddo
         enddo

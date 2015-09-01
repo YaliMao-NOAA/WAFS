@@ -50,7 +50,7 @@ fi
 
 UTIL=${EXECutil:-/nwprod/util/exec}
 
-ADDSDIR=${ADDSDIR:-/dcomdev/us007003}
+ADDSDIR=${ADDSDIR:-/dcom/us007003}
 
 rm $prod_lc.*
 
