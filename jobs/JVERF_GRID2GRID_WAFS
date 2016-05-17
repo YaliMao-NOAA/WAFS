@@ -119,6 +119,7 @@ export COMINFIP=${COMINFIP:-/dcom/us007003}
 # Raw input of WAFS icing validation/analysis data
 #---------------------------------
 export CIPDIR=${CIPDIR:-/dcom/us007003}
+# $PDY will be appended.
 export GCIPDIR=${GCIPDIR:-/$COM/gfs/${envir}/gfs}
 # Raw input of Wind/Temp, both forecast and validation/analysis data
 #---------------------------------

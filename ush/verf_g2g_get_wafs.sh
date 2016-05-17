@@ -70,7 +70,7 @@ if [[ $valid =~ cip ]] ; then
 
   elif [[ $model_name =~ gcip ]] ; then  # Observation GCIP data, every 3 hours
     for hh in $HHOBS3 ; do
-      imfile=$GCIPDIR/gcip.$vday/gfs.t${hh}z.gcip.f00.grib2
+      imfile=$GCIPDIR.$vday/gfs.t${hh}z.gcip.f00.grib2
       for lvl in $PLEVELSicing ; do
         $EXECutil/wgrib2 $imfile -match ":ICIP:$lvl mb:" $matchgrid x.$lvl
 	cat x.$lvl >>  $COMOUT/${model_name}.t${hh}z.grd$vgrid.f00.grib2
