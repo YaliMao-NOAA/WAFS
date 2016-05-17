@@ -8,6 +8,8 @@
 ########################################################################################
 set -x
 
+# The processed inputs will be saved to $COMOUT by verf_g2g_get_wafs.sh
+
 cd $DATA
 
 echo "$0 STRDATE "`date`

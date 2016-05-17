@@ -148,7 +148,7 @@ elif [ $valid = gfs ] ; then
 
   if [ $model_name = gfs ] ; then	# analysis GFS data, every 6 hours
     for hh in $HHOBS6 ; do
-      imfile=$COMINUS.$vday/gfs.t${hh}z.master.grb2anl
+      imfile=$COMINGFS.$vday/gfs.t${hh}z.master.grb2anl
       for lvl in $PLEVELStwind ; do
         $EXECutil/wgrib2 $imfile -match ":TMP:$lvl mb:" $matchgrid  t.$lvl
         $EXECutil/wgrib2 $imfile -match  "GRD:$lvl mb:" $matchgrid uv.$lvl
@@ -165,7 +165,7 @@ elif [ $valid = gfs ] ; then
       if [[ -s $outfile ]] ; then
 	  continue
       fi
-      imfile=$COMINUS.$vday/gfs.t${hh}z.master.grb2f$fh
+      imfile=$COMINGFS.$vday/gfs.t${hh}z.master.grb2f$fh
       for lvl in $PLEVELStwind ; do
         $EXECutil/wgrib2 $imfile -match ":TMP:$lvl mb:" $matchgrid  t.$lvl
         $EXECutil/wgrib2 $imfile -match  "GRD:$lvl mb:" $matchgrid uv.$lvl

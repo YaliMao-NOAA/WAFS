@@ -16,6 +16,10 @@ export SENDECF=${SENDECF:-YES}
 ###############################
 export NET=verf
 export RUN=wafs
+export envir=${envir:-prod}
+
+
+export COM=com2
 
 ###############################################################
 # This block can be modified for different Production test
@@ -23,7 +27,7 @@ export RUN=wafs
 ###############################################################
 if [ "$RUN_ENVIR" = prod ]; then
 #if [ "$RUN_ENVIR" = prod -a $envir != prod ]; then
-  export jlogfile=${jlogfile:-/com/logs/jlogfiles/jlogfile.$$}
+  export jlogfile=${jlogfile:-/$COM/logs/jlogfiles/jlogfile.$$}
 fi
 
 # ###################################
@@ -51,7 +55,7 @@ cd $DATA
 ####################################
 # File To Log Msgs
 ####################################
-export jlogfile=${jlogfile:-/com/logs/jlogfiles/jlogfile.$$}
+export jlogfile=${jlogfile:-/$COM/logs/jlogfiles/jlogfile.$$}
 
 ####################################
 # Determine Job Output Name on System
@@ -100,27 +104,38 @@ export vday=${vday:-$PDYm1}
 ##################################
 # Define COMIN/COMOUT variables
 ##################################
-export COM_IN=${COM_IN:-/com/$NET/${envir}}
-export COM_OUT=${COM_OUT:-/com/$NET/${envir}}
 
-export FCSTDIR=${FCSTDIR:-$COM_OUT/${RUN}}
-export OBSVDIR=${OBSVDIR:-$COM_OUT/${RUN}}
-
-export COMIN=$COM_IN/${RUN}.$vday
-export COMOUT=$COM_OUT/${RUN}.$vday
-export COMVSDB=${COMVSDB:-/com/verf/${envir}/vsdb/grid2grid}
-
+#Raw input of WAFS icing forecast
+#---------------------------------
 # Global WAFS icing forecast, $PDY will be appended.
-export COMINUS=${COMINUS:-/com/gfs/${envir}/gfs}
+export COMINUS=${COMINUS:-/$COM/gfs/${envir}/gfs}
 export COMINUK=${COMINUK:-/dcom/us007003}
-export COMINBLND=${COMINBLND:-/com/gfs/${envir}/gfs}
-#This is an experimental version of GFIP, $PDY will be appended.
-export COMINGFIP=${COMINGFIP:-/ptmpp1/Yali.Mao/gfip}
+export COMINBLND=${COMINBLND:-/$COM/gfs/${envir}/gfs}
+#This is an operational version of GFIP, $PDY will be appended.
+#export COMINGFIP=${COMINGFIP:-/ptmpp1/Yali.Mao/gfip}
+export COMINGFIP=${COMINGFIP:-/$COM/gfs/${envir}/gfs}
 # Regional icing forecast, $PDY will be appended.
 export COMINFIP=${COMINFIP:-/dcom/us007003}
-# Validation/Observation data
+# Raw input of WAFS icing validation/analysis data
+#---------------------------------
 export CIPDIR=${CIPDIR:-/dcom/us007003}
-export GCIPDIR=${GCIPDIR:-/ptmpp1/Yali.Mao}
+export GCIPDIR=${GCIPDIR:-/$COM/gfs/${envir}/gfs}
+# Raw input of Wind/Temp, both forecast and validation/analysis data
+#---------------------------------
+export COMINGFS=${COMINGFS:-/$COM/gfs/${envir}/gfs}
+
+# Processed inputs for all forecast and analysis
+#---------------------------------
+# folder base for processed inputs
+export COM_OUT=${COM_OUT:-/$COM/$NET/${envir}}
+# location of processed inputs, general for all dates
+export FCSTDIR=$COM_OUT/${RUN}
+export OBSVDIR=$COM_OUT/${RUN}
+# location of processed inputs, for $vday after this run
+export COMOUT=$FCSTDIR.$vday
+
+# Final VSDB output
+export COMVSDB=${COMVSDB:-/$COM/verf/${envir}/vsdb/grid2grid}
 
 mkdir -p -m 775 $COMOUT $COMVSDB/${RUN}
 
