@@ -14,7 +14,7 @@ set -xa
 LOGNAME=`whoami`
 WEBSERVER="ymao@emcrzdm"
 WEBDIR="/home/www/emc/htdocs/gmb/icao"
-doftp="YES"
+export doftp="YES"
 
 ############# Set up environments ##################
 chost=`echo $(hostname) |cut -c 1-1`
@@ -95,6 +95,7 @@ for obsv in $observation ; do
   elif [[ $obsv == gcip ]] ; then
 #    models="blndmax blndmean ukmax ukmean usmax usmean usfip"
     models="blndmax blndmean"
+#    models="usmax usmean"
   elif [[ $obsv == gcipall ]] ; then
     obsv=gcip
     models="ukmax ukmean usmax usmean blndmax blndmean"

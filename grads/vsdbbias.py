@@ -51,7 +51,7 @@ with open(filename) as f:
     ax.yaxis.set_ticks_position('left')
     ax.set_xlabel('Forecast Threshold', size=12)
     ax.set_ylabel('BIAS (forecast/observation)', size=12)
-    ax.text(0.01,1.055, "ICING ROC against "+obsv.upper()+", "+daterange, va='top',size=15,transform = ax.transAxes)
+    ax.text(0.01,1.055, "ICING BIAS against "+obsv.upper()+", "+daterange, va='top',size=15,transform = ax.transAxes)
     title= "on "+preslevl+"mb, fcst hour="+fhour 
     ax.text(0.99,1.025, title, style='italic',horizontalalignment='right', va='top',size=10,transform = ax.transAxes)
 
