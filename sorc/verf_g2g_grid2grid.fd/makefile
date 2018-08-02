@@ -5,10 +5,7 @@
 #          20 Feb 2005
 #  Modification: 6/20/2014: changed to grib2 version
 
-FC=    ifort -convert big_endian
-INC= /nwprod/lib/incmod/g2_4
-LIBS=   -L/nwprod/lib -lip_4 -lw3nco_4 -lw3emc_4  -lbacio_4 -lsp_4 -lg2_4 -ljasper -lpng -lz
-FFLAGS = -O3 -openmp -auto -I $(INC)
+FFLAGS = -convert big_endian -O3 -auto -I $(INC)
 
 SRCS=   gtgdef.f readcntl.f setarea.f \
 	setfcst.f setlevel.f setmodel.f setobtyp.f  \
@@ -25,7 +22,7 @@ SRCS=   gtgdef.f readcntl.f setarea.f \
 OBJ=${SRCS:.f=.o}
 
 verf_g2g_grid2grid: $(OBJ)
-	$(FC) $(FFLAGS) -o $(@) grid2grid.f  $(OBJ)  $(LIBS)
+	$(FC) $(FFLAGS) -o $(@) grid2grid.f  $(OBJ)  $(LIBS) $(OPENMP)
 	mkdir -p ../../exec/
 	mv  $(@) ../../exec/.
 
