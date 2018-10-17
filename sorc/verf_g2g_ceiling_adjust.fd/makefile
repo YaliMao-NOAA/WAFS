@@ -2,14 +2,16 @@
 #
 #  This makefile is to compile ensembel production generator
 #  Author: Binbin Zhou
-#  OS: Intel WCOSS
 #
 
-FC=     ifort
-INC= /nwprod/lib/incmod/g2_4
-LIBS=  -L/nwprod/lib -lip_4 -lw3nco_4 -lw3emc_4  -lbacio_4 -lsp_4 -lg2_4 -ljasper -lpng -lz
-FFLAGS =        -O3 -g -convert big_endian -I $(INC)
+CMD= verf_g2g_ceiling_adjust
 
-verf_g2g_ceiling_adjust:
-	$(FC) -o $(@) $(FFLAGS) ceiling_adjust.f $(LIBS)
-#
+#all:	check_prereqs $(CMD)
+#all:	clean $(CMD) install
+
+$(CMD):
+	$(FC) $(FFLAGS) -o $(@) ceiling_adjust.f $(LIBS)
+clean:
+	-rm -f *.o $(CMD)
+install:
+	-mv $(CMD) ../../exec/$(CMD).$(MACHINE)

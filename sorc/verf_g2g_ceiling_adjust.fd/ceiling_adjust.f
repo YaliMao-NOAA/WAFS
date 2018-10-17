@@ -13,6 +13,9 @@ C  raw data
        !GRIBID=227
        GRIBID=255
 
+        read (*,*) fname
+         fnameout=trim(fname)//'.adjusted'
+
 
        if(GRIBID.eq.255) then   !For HRRR 255 grid
          im=1799
@@ -30,9 +33,6 @@ C  raw data
        allocate(var(jf)) 
        allocate(hsfc(jf)) 
        allocate(ceil(jf)) 
-
-        read (*,*) fname
-         fnameout=trim(fname)//'.adjusted' 
 
         write (*,*) 'fname, fnameout=',trim(fname),'  ',trim(fnameout)  
 

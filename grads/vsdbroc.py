@@ -11,9 +11,9 @@ from matplotlib import rcParams
 
 rcParams['xtick.direction'] = 'out'
 rcParams['ytick.direction'] = 'out'
-rcParams['xtick.labelsize'] = 9
-rcParams['ytick.labelsize'] = 9
-rcParams['legend.fontsize'] = 9
+rcParams['xtick.labelsize'] = 17
+rcParams['ytick.labelsize'] = 17
+rcParams['legend.fontsize'] = 17
 
 
 colors = ["blue","red", "DarkGreen","Fuchsia", "aqua"]
@@ -32,7 +32,7 @@ obsv=sys.argv[4]
 curvename="roc"
 
 idxdate=filename.rfind("_")+1
-daterange=filename[idxdate:idxdate+8] + "-" + filename[idxdate+8:idxdate+16]
+daterange=filename[idxdate:idxdate+8] + " - " + filename[idxdate+8:idxdate+16]
 
 with open(filename) as f:
 
@@ -57,6 +57,7 @@ with open(filename) as f:
     fw.write('  <link href="/gmb/icao/roctab.css" rel="stylesheet">')
     fw.write('</head>')
     fw.write('<body>')
+    fw.write('<div align="center" style="font-size:2.0em;margin-bottom: 10px;">('+daterange+')</div>')
     fw.write('<div align="center" style="font-size:1.3em">Contingency Tables for ')
     if region.find("G45NHM") > -1:
       fw.write('       Northern Hemisphere')
@@ -100,11 +101,12 @@ with open(filename) as f:
     ax=fig.add_axes([0.1, 0.1, 0.8, 0.8])
     ax.xaxis.set_ticks_position('bottom')
     ax.yaxis.set_ticks_position('left')
-    ax.set_xlabel('False Alarm Rate', size=12)
-    ax.set_ylabel('Hit Rate', size=12)
-    ax.text(0.01,1.025, "ICING ROC against "+obsv.upper()+", "+daterange, size=15)
+    ax.set_xlabel('False Alarm Rate', size=20)
+    ax.xaxis.set_label_coords(0.5, -0.075)
+    ax.set_ylabel('Hit Rate', size=20)
+    ax.text(0.0,1.025, "ICING ROC against "+obsv.upper(), size=20)
     title= "on "+preslevl+"mb, fcst hour="+fhour 
-    ax.text(0.99,1.005, title, style='italic',horizontalalignment='right',size=10)
+    ax.text(1.0,1.025, title, style='italic',horizontalalignment='right',size=17)
 
     print fhour, preslevl, nproducts
 
@@ -133,7 +135,7 @@ with open(filename) as f:
       y.append(0)
       x.append(1)
       y.append(1)
-      ax.plot(x, y, linewidth=0.25,  color='black')
+      ax.plot(x, y, linewidth=0.8,  color='black')
       del x[:]
       del y[:]
 
@@ -185,11 +187,11 @@ with open(filename) as f:
         prd0 = prd
 
       if imean > 0:
-        ax.plot(x, y, marker="s", markersize=3.8, linewidth=1, label=product, color=colors[i])
+        ax.plot(x, y, marker="s", markersize=3.8, linewidth=1.5, label=product, color=colors[i])
       elif imax > 0:
-        ax.plot(x, y, marker="^", markersize=5.5, markerfacecolor='None',markeredgecolor=colors[i],linewidth=1, label=product, color=colors[i],linestyle="dashed")
+        ax.plot(x, y, marker="^", markersize=5.5, markerfacecolor='None',markeredgecolor=colors[i],linewidth=1.5, label=product, color=colors[i],linestyle="dashed")
       else:
-        ax.plot(x, y, marker="s", markersize=3.8, linewidth=1, label=product, color=colors[i])
+        ax.plot(x, y, marker="s", markersize=3.8, linewidth=1.5, label=product, color=colors[i])
 
       del x[:]
       del y[:]

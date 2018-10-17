@@ -11,9 +11,9 @@ from matplotlib import rcParams
 
 rcParams['xtick.direction'] = 'out'
 rcParams['ytick.direction'] = 'out'
-rcParams['xtick.labelsize'] = 9
-rcParams['ytick.labelsize'] = 9
-rcParams['legend.fontsize'] = 9
+rcParams['xtick.labelsize'] = 17
+rcParams['ytick.labelsize'] = 17
+rcParams['legend.fontsize'] = 17
 
 
 colors = ["blue","red", "DarkGreen","Fuchsia", "aqua"]
@@ -32,7 +32,7 @@ obsv=sys.argv[4]
 curvename="bias"
 
 idxdate=filename.rfind("_")+1
-daterange=filename[idxdate:idxdate+8] + "-" + filename[idxdate+8:idxdate+16]
+daterange=filename[idxdate:idxdate+8] + " - " + filename[idxdate+8:idxdate+16]
 
 with open(filename) as f:
 
@@ -49,11 +49,12 @@ with open(filename) as f:
     ax=fig.add_axes([0.1, 0.1, 0.8, 0.8])
     ax.xaxis.set_ticks_position('bottom')
     ax.yaxis.set_ticks_position('left')
-    ax.set_xlabel('Forecast Threshold', size=12)
-    ax.set_ylabel('BIAS (forecast/observation)', size=12)
-    ax.text(0.01,1.055, "ICING BIAS against "+obsv.upper()+", "+daterange, va='top',size=15,transform = ax.transAxes)
+    ax.set_xlabel('Forecast Threshold', size=20)
+    ax.xaxis.set_label_coords(0.5, -0.075)
+    ax.set_ylabel('BIAS (forecast/observation)', size=20)
+    ax.text(0.0,1.05, "ICING BIAS against "+obsv.upper(), va='top',size=20,transform = ax.transAxes)
     title= "on "+preslevl+"mb, fcst hour="+fhour 
-    ax.text(0.99,1.025, title, style='italic',horizontalalignment='right', va='top',size=10,transform = ax.transAxes)
+    ax.text(1.0,1.05, title, style='italic',horizontalalignment='right', va='top',size=17,transform = ax.transAxes)
 
     print fhour, preslevl, nproducts
 
@@ -72,7 +73,7 @@ with open(filename) as f:
       y.append(1)
       x.append(0.9)
       y.append(1)
-      ax.plot(x, y, linewidth=0.25,  color='black')
+      ax.plot(x, y, linewidth=0.8,  color='black')
       del x[:]
       del y[:]
 
@@ -104,11 +105,11 @@ with open(filename) as f:
         prd0 = prd
 
       if imean > 0:
-        ax.plot(x, y, marker="s", markersize=3.8, linewidth=1, label=product, color=colors[i])
+        ax.plot(x, y, marker="s", markersize=3.8, linewidth=1.5, label=product, color=colors[i])
       elif imax > 0:
-        ax.plot(x, y, marker="^", markersize=5.5, markerfacecolor='None',markeredgecolor=colors[i],linewidth=1, label=product, color=colors[i],linestyle="dashed")
+        ax.plot(x, y, marker="^", markersize=5.5, markerfacecolor='None',markeredgecolor=colors[i],linewidth=1.5, label=product, color=colors[i],linestyle="dashed")
       else:
-        ax.plot(x, y, marker="s", markersize=3.8, linewidth=1, label=product, color=colors[i])
+        ax.plot(x, y, marker="s", markersize=3.8, linewidth=1.5, label=product, color=colors[i])
 
       del x[:]
       del y[:]

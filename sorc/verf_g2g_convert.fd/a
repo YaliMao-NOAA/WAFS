@@ -1,8 +1,0 @@
- jf=      982101
- fname, fnameout=refd3d.t12z.grb2f00                                         
- refd3d.t12z.grb2f00                                         
- open refd3d.t12z.grb2f00                                          ierr=
-           0
- iret=          99
- close refd3d.t12z.grb2f00                                         ierr=
-           0

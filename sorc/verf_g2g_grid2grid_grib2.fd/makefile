@@ -4,8 +4,10 @@
 #  Author: Binbin Zhou
 #          20 Feb 2005
 #  Modification: 6/20/2014: changed to grib2 version
+#  Modification: 1/12/2017: Port from WCOSS to Cray
 
-SRCS=   gtgdef.f readcntl.f setarea.f \
+
+SRCS=	gtgdef.f readcntl.f setarea.f \
 	setfcst.f setlevel.f setmodel.f setobtyp.f  \
 	stclst.f stldsp.f stlstr.f stnumb.f stread.f strmbl.f \
 	strxbl.f getregion.f getnumber.f getGRIB2data.f \
@@ -15,19 +17,23 @@ SRCS=   gtgdef.f readcntl.f setarea.f \
 	esl1l2.f evl1l2.f rhnt.f rhet.f sl1l2_S1.f efho.f \
 	EFS.f getHiresClimData.f \
 	DIST.f PROB.f naefs.f fho_fss.f FSS.f \
-        getcfho.f cfho.f \
-	readGRIB2.f
-OBJS=	${SRCS:.f=.o}
+	readGRIB2.f getClimData_2.5deg.f getNAEFSanalysis.f \
+	fhop.f readProbGRIB2.f
 
-CMD=	verf_g2g_grid2grid
+OBJ=${SRCS:.f=.o}
 
-$(CMD):	$(OBJS)
-	$(FC) $(FFLAGS) -o $(@) grid2grid.f  $(OBJS)  $(LIBS)
+CMD= verf_g2g_grid2grid_grib2
+
+$(CMD):	$(OBJ)
+	$(FC) $(FFLAGS) -o $(@) grid2grid.f  $(OBJ)  $(LIBS)
 
 clean:
-	@rm -f $(OBJS)
+	-rm -f $(OBJ) $(CMD)
 
 install:
-	mv  $(CMD) ../../exec/$(CMD).$(MACHINE)
+	-mv $(CMD) ../../exec/$(CMD).$(MACHINE)
 
+check_prereqs:
+	/nwprod/spa_util/check_libs.bash $(LIBS)
+	/nwprod/spa_util/check_incs.bash $(INC)
 ########################################################
