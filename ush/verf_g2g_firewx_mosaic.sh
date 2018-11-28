@@ -90,7 +90,7 @@ elif [ $model = 'HRRR' ] ; then
 
 elif [ $model = 'NAMFIREWX' ] ; then
 
-  export fcstdir=/com/nam/prod/nam
+  export fcstdir=$COMNAMFIREWX
   export fhead=nam
   export fgrbtype=firewxnest.hiresf
   export ftm=.tm00.grib2
@@ -108,16 +108,17 @@ echo "model-done" $model
 
 #### Step 2: call prepg2g.sh to prepare both forecast and observation GRIB files
 
-$USHverf_g2g/verf_g2g_prepg2g.sh < user.ctl >output.prepg2g.$model
+$USHverf_g2g/verf_g2g_prepg2g_grib2.sh < user.ctl >output.prepg2g.$model
 
 echo "prepg2g.sh done for "${PAST2}${HH} 
 
 # Step 3: call run_g2g.sh to arange forecast and observation GRIB files and then
 #         call g2g executable to generate SL1L2 and FHO VSDB files
 
-$USHverf_g2g/verf_g2g_fitsg2g.sh<temp
-
-echo "verf_g2g_fitsg2g.sh done for " ${PAST2}${HH}
+if [ -s fcst.grib.$model ] && [ -s obsv.grib.$model ] ; then
+ $USHverf_g2g/verf_g2g_fitsg2g_grib2.sh<temp
+ echo "verf_g2g_fitsg2g_grib2.sh done for " ${PAST2}${HH}
+fi
  
 HH=`expr $HH + 6`
 done

@@ -40,7 +40,7 @@ if [ $domain = 'CONUS' ] ; then
   done
 
  elif [ $model_name = gfs ]; then   # GFS data
-  COMGFS=${COMGFS:-/com/gfs/prod/gfs}
+  COMGFS=${COMGFS:-/com2/gfs/prod/gfs}
   for HH in 00 06 12 18
   do
     fhr=00
@@ -53,7 +53,7 @@ if [ $domain = 'CONUS' ] ; then
        #convert to 212 grid
        $copygb2 -g"30 6 0 0 0 0 0 0 185 129 12190000 226541000 8 25000000 265000000 40635000 40635000 0 64 25000000 25000000 0 0" -i3 -x  retrieved1 $COMOUT/gfs.t${HH}z.grd212.f${fhr}.grib2 
     
-       rm -f $file1 retrieved1 
+       rm -f  retrieved1 
  
        fhr=`expr $fhr + 6`
        if [ $fhr -lt 10 ]; then fhr=0$fhr; fi
@@ -70,12 +70,12 @@ if [ $domain = 'CONUS' ] ; then
     fhr=00
     while [ $fhr -le 48 ]
     do
-      file1=$COMHIRESW.$vday/conusarw.t${HH}z.awp5kmf${fhr}.grib2
+      file1=$COMHIRESW.$vday/hiresw.t${HH}z.arw_5km.f${fhr}.conus.grib2
       $wgrib2 -match ":TCDC:entire atmosphere" $file1|$wgrib2 -i $file1 -grib retrieved1
       $copygb2 -g"30 6 0 0 0 0 0 0 185 129 12190000 226541000 8 25000000 265000000 40635000 40635000 0 64 25000000 25000000 0 0" -i3 -x retrieved1 $COMOUT/conusarw.t${HH}z.grd212.f${fhr}.grib2
       rm -f retrieved1
 
-      file2=$COMHIRESW.$vday/conusnmmb.t${HH}z.awp5kmf${fhr}.grib2
+      file2=$COMHIRESW.$vday/hiresw.t${HH}z.nmmb_5km.f${fhr}.conus.grib2
       $wgrib2 -match ":TCDC:entire atmosphere" $file2|$wgrib2 -i $file2 -grib retrieved2
       $copygb2 -g"30 6 0 0 0 0 0 0 185 129 12190000 226541000 8 25000000 265000000 40635000 40635000 0 64 25000000 25000000 0 0" -i3 -x  retrieved2 $COMOUT/conusnmmb.t${HH}z.grd212.f${fhr}.grib2
       rm -f retrieved2
@@ -91,13 +91,13 @@ if [ $domain = 'CONUS' ] ; then
   for HH in 00 06 12 18 ; do 
    fhr=00 
    while [ $fhr -le 15 ] ; do 
-     COMHRRR=${COMHRRR:-/com/hrrr/prod/hrrr}
+     COMHRRR=${COMHRRR:-/com2/hrrr/prod/hrrr}
      file1=$COMHRRR.$vday/hrrr.t${HH}z.wrfsfcf${fhr}.grib2
      $wgrib2 -match ":TCDC:entire atmosphere" $file1 |$wgrib2  -i $file1 -grib  retrieved1
      $copygb2 -g"30 6 0 0 0 0 0 0 185 129 12190000 226541000 8 25000000 265000000 40635000 40635000 0 64 25000000 25000000 0 0" -i3 -x retrieved1 $COMOUT/hrrr.t${HH}z.grd212.f${fhr}.grib2
      rm -f retrieved1
 
-     COMRAP=${COMRAP:-/com/rap/prod/rap}
+     COMRAP=${COMRAP:-/com2/rap/prod/rap}
      file2=$COMRAP.$vday/rap.t${HH}z.awp130pgrbf${fhr}.grib2
      $wgrib2 -match ":TCDC:entire atmosphere" $file2|$wgrib2  -i $file2 -grib retrieved2
      $copygb2 -g"30 6 0 0 0 0 0 0 185 129 12190000 226541000 8 25000000 265000000 40635000 40635000 0 64 25000000 25000000 0 0" -i3 -x retrieved2 $COMOUT/rap.t${HH}z.grd212.f${fhr}.grib2
@@ -153,7 +153,7 @@ else        # and of domain=CONUS
   done
 
  elif [ $model_name = gfs ]; then   # GFS data
-  COMGFS=${COMGFS:-/com/gfs/prod/gfs}
+  COMGFS=${COMGFS:-/com2/gfs/prod/gfs}
   for HH in 00 06 12 18
   do
     fhr=00
@@ -165,7 +165,7 @@ else        # and of domain=CONUS
        $wgrib2 -match ":TCDC:entire atmosphere" $file1|$wgrib2 -i $file1 -grib retrieved1
        $copygb2 -g"20 6 0 0 0 0 0 0 553 425 30000000 187000000 8 60000000 225000000 11250000 11250000 0 64" -i3 -x retrieved1 $COMOUT/gfs.t${HH}z.grd242.f${fhr}.grib2
 
-       rm -f $file1 retrieved1
+       rm -f  retrieved1
 
        fhr=`expr $fhr + 6`
        if [ $fhr -lt 10 ]; then fhr=0$fhr; fi

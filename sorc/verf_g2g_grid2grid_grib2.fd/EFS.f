@@ -182,6 +182,7 @@ c      REAL rfcst(ngrid,Nmodel),rfanl(ngrid)
 
       write(*,*) 'fho symbol', (fho(ivr),ivr=1,numvarbl)  
       write(*,*) 'fhomrk', (fhomrk(ivr),ivr=1,numvarbl)
+      write(*,*) 'continue_mrk', (continue_mrk(ivr),ivr=1,numvarbl)
       write(*,*) 'rfhothr', (rfhothr(ivr,1),ivr=1,numvarbl)
       do i=1,numfcst
        write(*,*) 'nfcst=',i
@@ -251,7 +252,6 @@ c         jhh=hhobsv(ifh)
         if (ib.eq.1.or.ib.eq.0) then      !use a singgle model forecast data as climate reference
                                          !in this case, this single model forecast yyyy,mm,dd,hh,ff
                                          !are same as the ensemble forecast's yyyy,mm,dd,hh,ff
-         write(*,*)'Using singgle model forecast as clim reference'
          jmm=mmfcst(ifh)
          jdd=ddfcst(ifh)
          jhh=hhfcst(ifh)
@@ -266,7 +266,6 @@ c         jhh=hhobsv(ifh)
 
         else
 
-         write(*,*)'Using grib clim data reference'
          jmm=mmobsv(ifh)
          jdd=ddobsv(ifh)
          jhh=hhobsv(ifh)
@@ -324,8 +323,178 @@ c         jhh=hhobsv(ifh)
        END if
 
 
-        if (mode(iar).eq.1) then                          !all GRID domain (mode 1)
+      if (mode(iar).eq.1) then                  !all GRID domain (mode 1)
+ 
+       if (ensname(1:4).eq.'HREF'.and.              !Specific for HREF
+     +     ((kk4.eq.0.and.kk5.eq.0).or.             !For T2m    
+     +      (kk4.eq.16.and.kk5.eq.196).or.          !For Reflectivity
+     +      (kk4.eq.16.and.kk5.eq.197).or.          !For Etop
+     +      (kk4.eq.19.and.kk5.eq.0).or.            !For VIS
+     +      (kk4.eq.1.and.kk5.eq.8).or.             !For APCP
+     +      (kk4.eq.6.and.kk5.eq.1) ) )  then       !For CLOUD 
+                        
+          nxy=0
+          if(kk4.eq.16.and.kk5.eq.196) then
+            do  i = 1,ngrid   !how many effective points for refl
+              if(obsvdata(ifh,ivr,ilv,i).gt.-990.) then
+                nxy=nxy+1
+              end if
+            end do
+          write(*,*) 'In EFS, reflectivity nxy=',nxy
+          else if(kk4.eq.0.and.kk5.eq.0) then
+            do 7000 i = 1,ngrid   !how many effective points for t2m
+              do iens=1,Nmodel
+               if(fcstmdl(iens,ifh,ivr,ilv,i).eq.0.) goto 7000
+              end do 
+              nxy=nxy+1
+7000        continue
+          else ! All APCP and VIS grid points are effective!
+            nxy=ngrid
+          end if
+
+          write(*,*) 'how many effective points nxy=',nxy
+
+          allocate(rclim(nxy,kb))
+          allocate(rfanl(nxy))
+          allocate(rfcst(nxy,Nmodel))
+
+           nxy=0
+           swgt = 0.
+           rclim = 0.
+
+          do i = 1,ngrid 
+           if(kk4.eq.16.and.kk5.eq.196) then
+            if(obsvdata(ifh,ivr,ilv,i).gt.-990.) then
+             nxy=nxy+1
+             rclim(nxy,:) = clip(i,:)
+             area_factor(nxy)=cos(datan(1.0d0)*region_latlon(1,i)/45.0)
+             swgt=swgt +  area_factor(nxy)
+
+              do iens=1,Nmodel
+                rfcst(nxy,iens)=fcstmdl(iens,ifh,ivr,ilv,i)
+                !set very small reflectivity to be 0 
+                if(rfcst(nxy,iens).le.0.) rfcst(nxy,iens)=0.
+              end do
+
+              rfanl(nxy)=obsvdata(ifh,ivr,ilv,i)
+              !set very small eflectivity (<0 but >-999) to be 0
+              if (rfanl(nxy).le.0.) rfanl(nxy)=0.
+            end if
+           else if (kk4.eq.0.and.kk5.eq.0) then
+             do iens=1,Nmodel                !As long as one member has T2m-0.0 at gridpoint i, skip this grid point
+                if(fcstmdl(iens,ifh,ivr,ilv,i).eq.0.) goto 7100
+             end do
+             nxy=nxy+1
+             do iens=1,Nmodel
+                rfcst(nxy,iens)=fcstmdl(iens,ifh,ivr,ilv,i)
+             end do
+             rclim(nxy,:) = clip(i,:)
+             area_factor(nxy)=cos(datan(1.0d0)*region_latlon(1,i)/45.0)
+             swgt=swgt +  area_factor(nxy)
+             rfanl(nxy)=obsvdata(ifh,ivr,ilv,i)
+7100         continue
+              
+           else
+             ! VIS and APCP need not to change'
+             nxy=nxy+1
+             rclim(nxy,:) = clip(i,:)
+             area_factor(nxy)=cos(datan(1.0d0)*region_latlon(1,i)/45.0)
+             swgt=swgt +  area_factor(nxy)
+             do iens=1,Nmodel
+               rfcst(nxy,iens)=fcstmdl(iens,ifh,ivr,ilv,i)
+             end do
+             rfanl(nxy)=obsvdata(ifh,ivr,ilv,i)
+           end if
+
+          end do
+
+          write(*,*) 'nxy ib swgt=',nxy,ib,swgt
+
+          do i = 1, nxy
+            wght(i)=area_factor(i)*nxy/swgt
+          end do
+
+          dists = 0.
+          probs = 0.
+          scrf = 1.0/float(ib)
+
+          if (ib.eq.1) then
+           tprob=0.0
+           cprob=0.0
+           do i=1,nxy
+             tprob=tprob+wght(i)
+             if(rfanl(i).le.rclim(i,2)) then
+                  cprob=cprob+wght(i)
+             end if
+           end do
+
+           scrf = cprob/tprob
+
+          end if
+
+          if((kk4.eq.1.and.kk5.eq.8).or.
+     +       (kk4.eq.19.and.kk5.eq.0).or.
+     +       (kk4.eq.16.and.kk5.eq.196).or.
+     +       (kk4.eq.16.and.kk5.eq.197).or.
+     +       (kk4.eq.6.and.kk5.eq.1) ) then
+            
+          call dist1(rfcst,rfanl,rclim,wght,nxy,ib,Nmodel,kk4,kk5)
+         else
+          call dist(rfcst,rfanl,rclim,wght,nxy,ib,Nmodel)
+         end if
+          call prob(rfcst,rfanl,rclim,wght,nxy,ib,Nmodel,scrf,
+     +    op,thresholds,nthrs)
+
+          do k = 1, Nmodel+1
+           fit(ifh,iob,iar,ivr,ilv,k)=dists(k)
+          end do
+          do k = 1, Nmodel
+           fir(ifh,iob,iar,ivr,ilv,k)=
+     +       dists(Nmodel+1+k)
+          end do
+          do k=1,5
+           rmse(ifh,iob,iar,ivr,ilv,k)=
+     +       dists(2*Nmodel+1+k)
+          end do
+
+          do k = 1, Nmodel1
+           obsv(ifh,iob,iar,ivr,ilv,k)=probs(k)
+           fcst(ifh,iob,iar,ivr,ilv,k)=probs(k+Nmodel1)
+           hit(ifh,iob,iar,ivr,ilv,k)=probs(k+2*Nmodel1)
+           far(ifh,iob,iar,ivr,ilv,k)=probs(k+3*Nmodel1)
+          end do
+          do k = 1, 18
+           eco(ifh,iob,iar,ivr,ilv,k)=probs(k+17+4*Nmodel1)
+          end do
+          do k = 1,6
+           rps(ifh,iob,iar,ivr,ilv,k)=probs(k+4*Nmodel1)
+           bss(ifh,iob,iar,ivr,ilv,k)=probs(k+6+4*Nmodel1)
+          end do
+          do k = 7,9
+           rps(ifh,iob,iar,ivr,ilv,k)=probs(k+29+4*Nmodel1)
+          end do
+           bss(ifh,iob,iar,ivr,ilv,7)=probs(14+4*Nmodel1)
+           bss(ifh,iob,iar,ivr,ilv,8)=probs(16+4*Nmodel1)
+           bss(ifh,iob,iar,ivr,ilv,9)=probs(17+4*Nmodel1)
+
+         write(*,'(21F6.0)') (obsv(ifh,iob,iar,ivr,ilv,k),k=1,Nmodel1)
+         write(*,'(21F6.0)') (fcst(ifh,iob,iar,ivr,ilv,k),k=1,Nmodel1)
+         write(*,'(21F6.3)') (hit(ifh,iob,iar,ivr,ilv,k),k=1,Nmodel1)
+         write(*,'(21F6.3)') (far(ifh,iob,iar,ivr,ilv,k),k=1,Nmodel1)
+         write(*,'(9F10.5)') (rps(ifh,iob,iar,ivr,ilv,k),k=1,9)
+         write(*,'(9F10.5)') (bss(ifh,iob,iar,ivr,ilv,k),k=1,9)
+         write(*,'(18F6.2)') (eco(ifh,iob,iar,ivr,ilv,k),k=1,18)
+
+         write(*,'(21F6.2)') (fit(ifh,iob,iar,ivr,ilv,k),k=1,Nmodel+1)
+         write(*,'(20F6.2)') (fir(ifh,iob,iar,ivr,ilv,k),k=1,Nmodel)
+         write(*,'(5F6.2)') (rmse(ifh,iob,iar,ivr,ilv,k),k=1,5)
+
+         deallocate(rfcst)
+         deallocate(rfanl)
+         deallocate(rclim)
         
+       else !End of HREF (Non-continous fields)
+ 
           write(*,*) 'All domain region points:', ngrid 
           allocate(rclim(ngrid,kb))
           allocate(rfanl(ngrid))
@@ -419,6 +588,9 @@ c         jhh=hhobsv(ifh)
            fcst(ifh,iob,iar,ivr,ilv,k)=probs(k+Nmodel1)
            hit(ifh,iob,iar,ivr,ilv,k)=probs(k+2*Nmodel1)
            far(ifh,iob,iar,ivr,ilv,k)=probs(k+3*Nmodel1)
+
+           write(*,*) ifh,iob,iar,ivr,ilv,(probs(j),j=1,Nmodel1)
+           write(*,*) (probs(j),j=Nmodel1+1,2*Nmodel1) 
           end do
           do k = 1, 18     
            eco(ifh,iob,iar,ivr,ilv,k)=probs(k+17+4*Nmodel1)
@@ -450,8 +622,10 @@ c         jhh=hhobsv(ifh)
          deallocate(rfcst)
          deallocate(rfanl)
          deallocate(rclim)
-
-       else if (mode(iar).eq.2) then                  !Sub-region cases
+ 
+       end if    
+ 
+      else if (mode(iar).eq.2) then                  !Sub-region cases
  
          if (numreg(iar).le.30) then                     !Sub-region case 1: 30 small fixed regions
 
@@ -1027,6 +1201,8 @@ c         jhh=hhobsv(ifh)
          deallocate(rfanl)
          deallocate(rclim)
 
+
+
           end if   !end if ptr1 
          end if    !end if numreg(iar)
        end if      !end if mode
@@ -1142,8 +1318,8 @@ c         jhh=hhobsv(ifh)
 
 1001    FORMAT (A,<Nmodel+1>(1x,F6.2))
 1002    FORMAT (A,<Nmodel>(1x,F6.2))
-1003    FORMAT (A,5F10.5)
-1004    FORMAT (A,<2*Nmodel1>(1x,F8.0))
+1003    FORMAT (A,5F12.3)
+1004    FORMAT (A,<2*Nmodel1>(1x,F12.0))
 1005    FORMAT (A,<2*Nmodel1>(1x,F6.3))
 1006    FORMAT (A,9F12.5)
 1007    FORMAT (A,9F12.5)
@@ -1213,7 +1389,7 @@ ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
                     
 7001    FORMAT (<Nmodel+1>(1x,F6.2))
 7002    FORMAT (<Nmodel>(1x,F6.2))
-7003    FORMAT (5F10.5)
+7003    FORMAT (5F12.5)
 7004    FORMAT (<2*Nmodel1>(1x,F8.0))
 7005    FORMAT (<2*Nmodel1>(1x,F10.5))
 7006    FORMAT (9F12.5)

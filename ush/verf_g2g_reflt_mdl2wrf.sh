@@ -45,7 +45,7 @@ if [ $modnam = nam ]; then
   do
     for fhr in 06 12 18 24 30 36 42 48 54 60 66 72 78 84
     do
-      nam=$COMNAM.$vday/nam.t${cyc}z.awphys${fhr}.grb2.tm00
+      nam=$COMNAM.$vday/nam.t${cyc}z.awphys${fhr}.tm00.grib2
       $wgrib2 -match ":REFC:entire atmosphere" $nam |$wgrib2 -i $nam -grib $DATA/temp.${cyc}.${fhr}
       $wgrib2 -match ":REFD:1000 m" $nam       |$wgrib2 -i $nam -grib $DATA/ref1k.${cyc}.${fhr}
       cat $DATA/ref1k.${cyc}.${fhr} >> $DATA/temp.${cyc}.${fhr} 
@@ -66,7 +66,7 @@ fi
 #3:Get convert RAP to Hires-WRF grid#227
 #######################################
 if [ $modnam = rap ]; then
-  COMRAP=${COMRAP:-/com/rap/prod/rap}
+  COMRAP=${COMRAP:-/com2/rap/prod/rap}
   cycles="00 06 12 18"
   for cyc in $cycles
   do
@@ -85,7 +85,7 @@ if [ $modnam = rap ]; then
 fi
 
 if [ $modnam = hrrr ]; then
-  COMHRRR=${COMHRRR:-/com/hrrr/prod/hrrr}
+  COMHRRR=${COMHRRR:-/com2/hrrr/prod/hrrr}
   cycles="00 06 12 18"
   for cyc in $cycles
   do
@@ -107,7 +107,7 @@ fi
 #4: Get convert SREF nmm control grid to grid#227
 #####################################################
 if [ $modnam = srefnmm ]; then 
-  COMSREF=${COMSREF:-/com/sref/prod/sref}
+  COMSREF=${COMSREF:-/com2/sref/prod/sref}
   cycles="03 09 15 21"
   mdl=nmm
   for cyc in $cycles
@@ -127,7 +127,7 @@ fi
 #4: Get convert SREF arw control grid to grid#227
 #####################################################
 if [ $modnam = srefarw ]; then 
-  COMSREF=${COMSREF:-/com/sref/prod/sref}
+  COMSREF=${COMSREF:-/com2/sref/prod/sref}
   cycles="03 09 15 21"
   mdl=em
   for cyc in $cycles
@@ -147,7 +147,7 @@ fi
 #4: Get convert SREF nmmb control grid to grid#227
 #####################################################
 if [ $modnam = srefnmmb ]; then
-  COMSREF=${COMSREF:-/com/sref/prod/sref}
+  COMSREF=${COMSREF:-/com2/sref/prod/sref}
   cycles="03 09 15 21"
   mdl=nmb
   for cyc in $cycles

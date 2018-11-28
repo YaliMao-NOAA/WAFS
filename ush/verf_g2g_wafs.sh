@@ -66,9 +66,9 @@ for HH in $HHSobsv ; do
       -e "s/FHRs/$tabsFcst/g" -e "s/PRSs/$tabsLevels/g" \
       -e "s/OBSTYPE/$obsvdata/g" $CNTLtemplate >user.ctl
 
-  $USHverf_g2g/verf_g2g_prepg2g.sh < user.ctl >output.prepg2g.${obsv}.${model}
+  $USHverf_g2g/verf_g2g_prepg2g_grib2.sh < user.ctl >output.prepg2g.${obsv}.${model}
 
-  $USHverf_g2g/verf_g2g_fitsg2g.sh<temp
+  $USHverf_g2g/verf_g2g_fitsg2g_grib2.sh<temp
 
   echo "verf_g2g_ref.sh done for " ${PAST1}${HH} $vgrid
 done

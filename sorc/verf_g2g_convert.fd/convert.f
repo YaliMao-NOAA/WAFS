@@ -1,6 +1,4 @@
         use grib_mod
-
-        type(gribfield) :: gfld
 C  raw data
        real,allocatable,dimension(:) :: var
 
@@ -9,6 +7,7 @@ C  raw data
        character*60 fname, fnameout
        integer yy,mm,dd,cyc(4),ff(5)
 
+       type(gribfield) :: gfld
 
        !GRIBID=227
        GRIBID=255

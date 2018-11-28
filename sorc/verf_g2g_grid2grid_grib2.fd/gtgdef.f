@@ -59,6 +59,11 @@ C
      +     trim(obstype).ne.'FIREWX' ) then
             kgds(2+2)=1799
             kgds(2+3)=1059
+
+        else if (model(1:4).eq.'href' ) then
+            kgds(2+2)=1121
+            kgds(2+3)=881
+
         else if(trim(obstype).eq.'RTMA' ) then 
             kgds(2+2)=1073   !RTMA
             kgds(2+3)=689    !RTMA

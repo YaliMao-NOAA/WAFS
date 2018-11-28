@@ -35,11 +35,11 @@ if [ $vmodel = hiresw ]; then
 
   export fcstdir=${COMHIRESW:-/com/hiresw/prod/hiresw}
   export obsvdir=${obsvdir:-$OBSVDIR}
-  export fhead=$nest
+  export fhead=hiresw
   export ohead=refd3d
-  export fgrbtype=awp5kmf
+  export fgrbtype=`echo $nest|sed -e s/conus//g`_5km.f
   export ogrbtype=grid227
-  export ftm=.grib2
+  export ftm=.conus.grib2
   export otm=
   export otail=.f00
 elif [ $vmodel = nam ]; then
@@ -76,8 +76,8 @@ do
   cp $PARMverf_g2g/verf_g2g_etop.${vmodel} .
   sed -e "s/MODNAM/$MDL/g" -e "s/VDATE/$vday$vcyc/g" verf_g2g_etop.${vmodel} >verf_g2g_etop.${vmodel}.$nest
 
-  $USHverf_g2g/verf_g2g_prepg2g.sh < verf_g2g_etop.${vmodel}.$nest
-  $USHverf_g2g/verf_g2g_fitsg2g.sh <$workdir/temp
+  $USHverf_g2g/verf_g2g_prepg2g_grib2.sh < verf_g2g_etop.${vmodel}.$nest
+  $USHverf_g2g/verf_g2g_fitsg2g_grib2.sh <$workdir/temp
 done
 
 # Concatenate the vsdb file

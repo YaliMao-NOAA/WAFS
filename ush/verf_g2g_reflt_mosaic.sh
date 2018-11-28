@@ -64,10 +64,10 @@ if [ $model = 'SREFNMM' ] || [ $model = 'SREFARW' ] || [ $model = 'SREFNMMB' ] ;
 
 elif [ $model = 'CONUSNMMB' ] || [ $model = 'CONUSARW' ] ; then
 
-     export fcstdir=${COMHIRESW:-/com/hiresw/prod/hiresw}
-     export fhead=${core}
-     export fgrbtype=awp5kmf
-     export ftm=.grib2
+     export fcstdir=$COMHIRESW
+     export fhead=hiresw
+     export fgrbtype=`echo $core |sed -e s/conus//g`_5km.f
+     export ftm=.conus.grib2
 
      cp $PARMverf_g2g/verf_g2g_reflt.hiresw .
      sed -e "s/MODNAM/$model/g" -e "s/VDATE/${PAST1}${HH}/g"  verf_g2g_reflt.hiresw >user.ctl 
@@ -84,7 +84,7 @@ elif [ $model = 'NAM' ] ; then
 
 elif [ $model = NAMNEST ] ; then
 
-  export fcstdir=/com/nam/prod/nam
+  export fcstdir=$COMNAMNEST
   export fhead=nam
   export fgrbtype=conusnest.hiresf
   export ftm=.tm00.grib2
@@ -123,16 +123,16 @@ echo "model-done" $model
 
 #### Step 2: call prepg2g.sh to prepare both forecast and observation GRIB files
 
-$USHverf_g2g/verf_g2g_prepg2g.sh < user.ctl >output.prepg2g.$model
+$USHverf_g2g/verf_g2g_prepg2g_grib2.sh < user.ctl >output.prepg2g.$model
 
 echo "prepg2g.sh done for "${PAST1}${HH} 
 
 # Step 3: call run_g2g.sh to arange forecast and observation GRIB files and then
 #         call g2g executable to generate SL1L2 and FHO VSDB files
 
-$USHverf_g2g/verf_g2g_fitsg2g.sh<temp
+$USHverf_g2g/verf_g2g_fitsg2g_grib2.sh<temp
 
-echo "verf_g2g_fitsg2g.sh done for " ${PAST1}${HH}
+echo "verf_g2g_fitsg2g_grib2.sh done for " ${PAST1}${HH}
  
 HH=`expr $HH + 6`
 done

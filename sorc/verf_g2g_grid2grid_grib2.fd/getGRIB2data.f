@@ -95,6 +95,8 @@ c
      +              k4(nvar).eq.6.and.k5(nvar).eq.1  ) then
            jpdtn=1
            jpd10=200
+          else if ( grib2file(1:14).eq.'fcst.grib.href') then
+           jpdtn=0 
           else
            jpdtn=1
           end if
@@ -138,6 +140,17 @@ c        jpd9=ff(nfcst)     !Forecast time or accumulation beginning time
            end if
 
         end if
+
+         if(jpd1.eq.1.and.jpd2.eq.8) then  ! APCP use Template 4.8, only verify 3hr accumulation
+            jpdtn=8
+           if(grib2file(1:4).eq.'obsv') then
+            jpd9= 0         !Strange, Yin Lin's CCPA jpd9 is set to 0
+            hh(nfcst)=hh(nfcst)-3 
+           else
+            jpd9= ff(nfcst) -3             
+           end if
+         end if
+
 
         if(jpd1.eq.6.and.jpd2.eq.1) then
           if (grib2file(1:13).eq.'fcst.grib.GFS') then
@@ -304,7 +317,7 @@ c        jpd9=ff(nfcst)     !Forecast time or accumulation beginning time
               do ng = 1, ngrid
                vr=-99.
 c               if (data(nfcst,nvar,np,ng).eq.-1.0) then
-               if (data(nfcst,nvar,np,ng).gt.-1.5.and.
+                if (data(nfcst,nvar,np,ng).gt.-1.5.and.
      +             data(nfcst,nvar,np,ng).lt.0.0) then
                  vr=data(nfcst,nvar,np,ng)
 c               else if (data(nfcst,nvar,np,ng).eq.-2.0.or.
@@ -316,12 +329,17 @@ c               else if (data(nfcst,nvar,np,ng).eq.-9.0) then
                 else if (data(nfcst,nvar,np,ng).gt.-9.0.and.
      +                   data(nfcst,nvar,np,ng).lt.-3.5) then
                  vr=data(nfcst,nvar,np,ng)
-               else
+                else
                  vr=data(nfcst,nvar,np,ng)
-               end if
+                end if
                  data(nfcst,nvar,np,ng)=vr
               end do
              end if
+
+           if(jpd1.eq.1.and.jpd2.eq.8.and.
+     +         grib2file(1:4).eq.'obsv') then  !CCPA's  hh set back 
+              hh(nfcst)=hh(nfcst)+3    
+           end if
 
           end do
 
@@ -337,6 +355,5 @@ c               else if (data(nfcst,nvar,np,ng).eq.-9.0) then
       end
 
         
-
 
       

@@ -28,7 +28,7 @@ if [ $domain = 'CONUS' ] ; then
 vgrid=212
 
 case $model in 
-  nam)      export fcstdir=${COMNAM:-/com/nam/prod/nam}
+  nam)      export fcstdir=${COMNAM:-/com2/nam/prod/nam}
             export fhead=nam
             export fgrbtype=awip3d
             export ftm=.tm00.grib2
@@ -126,9 +126,9 @@ do
      exit
   fi
      
-  $USHverf_g2g/verf_g2g_prepg2g.sh < user.ctl >output.prepg2g.${obsv}.${model}
+  $USHverf_g2g/verf_g2g_prepg2g_grib2.sh < user.ctl >output.prepg2g.${obsv}.${model}
 
-  $USHverf_g2g/verf_g2g_fitsg2g.sh<temp
+  $USHverf_g2g/verf_g2g_fitsg2g_grib2.sh<temp
 
   echo "verf_g2g_ref.sh done for " ${PAST1}${HH} $vgrid
 done
@@ -145,12 +145,12 @@ do
   cat ${MODEL}_${vgrid}_${PAST1}${HH}.vsdb >> $COMVSDB/cloud/${model}_${obsv}_${PAST1}.vsdb
 done
 
-rm -rf *${MODEL}*.vsdb
+#rm -rf *${MODEL}*.vsdb
 
 else  # for Alaska domain grid#242:
 vgrid=242
  case $model in
-  nam)      export fcstdir=${COMNAM:-/com/nam/prod/nam}
+  nam)      export fcstdir=${COMNAM:-/com22/nam/prod/nam}
             export fhead=nam
             export fgrbtype=awak3d
             export ftm=.grb2.tm00
@@ -162,7 +162,7 @@ vgrid=242
             export ftm=.grib2
             export mdl=GFS
             ;;
-  rap)      export fcstdir=/com/rap/prod/rap
+  rap)      export fcstdir=/com2/rap/prod/rap
             export fhead=rap
             export fgrbtype=awp242f
             export ftm=.grib2
@@ -226,9 +226,9 @@ do
      exit
   fi
 
-  $USHverf_g2g/verf_g2g_prepg2g.sh < user.ctl >output.prepg2g.${obsv}.${model}
+  $USHverf_g2g/verf_g2g_prepg2g_grib2.sh < user.ctl >output.prepg2g.${obsv}.${model}
 
-  $USHverf_g2g/verf_g2g_fitsg2g.sh<temp
+  $USHverf_g2g/verf_g2g_fitsg2g_grib2.sh<temp
 
   echo "verf_g2g_ref.sh done for " ${PAST1}${HH}  $vgrid
 done

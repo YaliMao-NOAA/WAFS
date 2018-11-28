@@ -115,9 +115,9 @@ c     print *, 'bspec=',bspec
          pt(i) = clim(nxy,i)
         enddo
        else
-        do i = 1,nthrs then
+        do i = 1,nthrs 
             pt(i) = thrs(i)
-         end do
+        end do
        end if
 
        wfac = wght(nxy)
@@ -127,6 +127,8 @@ c       print *, '        RELIABILITY DIAGRAM '
 c B.Zhou: for non-climatology data reference case, use specified thresholds pt()
 c         for climatology data as reference case, use climatology 10 bins  
 c      print *, '++++++++++++++++++++++++++++++++++++'
+
+       
 
        if(nthrs.ge.3) then                     !threshold range case (FHO~),at least 2 bins t1~t2~t3 (3 thresholds)
          call reli(fs,im,fa,pt,nthrs-1,rp,irt,nthrs,op)
@@ -138,6 +140,10 @@ c      print *, '++++++++++++++++++++++++++++++++++++'
          write(*,*) 'Number of thresholds is wrong, 1 or  at least 3'
          stop 1001
        end if
+
+       !write(*,*) 'pt=',(pt(k),k=1,nthrs)
+       !write(*,*) 'analy',(rp(k,2),k=1,imp1)
+       !write(*,*) 'fcst ',(rp(k,1),k=1,imp1)
 
        do np = 1, imp1
         sanp(np) = sanp(np) + rp(np,2)*wfac
@@ -711,6 +717,7 @@ ccc for example: ib=2 2 equally-a-likely-bin
         rp(icnt+1,2)=rp(icnt+1,2)+1.0
        endif
 
+ccc FHO~ case
        if (ib.gt.2) then
        do i = 2, ib-1
         icnt=0

@@ -102,6 +102,18 @@ elif [ $model = NARREMEAN ] ; then
   cp $PARMverf_g2g/verf_g2g_urma.narremean .
   sed -e "s/MODNAM/$model/g" -e "s/VDATE/${PAST1}${HH}/g"  -e "s/G184/G${vgrid}/g" verf_g2g_urma.narremean >user.ctl
 
+
+elif [ $model = HREFMEAN ] ; then
+
+  export fcstdir=${fcstdir:-$FCSTDIR}
+  export fhead=hrefmean
+  export fgrbtype=grid${vgrid}.f
+  export ftm=.grib2
+
+  cp $PARMverf_g2g/verf_g2g_urma.hrefmean .
+  sed -e "s/MODNAM/$model/g" -e "s/VDATE/${PAST1}${HH}/g"  -e "s/G184/G${vgrid}/g" verf_g2g_urma.hrefmean >user.ctl
+
+
 elif [ $model = HRRR ] ; then
   export fcstdir=${fcstdir:-$FCSTDIR}
   export fhead=hrrr
@@ -110,6 +122,15 @@ elif [ $model = HRRR ] ; then
 
   cp $PARMverf_g2g/verf_g2g_urma.hrrr .
   sed -e "s/MODNAM/$model/g" -e "s/VDATE/${PAST1}${HH}/g" verf_g2g_urma.hrrr >user.ctl
+
+elif [ $model = GLMP ] ; then
+  export fcstdir=${fcstdir:-$FCSTDIR}
+  export fhead=glmp
+  export fgrbtype=grid184.f
+  export ftm=.grib2
+
+  cp $PARMverf_g2g/verf_g2g_urma.glmp .
+  sed -e "s/MODNAM/$model/g" -e "s/VDATE/${PAST1}${HH}/g" verf_g2g_urma.glmp >user.ctl
 
 
 elif [ $model = SREFMEAN ] ; then
@@ -133,16 +154,16 @@ echo "model-done" $model
 
 #### Step 2: call prepg2g.sh to prepare both forecast and observation GRIB files
 
-$USHverf_g2g/verf_g2g_prepg2g.sh < user.ctl >output.prepg2g.$model
+$USHverf_g2g/verf_g2g_prepg2g_grib2.sh < user.ctl >output.prepg2g.$model
 
 echo "prepg2g.sh done for "${PAST1}${HH} 
 
 # Step 3: call run_g2g.sh to arange forecast and observation GRIB files and then
 #         call g2g executable to generate SL1L2 and FHO VSDB files
 
-$USHverf_g2g/verf_g2g_fitsg2g.sh<temp
+$USHverf_g2g/verf_g2g_fitsg2g_grib2.sh<temp
 
-echo "verf_g2g_fitsg2g.sh done for " ${PAST1}${HH}
+echo "verf_g2g_fitsg2g_grib2.sh done for " ${PAST1}${HH}
  
 HH=`expr $HH + 6`
 done

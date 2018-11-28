@@ -16,7 +16,6 @@ export vdate=${vdate:-$vday$cyc}
 export copygb2=${copygb2:-/nwprod/util/exec/copygb2}
 export cnvgrib=${cnvgrib:-/nwprod/util/exec/cnvgrib}
 export wgrib2=${wgrib2:-/nwprod/util/exec/wgrib2}
-EXECverf=${EXECverf:-/u/Binbin.Zhou/work/grid2grid/verf_g2g.v4.0.0/exec} 
 
 #############################################################
 #1:Get gfs analysis grib2 data in GRID#3 (1-degree global)
@@ -25,7 +24,7 @@ if [ $modnam = gfsanl ]; then
 
   echo $modnam is print here ...............
 
-    COMGFSANL=${COMGFSANL:-/com/gfs/prod/gfs}
+    COMGFSANL=${COMGFSANL:-/com2/gfs/prod/gfs}
 
   for cyc in 00 06 12 18 ; do
 
@@ -33,7 +32,7 @@ if [ $modnam = gfsanl ]; then
     if [ -s $gfsanl ] ; then 
       cp $gfsanl $COMOUT/gfs.t${cyc}z.pgrbf00.grib2
     else 
-      cnvgrib -g12 $COMGFSANL.$vday/gfs.t${cyc}z.pgrbf00 $COMOUT/gfsanl.t${cyc}z.grd3.f00.grib2
+      $cnvgrib -g12 $COMGFSANL.$vday/gfs.t${cyc}z.pgrbf00 $COMOUT/gfsanl.t${cyc}z.grd3.f00.grib2
     fi
 
   done
@@ -71,16 +70,16 @@ fi
 if [ $modnam = ndas ]; then
 
    echo $modnam is print here ...............
-   COMNDAS=${COMNDAS:-/com/nam/prod/ndas}
+   COMNDAS=${COMNDAS:-/com2/nam/prod/nam}
    
    DAY1=` /nwprod/util/exec/ndate +24 ${vday}09`
    tom=`echo ${DAY1} | cut -c 1-8`
-   ln -sf $COMNDAS.$tom/ndas.t00z.awip3d00.tm03.grib2 $COMOUT/ndas.t21z.awip3d00.f00.grib2
-   ln -sf $COMNDAS.$vday/ndas.t06z.awip3d00.tm03.grib2 $COMOUT/ndas.t03z.awip3d00.f00.grib2
-   ln -sf $COMNDAS.$vday/ndas.t12z.awip3d00.tm03.grib2 $COMOUT/ndas.t09z.awip3d00.f00.grib2
-   ln -sf $COMNDAS.$vday/ndas.t18z.awip3d00.tm03.grib2 $COMOUT/ndas.t15z.awip3d00.f00.grib2
+   ln -sf  $COMNDAS.$tom/nam.t00z.awip3d00.tm03.grib2 $COMOUT/ndas.t21z.awip3d00.f00.grib2
+   ln -sf $COMNDAS.$vday/nam.t06z.awip3d00.tm03.grib2 $COMOUT/ndas.t03z.awip3d00.f00.grib2
+   ln -sf $COMNDAS.$vday/nam.t12z.awip3d00.tm03.grib2 $COMOUT/ndas.t09z.awip3d00.f00.grib2
+   ln -sf $COMNDAS.$vday/nam.t18z.awip3d00.tm03.grib2 $COMOUT/ndas.t15z.awip3d00.f00.grib2
    for cyc in 03 09 15 21 ; do
-        copygb2 -g"30 6 0 0 0 0 0 0 185 129 12190000 226541000 8 25000000 265000000 40635000 40635000 0 64 25000000 25000000 0 0" -x $COMOUT/ndas.t${cyc}z.awip3d00.f00.grib2 $COMOUT/ndas.t${cyc}z.grd212.f00.grib2
+        $copygb2 -g"30 6 0 0 0 0 0 0 185 129 12190000 226541000 8 25000000 265000000 40635000 40635000 0 64 25000000 25000000 0 0" -x $COMOUT/ndas.t${cyc}z.awip3d00.f00.grib2 $COMOUT/ndas.t${cyc}z.grd212.f00.grib2
    done
 
 fi
@@ -93,8 +92,8 @@ if [ $modnam = srefclim ] ; then
 
    echo $modnam is print here ...............
 
-   FIXGFSCLIM=/meso/noscrub/Binbin.Zhou/clim
-   #FIXGFSCLIM=${FIXGFSCLIM:-/nwprod/naefs.v4.0.1/fix}
+   #FIXGFSCLIM=/meso/noscrub/Binbin.Zhou/clim
+   FIXGFSCLIM=${FIXGFSCLIM:-/nwprod/naefs.v4.0.1/fix}
    mm=`echo $vday|cut -c5-6`
    dd=`echo $vday|cut -c7-8`
 
@@ -106,9 +105,11 @@ if [ $modnam = srefclim ] ; then
         ens='stdv'
       fi
 
-      clim_grib2=$FIXGFSCLIM/${head}.1979${mm}${dd}.grid212.grib2
+      #clim_grib2=$FIXGFSCLIM/${head}.1979${mm}${dd}.grid212.grib2
+      clim_grib2=$FIXGFSCLIM/${head}.1979${mm}${dd}
       for cyc in 03 09 15 21 ; do
-        $wgrib2 -match "1979$mm$dd$cyc" $clim_grib2|$wgrib2 -i $clim_grib2 -grib $COMOUT/clim.grid212.${ens}.${mm}${dd}${cyc}.grib2
+        $copygb2 -g"30 6 0 0 0 0 0 0 185 129 12190000 226541000 8 25000000 265000000 40635000 40635000 0 64 25000000 25000000 0 0" -x $clim_grib2 $COMOUT/clim.grid212.${ens}.${mm}${dd}${cyc}.grib2
+        #$wgrib2 -match "1979$mm$dd$cyc" $clim_grib2|$wgrib2 -i $clim_grib2 -grib $COMOUT/clim.grid212.${ens}.${mm}${dd}${cyc}.grib2
       done
     done
 
@@ -118,13 +119,13 @@ fi
 #5:Get GFS 20 member grib2 file in grid3 
 ###########################################
 if [ $modnam = gefs ] ; then
-  COMGEFS=${COMGEFS:-/com/gens/prod/gefs}
+  COMGEFS=${COMGEFS:-/com2/gens/prod/gefs}
   total=20
 
   for dd in 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 ; do
 
    hrs=`expr $dd \* 24`
-   day=`ndate -$hrs ${vday}09 |cut -c1-8`
+   day=` /nwprod/util/exec/ndate -$hrs ${vday}09 |cut -c1-8`
    echo $day
    outdata=$COM_OUT/ens.$day
 
@@ -174,13 +175,13 @@ fi
 ###########################################
 
 if [ $modnam = naefs ] ; then
-  COMNAEFS=${COMNAEFS:-/com/gens/prod/cmce}
+  COMNAEFS=${COMNAEFS:-/com2/gens/prod/cmce}
   total=40
 
   for dd in 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 ; do
 
     hrs=`expr $dd \* 24`
-    day=`ndate -$hrs ${vday}09 |cut -c1-8`
+    day=` /nwprod/util/exec/ndate -$hrs ${vday}09 |cut -c1-8`
     echo $day
 
    outdata=$COM_OUT/ens.$day
@@ -252,58 +253,68 @@ fi
 ###########################################
 
 if [ $modnam = sref ] ; then
-  COMSREF=${COMSREF:-/com/sref/prod/sref}
-  total=21
+  COMSREF=${COMSREF:-/com2/sref/prod/sref}
+  total=26
 
-mdl[1]=sref_em
+mdl[1]=sref_arw
 mbr[1]=ctl
-mdl[2]=sref_em
+mdl[2]=sref_arw
 mbr[2]=p1
-mdl[3]=sref_em
+mdl[3]=sref_arw
 mbr[3]=n1
-mdl[4]=sref_em
+mdl[4]=sref_arw
 mbr[4]=p2
-mdl[5]=sref_em
+mdl[5]=sref_arw
 mbr[5]=n2
-mdl[6]=sref_em
+mdl[6]=sref_arw
 mbr[6]=p3
-mdl[7]=sref_em
+mdl[7]=sref_arw
 mbr[7]=n3
+mdl[8]=sref_arw
+mbr[8]=p4
+mdl[9]=sref_arw
+mbr[9]=n4
+mdl[10]=sref_arw
+mbr[10]=p5
+mdl[11]=sref_arw
+mbr[11]=n5
+mdl[12]=sref_arw
+mbr[12]=p6
+mdl[13]=sref_arw
+mbr[13]=n6
 
-mdl[8]=sref_nmb
-mbr[8]=ctl
-mdl[9]=sref_nmb
-mbr[9]=p1
-mdl[10]=sref_nmb
-mbr[10]=n1
-mdl[11]=sref_nmb
-mbr[11]=p2
-mdl[12]=sref_nmb
-mbr[12]=n2
-mdl[13]=sref_nmb
-mbr[13]=p3
 mdl[14]=sref_nmb
-mbr[14]=n3
+mbr[14]=ctl
+mdl[15]=sref_nmb
+mbr[15]=p1
+mdl[16]=sref_nmb
+mbr[16]=n1
+mdl[17]=sref_nmb
+mbr[17]=p2
+mdl[18]=sref_nmb
+mbr[18]=n2
+mdl[19]=sref_nmb
+mbr[19]=p3
+mdl[20]=sref_nmb
+mbr[20]=n3
+mdl[21]=sref_nmb
+mbr[21]=p4
+mdl[22]=sref_nmb
+mbr[22]=n4
+mdl[23]=sref_nmb
+mbr[23]=p5
+mdl[24]=sref_nmb
+mbr[24]=n5
+mdl[25]=sref_nmb
+mbr[25]=p6
+mdl[26]=sref_nmb
+mbr[26]=n6
 
-mdl[15]=sref_nmm
-mbr[15]=ctl
-mdl[16]=sref_nmm
-mbr[16]=p1
-mdl[17]=sref_nmm
-mbr[17]=n1
-mdl[18]=sref_nmm
-mbr[18]=p2
-mdl[19]=sref_nmm
-mbr[19]=n2
-mdl[20]=sref_nmm
-mbr[20]=p3
-mdl[21]=sref_nmm
-mbr[21]=n3
 
  for dd in 0 1 2 3 ; do
 
    hrs=`expr $dd \* 24`
-   day=`ndate -$hrs ${vday}09 |cut -c1-8`
+   day=` /nwprod/util/exec/ndate -$hrs ${vday}09 |cut -c1-8`
    echo $day
 
    outdata=$COM_OUT/ens.$day
@@ -347,13 +358,13 @@ fi
 #8:Get CMCE 20 member grib2 file in grid3 
 ###########################################
 if [ $modnam = cmce ] ; then
-  COMCMCE=${COMCMCE:-/com/gens/prod/cmce}
+  COMCMCE=${COMCMCE:-/com2/gens/prod/cmce}
   total=20
 
   for dd in 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 ; do
 
    hrs=`expr $dd \* 24`
-   day=`ndate -$hrs ${vday}09 |cut -c1-8`
+   day=` /nwprod/util/exec/ndate -$hrs ${vday}09 |cut -c1-8`
    echo $day
    outdata=$COM_OUT/ens.$day
 

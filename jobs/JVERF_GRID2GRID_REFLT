@@ -20,23 +20,18 @@ export RUN=reflt
 # This block can be modified for different Production test
 # environment. This is used for operational testings
 ###############################################################
-if [ "$RUN_ENVIR" = prod ]; then
-#if [ "$RUN_ENVIR" = prod -a $envir != prod ]; then
-  export jlogfile=${jlogfile:-/com/logs/jlogfiles/jlogfile.$$}
-  export COM_OUT=${COM_OUT:-/com/verf/${envir}}
-  export COM_IN=${COM_IN:-/com/verf/${envir}}
-  export COMIN=$COM_IN/${RUN}.$vday
-  export COMOUT=$COM_OUT/${RUN}.$vday
-  export COMRAP=/com/rap/prod/rap
-  export COMSREF=/com/sref/prod/sref
-  export COMHIRESW=/com/hiresw/prod/hiresw
-  export COMNAM=/com/nam/prod/nam
-  export COMMOSAIC=/com/hourly/prod/radar
-  export COMBUFR=/com/hourly/prod
-  export COMGFS=/com/gfs/prod/gfs
-  export AFWADIR=/dcom/us007003
-  export CLAVRDIR=/dcom/us007003
+if [ "$RUN_ENVIR" = prod -o "$RUN_ENVIR" = para ] ; then
+  if [ $envir != "prod" ] ; then
+    export SENDDBN=${SENDDBN:-NO}
+    export jlogfile=${jlogfile:-/com/logs/${envir}/jlogfile}
+    export DBNROOT=/nwprod/spa_util/fakedbn
+    export DBNLOG=${DBNLOG:-YES}
+    export DATA_IN=${DATA_IN:-/tmpnwprd2}
+    export COMSREF=${COMSREF:-/com2/sref/$envir/sref}
+  fi
 fi
+
+verf_g2g_ver=${verf_g2g_ver:-v3.0.12}
 
 #####################################################################################
 # This block is for Developer's test run:
@@ -51,7 +46,7 @@ fi
 #####################################################################################
 if [ "$RUN_ENVIR" = dev ]    ### For Developers
 then
-  . /u/Binbin.Zhou/work/grid2grid/verf_g2g.v3.0.0/parm/verf_g2g_prod_config
+  . /u/Binbin.Zhou/work/grid2grid/verf_g2g.${verf_g2g_ver}/parm/verf_g2g_prod_config
 fi
 
 #if [ $SENDECF = YES ]
@@ -69,7 +64,7 @@ date
 # obtain unique process id (pid) and make temp directories
 ###########################################################
 export pid=$$
-export DATA_IN=${DATA_IN:-/tmpnwprd}
+export DATA_IN=${DATA_IN:-/tmpnwprd1}
 export DATA=$DATA_IN/verf_g2g_reflt_${cyc}_${envir}.$$
 
 rm -rf $DATA
@@ -100,7 +95,7 @@ export SENDCOM=${SENDCOM:-YES}
 export SENDDBN=${SENDDBN:-YES}
 export SENDECF=${SENDECF:-YES}
 
-export HOMEverf_g2g=${HOMEverf_g2g:-/nw${envir}/verf_g2g.${model_ver}}
+export HOMEverf_g2g=${HOMEverf_g2g:-/nw${envir}/verf_g2g.${verf_g2g_ver}}
 export EXECverf_g2g=${EXECverf_g2g:-$HOMEverf_g2g/exec}
 export FIXverf_g2g=${FIXverf_g2g:-$HOMEverf_g2g/fix}
 export PARMverf_g2g=${PARMverf_g2g:-$HOMEverf_g2g/parm}
@@ -121,6 +116,24 @@ sh $utilscript/setpdy.sh
 . $DATA/PDY
 
 export vday=$PDYm1
+
+##################################
+# Define model input COMIN
+##################################
+  export COMRAP=${COMRAP:-/com2/rap/prod/rap}
+  export COMSREF=${COMSREF:-/com2/sref/prod/sref}
+  export COMNAMNEST=${COMNAMNEST:-/com2/nam/prod/nam}
+  export COMHIRESW=${COMHIRESW:-/gpfs/hps/nco/ops/com/hiresw/prod/hiresw}
+  export COMNAMFIREWX=${COMNAMFIREWX:-/com2/nam/prod/nam}
+  export COMNAM=${COMNAM:-/com2/nam/prod/nam}
+  export COMMOSAIC=${COMMOSAIC:-/com/hourly/prod/radar}
+  export COMBUFR=${COMBUFR:-/com/hourly/prod}
+  export COMHRRR=${COMHRRR:-/com2/hrrr/prod/hrrr}
+  export COMGEFS=${COMGEFS:-/com2/gens/prod/gefs}
+  export COMNDAS=${COMNDAS:-/com2/nam/prod/ndas}
+  export COMNAEFS=${COMNAEFS:-/com2/gens/prod/cmce}
+  export AFWADIR=${AFWADIR:-/dcom/us007003}
+  export CLAVRDIR=${CLAVRDIR:-/dcom/us007003}
 
 ##################################
 # Define COMIN/COMOUT variables

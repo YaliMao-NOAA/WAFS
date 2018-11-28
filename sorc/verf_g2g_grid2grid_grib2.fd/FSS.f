@@ -155,8 +155,6 @@ C
       write(*,*)'weight factor=', area_factor(10000)
       write(*,*) 'tag',(tag(i),i=1,numvarbl)     
       write(*,*) 'nxy',(nxy(i),i=1,numvarbl)     
-      write(*,*) 'numreg',(numreg(i),i=1,numarea)
-      write(*,*) 'mode',(mode(i),i=1,numarea)
 
       allocate(sumff(numfcst,numvarbl,numlevel,numarea,numvfyobs,10))
       allocate(sumoo(numfcst,numvarbl,numlevel,numarea,numvfyobs,10))

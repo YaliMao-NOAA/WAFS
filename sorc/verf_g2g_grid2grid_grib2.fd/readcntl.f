@@ -836,6 +836,7 @@ C  Modified as:
      +  (updown(n,i),i=1,10), dt(n)
         write(*,*)'  anomly_mrk=',anomly_mrk(n)
         write(*,*)'  wavemrk, wv1, wv2 =',wavemrk(n),wv1(n),wv2(n)
+        write(*,*)'  continue_mrk=',continue_mrk(n) 
       end do
 
 

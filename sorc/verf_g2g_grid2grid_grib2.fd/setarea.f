@@ -25,7 +25,6 @@ C-------------------------------------------------------------------------
       nam24 = namarea
       mode(iar) = 0
       iqstn = INDEX ( nam24, '.STNS' )
-      write(*,*) 'iqstn=',iqstn, 'nam24=', nam24
       IF (nam1(1).eq.'G' .and. iqstn .eq. 0 ) THEN
 
 c  Add by Binbin Zhou------------------------------------------------
@@ -39,7 +38,6 @@ c--------------------------------------------------------------------
 czhou        READ (nam24(2:4),'(I3)') igrid
 
         write(*,*) 'in setarea: igrid=',igrid
-        write(*,*) 'p=', p, ' usrmk=',usrmk
 
         CALL gtgdef(igrid,istat,imax(iar),jmax(iar),alat1(iar),
      +              elon1(iar),dxx(iar),dyy(iar),elonv(iar),alatan(iar),
@@ -109,9 +107,6 @@ Czhou           PRINT*,'IG104: ',IG104
         PRINT *, ' NON-CONFORMING AREA PARAMETER NEEDS TO BE Gxxx'
 	PRINT *, ' OR xxx.STNS, where xxx is an upper case name.'
       END IF
-
-      write(*,*) 'numreg=',  numreg
-      write(*,*) 'mode=',mode
 
       RETURN
       END

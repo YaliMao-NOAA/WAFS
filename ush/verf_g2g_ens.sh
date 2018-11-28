@@ -53,8 +53,10 @@ if [ $model = 'GEFS' ] ; then
   
 
    for hh in 00 06 12 18 ; do   # hh same as validation time
-     ln -s $obsvdir.$vday/clim.grid3.mean.${MM}${DD}${hh}.grib2  clim.mean.$MM$DD$hh
-     ln -s $obsvdir.$vday/clim.grid3.stdv.${MM}${DD}${hh}.grib2  clim.stdv.$MM$DD$hh
+     #ln -s $obsvdir.$vday/clim.grid3.mean.${MM}${DD}${hh}.grib2  clim.mean.$MM$DD$hh
+     #ln -s $obsvdir.$vday/clim.grid3.stdv.${MM}${DD}${hh}.grib2  clim.stdv.$MM$DD$hh
+     cp $obsvdir.$vday/clim.grid3.mean.${MM}${DD}${hh}.grib2  clim.mean.$MM$DD$hh
+     cp $obsvdir.$vday/clim.grid3.stdv.${MM}${DD}${hh}.grib2  clim.stdv.$MM$DD$hh
    done  
 
 
@@ -77,8 +79,10 @@ elif [ $model = 'CMCE' ] ; then
 
 
    for hh in 00 12 ; do   # hh same as validation time
-     ln -s $obsvdir.$vday/clim.grid3.mean.${MM}${DD}${hh}.grib2  clim.mean.$MM$DD$hh
-     ln -s $obsvdir.$vday/clim.grid3.stdv.${MM}${DD}${hh}.grib2  clim.stdv.$MM$DD$hh
+     #ln -s $obsvdir.$vday/clim.grid3.mean.${MM}${DD}${hh}.grib2  clim.mean.$MM$DD$hh
+     #ln -s $obsvdir.$vday/clim.grid3.stdv.${MM}${DD}${hh}.grib2  clim.stdv.$MM$DD$hh
+      cp $obsvdir.$vday/clim.grid3.mean.${MM}${DD}${hh}.grib2  clim.mean.$MM$DD$hh
+      cp $obsvdir.$vday/clim.grid3.stdv.${MM}${DD}${hh}.grib2  clim.stdv.$MM$DD$hh
    done
 
 
@@ -104,20 +108,22 @@ elif [ $model = 'NAEFS' ] ; then
    export ftm=
 
    for hh in 00 12 ; do   # hh same as validation time
-     ln -s $obsvdir.$vday/clim.grid3.mean.${MM}${DD}${hh}.grib2  clim.mean.$MM$DD$hh
-     ln -s $obsvdir.$vday/clim.grid3.stdv.${MM}${DD}${hh}.grib2  clim.stdv.$MM$DD$hh
+     #ln -s $obsvdir.$vday/clim.grid3.mean.${MM}${DD}${hh}.grib2  clim.mean.$MM$DD$hh
+     #ln -s $obsvdir.$vday/clim.grid3.stdv.${MM}${DD}${hh}.grib2  clim.stdv.$MM$DD$hh
+     cp $obsvdir.$vday/clim.grid3.mean.${MM}${DD}${hh}.grib2  clim.mean.$MM$DD$hh
+     cp $obsvdir.$vday/clim.grid3.stdv.${MM}${DD}${hh}.grib2  clim.stdv.$MM$DD$hh
    done
 
 elif [ $model = 'SREF' ] ; then
 
-  for m in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 ; do
+  for m in 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 ; do
      MODEL[${m}]=sref.ens${m}
   done
 
   HH=03
   END=21
 
-  NMODEL=21
+  NMODEL=26
 
    export ohead=ndas
    export ogrbtype=grd212.f00.grib2
@@ -128,8 +134,10 @@ elif [ $model = 'SREF' ] ; then
    export ftm=.grib2
 
    for hh in 03 09 15 21 ; do   # hh same as validation time
-     ln -s $obsvdir.$vday/clim.grid212.mean.${MM}${DD}${hh}.grib2  clim.mean.$MM$DD$hh
-     ln -s $obsvdir.$vday/clim.grid212.stdv.${MM}${DD}${hh}.grib2  clim.stdv.$MM$DD$hh
+     #ln -s $obsvdir.$vday/clim.grid212.mean.${MM}${DD}${hh}.grib2  clim.mean.$MM$DD$hh
+     #ln -s $obsvdir.$vday/clim.grid212.stdv.${MM}${DD}${hh}.grib2  clim.stdv.$MM$DD$hh
+     cp $obsvdir.$vday/clim.grid212.mean.${MM}${DD}${hh}.grib2  clim.mean.$MM$DD$hh
+     cp $obsvdir.$vday/clim.grid212.stdv.${MM}${DD}${hh}.grib2  clim.stdv.$MM$DD$hh
    done
 
 
@@ -146,7 +154,7 @@ while [ $HH -le $END ] ; do  # loop for different validation time
      export fhead=${MODEL[$m]} 
      sed -e "s/MODNAM/${MODEL[$m]}/g" -e "s/VDATE/$vday$HH/g" verf_g2g_ens.$core > user.ctl.${MODEL[$m]} 
 
-     $USHverf_g2g/verf_g2g_prepg2g.sh < user.ctl.${MODEL[$m]} > output.prepg2g.${MODEL[$m]}
+     $USHverf_g2g/verf_g2g_prepg2g_grib2.sh < user.ctl.${MODEL[$m]} > output.prepg2g.${MODEL[$m]}
 
      cat g2g.ctl.${MODEL[$m]} >> g2g.ctl.ensemble
 
@@ -155,9 +163,9 @@ while [ $HH -le $END ] ; do  # loop for different validation time
      m=`expr $m + 1`
    done 
 
-   $USHverf_g2g/verf_g2g_fitsg2g.sh<temp
+   $USHverf_g2g/verf_g2g_fitsg2g_grib2.sh<temp
 
-   echo "verf_g2g_fitsg2g.sh done for " ${PAST1}${HH}
+   echo "verf_g2g_fitsg2g_grib2.sh done for " ${PAST1}${HH}
 
   if [ $model = 'NAEFS' ] || [ $model = 'CMCE' ] ; then
    HH=`expr $HH + 12`

@@ -22,7 +22,7 @@ for domain in CONUS Alaska ; do
 ################################################
 # Get the observation AFWA and CLAVR cloud data 
 ################################################
-$USHverf_g2g/verf_g2g_get_cloud.sh afwa $vday $domain
+#$USHverf_g2g/verf_g2g_get_cloud.sh afwa $vday $domain  #AFWA data are removed after 6/30/2017
 $USHverf_g2g/verf_g2g_get_cloud.sh clavr $vday $domain
 
 ## Read in the model information
@@ -52,8 +52,9 @@ do
      # Part I: Verification of the model output against the AFWA data:
      #################################################################
      # Turn off cloud base for the afwa data
-     export cloud_base_from_sfc=no
-     $USHverf_g2g/verf_g2g_cloud.sh $vday $model afwa $domain
+     #export cloud_base_from_sfc=no
+     #$USHverf_g2g/verf_g2g_cloud.sh $vday $model afwa $domain
+     #AFWA data are removed after 6/30/2017    
 
      #################################################################
      # Part II: Verification of the model output against the CLAVR data:

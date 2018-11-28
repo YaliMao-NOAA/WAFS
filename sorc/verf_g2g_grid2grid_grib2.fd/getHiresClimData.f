@@ -23,7 +23,7 @@
       allocate(mean(ngrid))
       allocate(spread(ngrid))
 
-      write(*,*) ' In get_HiresClimData' 
+      write(*,*) ' In get_HiresClimData, kb=',kb  
 
        write(*,*) trim(meangribfile),' ',trim(sprdgribfile)
 
@@ -36,14 +36,34 @@
         return
        end if
 
-   
-         if (kk4.eq.19.and.kk5.eq.20) then
-          jpdtn=1
-         else
-          jpdtn=8
-         end if
+       if(kb.eq.11) then 
+          if (kk4.eq.19.and.kk5.eq.20) then
+           jpdtn=1
+          else
+           jpdtn=8
+           kk27=0
+          end if
+        else             ! for HREFv2
+          if (kk4.eq.19.and.kk5.eq.20) then
+           jpdtn=1
+          else if (kk4.eq.1.and.kk5.eq.8) then
+           jpdtn=8
+           kk27=3   !set accumulated 3hr for NAMNEST APCP as ref
+          else
+           jpdtn=0    
+          end if
+        end if
+         
 
-          call readClimGB2(51,jpdtn,kk4,kk5,kk6,kk7,gfld,iret)
+         !if (kk4.eq.16.and.kk5.eq.196) then  !HRRR REFC uses different kpds6
+         ! kk6=10
+         !end if
+         !if (kk4.eq.6.and.kk5.eq.1) then  !HRRR TCDC  uses different kpds6
+         ! kk6=10
+         !end if
+ 
+
+          call readClimGB2(51,jpdtn,kk4,kk5,kk6,kk7,kk27,gfld,iret)
 
           if(iret.ne.0) then
             write(*,*)'read mean clim data file error=',iret  
@@ -63,7 +83,7 @@
         nodata = 1 
        end if
 
-         call readClimGB2(52,jpdtn,kk4,kk5,kk6,kk7,gfld,iret)
+         call readClimGB2(52,jpdtn,kk4,kk5,kk6,kk7,kk27,gfld,iret)
 
 
           if(iret.ne.0) then
@@ -114,7 +134,7 @@ CCC Now compute climate data at 11 probability bin ----
         end
 
       subroutine readClimGB2(igrb2,jpdtn,jpd1,jpd2,jpd10,jpd12,
-     +     gfld,iret)
+     +     jpd27, gfld,iret)
 
         use grib_mod
 
@@ -123,7 +143,7 @@ CCC Now compute climate data at 11 probability bin ----
         integer igrb2,jpdtn,jpd1,jpd2,jpd10,jpd12,jpd27
         logical :: unpack=.true.
 
-        write(*,*) igrb2, jpdtn,jpd1,jpd2,jpd10,jpd12
+        write(*,*) igrb2, jpdtn,jpd1,jpd2,jpd10,jpd12,jpd27
 
         jids=-9999  !array define center, master/local table, year,month,day, hour, etc, -9999 wildcard to accept any
         jpdt=-9999  !array define Product, to be determined
@@ -142,6 +162,8 @@ CCC Now compute climate data at 11 probability bin ----
         else
            jpdt(12)=jpd12
         end if
+
+        if(jpdtn.eq.8) jpdt(27)=jpd27
 
         call getgb2(igrb2,0,jskp,jdisc,jids,jpdtn,jpdt,jgdtn,jgdt,
      +     unpack, jskp1, gfld,iret)

@@ -235,12 +235,15 @@ c ----
 c to calculate the root mean square error for analysis and ensemble ave
 c ----
       rmsa=(ve-ave)*(ve-ave)
+
+      !!!write(*,'(14f8.2)') (em(i),i=1,m),ave,sprd,rmsa
 c ----
 c to order data
 c ----
       call sortmm(ena,m,3,2)
 c ----
 c get relative position for analysis
+c Binbin Note: 2 ends give "2", between give "1" respectively 
 c ----
       do i = 1, m
        if (ve.le.ena(i,2)) then
