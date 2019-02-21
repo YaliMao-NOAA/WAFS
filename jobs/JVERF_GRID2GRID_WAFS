@@ -4,12 +4,8 @@ set -xa
 #################################################################
 # 9/20/2009, Julia Zhu   Scripts are modified to be sharable
 #                        between EMC and NCO
-#         Please note that variable "RUN_ENVIR" is set and used
-#         in the development enviroment only.
 # 3/10/2015, Yali Mao    For WAFS Icing temperature UV verification
 #################################################################
-export RUN_ENVIR=${RUN_ENVIR:-prod}
-export SENDECF=${SENDECF:-YES}
 
 ###############################
 # Specify RUN name
@@ -17,18 +13,6 @@ export SENDECF=${SENDECF:-YES}
 export NET=verf
 export RUN=wafs
 export envir=${envir:-prod}
-
-
-export COM=$COMROOThps
-
-###############################################################
-# This block can be modified for different Production test
-# environment. This is used for operational testings
-###############################################################
-if [ "$RUN_ENVIR" = prod ]; then
-#if [ "$RUN_ENVIR" = prod -a $envir != prod ]; then
-  export jlogfile=${jlogfile:-$COM/logs/jlogfiles/jlogfile.$$}
-fi
 
 # ###################################
 # SET SHELL PROCESSING VARIABLES
@@ -44,9 +28,7 @@ date
 # obtain unique process id (pid) and make temp directories
 ###########################################################
 export pid=$$
-export DATA_IN=${DATA_IN:-/tmpnwprd}
-#export DATA=$DATA_IN/verf_g2g_wafs_${cyc}_${envir}.$$
-export DATA=$DATA_IN/verf_g2g_wafs_${envir}.$$
+export DATA=${DATA:-${DATAROOT}/${jobid:?}}
 
 rm -rf $DATA
 mkdir -p $DATA
@@ -55,7 +37,7 @@ cd $DATA
 ####################################
 # File To Log Msgs
 ####################################
-export jlogfile=${jlogfile:-$COM/logs/jlogfiles/jlogfile.$$}
+export jlogfile=${jlogfile:-$DATA/logs/jlogfiles/jlogfile.$$}
 
 ####################################
 # Determine Job Output Name on System
@@ -82,22 +64,10 @@ export EXECverf_g2g=${EXECverf_g2g:-$HOMEverf_g2g/exec}
 export FIXverf_g2g=${FIXverf_g2g:-$HOMEverf_g2g/fix}
 export PARMverf_g2g=${PARMverf_g2g:-$HOMEverf_g2g/parm}
 export USHverf_g2g=${USHverf_g2g:-$HOMEverf_g2g/ush}
-export SCRIPTSverf_g2g=${SCRIPTSverf_g2g:-$HOMEverf_g2g/scripts}
-
-###################################
-# Set up the UTILITIES
-###################################
-export EXECutil=/nwprod/util/exec
-export HOMEutil=${HOMEutil:-/nw${envir}/util.${util_ver}}
-export USHutil=${USHutil:-$HOMEutil/ush}
-export EXECutil=${EXECutil:-$HOMEutil/exec}
-
-# Run setup to initialize working directory and utility scripts
-sh $USHutil/setup.sh
 
 # Run setpdy and initialize PDY variables
-sh $USHutil/setpdy.sh
-. $DATA/PDY
+setpdy.sh
+. ./PDY
 
 export vday=${vday:-$PDYm1}
 
@@ -108,52 +78,49 @@ export vday=${vday:-$PDYm1}
 #Raw input of WAFS icing forecast
 #---------------------------------
 # Global WAFS icing forecast, $PDY will be appended.
-export COMINUS=${COMINUS:-$COM/gfs/${envir}/gfs}
-export COMINUK=${COMINUK:-/dcom/us007003}
-export COMINBLND=${COMINBLND:-$COM/gfs/${envir}/gfs}
-#This is an operational version of GFIP, $PDY will be appended.
-#export COMINGFIP=${COMINGFIP:-/ptmpp1/Yali.Mao/gfip}
-export COMINGFIP=${COMINGFIP:-$COM/gfs/${envir}/gfs}
+export COMINUS=${COMINUS:-$COMROOT/gfs/${envir}/gfs} # US mean max
+export COMINUK=${COMINUK:-$DCOMROOT/us007003}            # UK mean max
+export COMINBLND=${COMINBLND:-$COMROOT/gfs/${envir}/gfs} # blended
+export COMINGFIP=${COMINGFIP:-$COMROOT/gfs/${envir}/gfs} # high resolution
 # Regional icing forecast, $PDY will be appended.
-export COMINFIP=${COMINFIP:-/dcom/us007003}
+export COMINFIP=${COMINFIP:-$DCOMROOT/us007003}
 # Raw input of WAFS icing validation/analysis data
 #---------------------------------
-export CIPDIR=${CIPDIR:-/dcom/us007003}
+export CIPDIR=${CIPDIR:-$DCOMROOT/us007003}
 # $PDY will be appended.
-export GCIPDIR=${GCIPDIR:-$COM/gfs/${envir}/gfs}
-# Raw input of Wind/Temp, both forecast and validation/analysis data
+export GCIPDIR=${GCIPDIR:-$COMROOT/gfs/${envir}/gfs}
+# Raw input of Wind/Temp, forecast
 #---------------------------------
-export COMINGFS=${COMINGFS:-$COM/gfs/${envir}/gfs}
+export COMINGFSP=${COMINGFSP:-$COMROOT/gfs/${envir}/gfs}  # U/V/T
+# Raw input of Wind/Temp, validation/analysis
+#---------------------------------
+export COMINGFSV=${COMINGFSV:-$COMROOT/gfs/${envir}/gfs}  # U/V/T
 
 # Processed inputs for all forecast and analysis
 #---------------------------------
 # folder base for processed inputs
-export COM_OUT=${COM_OUT:-$COM/$NET/${envir}}
+export COM_OUT=${COM_OUT:-$COMROOT/$NET/${envir}}
 # location of processed inputs, general for all dates
-export FCSTDIR=$COM_OUT/${RUN}
-export OBSVDIR=$COM_OUT/${RUN}
+export FCSTDIR=$COM_OUT/${RUN} # vday will be appended
+export OBSVDIR=$COM_OUT/${RUN} # vday will be appended
 # location of processed inputs, for $vday after this run
-export COMOUT=$FCSTDIR.$vday
+export COMOUT=$COM_OUT/${RUN}.$vday
 
 # Final VSDB output
-export COMVSDB=${COMVSDB:-$COM/verf/${envir}/vsdb/grid2grid}
+export COMVSDB=${COMVSDB:-$COMROOT/verf/${envir}/vsdb/grid2grid}
+export COMVSDB=$COMVSDB/${RUN}
 
-mkdir -p -m 775 $COMOUT $COMVSDB/${RUN}
+mkdir -p -m 775 $COMOUT $COMVSDB
 
 env
 
 #######################################################################
 # Execute the script.
 export VMODELS=${VMODELS:-"|cip|gcipconus|gcip|gfs|"}
-sh $SCRIPTSverf_g2g/exverf_g2g_wafs.sh.ecf $vday $VMODELS
+sh $HOMEverf_g2g/scripts/exverf_g2g_wafs.sh.ecf $vday $VMODELS
 
 msg="JOB $job HAS COMPLETED NORMALLY."
 postmsg "$jlogfile" "$msg"
-
-#cd $DATA_IN
-#if [ ${RM_TMPDIR:-NO} = YES ]; then
-#  rm -rf $DATA
-#fi
 
 date
 

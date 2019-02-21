@@ -29,6 +29,8 @@ c  Mar. 10, 2005   Original, Binbin Zhou, SAIC@EMC/NCEP/NOAA
 c  Oct. 12, 2006   Modification: Add 255 grid, Binbin Zhou 
 c  Set. 15, 2012   Modification: add aditional model/obstype name to id NX, NY
 c  2014-5-6        Binbin Z. Add Firewx grid reading
+c  2015-3-17       Y Mao Add WAFS MET-office defined Area-2 on GRID#45, 
+c                    borrowing ig104(:,:) but making it allocatable.
 
 c  INPUT: gribid, integer, requested grib id number, such as 212, 223
 c  OUTPUT: region_id(Ngrid), integer, region id for each grid point
@@ -49,10 +51,14 @@ c
         integer kgds(200)
         character*50 gds(400)
 
-        integer ig104(147,110)
+        integer :: nx104, ny104
+        ! ig104 is not common and shared by other subroutines outside - Y Mao
+        integer, allocatable :: ig104(:,:)
         character*3 regions
         character*24 model, obstype, ens
         integer dumy(20)                 !for reading firewx griddef file
+
+        character*24 gridfile
 
         COMMON /for255/Ngrid
 
@@ -250,7 +256,24 @@ c     &       rlon,rlat,nret,lrot,crot,srot)
         call gdswzd(kgds212,iopt,Ngrid,fill,xpts212,ypts212,
      &       rlon,rlat,nret,crot,srot)
 
-        id=104
+
+        ! add grid#45 mask file for UK MET defined area 2 - Yali Mao
+        if (gribid == 45) then
+           gridfile = 'grid#45'
+           id = 45
+           nx104=288
+           ny104=145
+        else
+           gridfile = 'grid#104'
+           id = 104
+           nx104=147
+           ny104=110
+        endif
+        allocate(ig104(nx104,ny104))
+        open(20, file=gridfile, status='old') 
+        read(20, '(20I4)') ig104
+        close(20)
+
         call makgds(id, kgds104, gds, lengds, ier)
        
         !from array of lat and long of all points to get xpts104,ypts104, i.e. (i,j) of thse points
@@ -260,8 +283,6 @@ c     &       rlon,rlat,nret,lrot,crot,srot)
 
         call gdswzd(kgds104,iopt,Ngrid,fill,xpts104,ypts104,
      &       rlon,rlat,nret,crot,srot)
-        open(20, file='grid#104', status='old') 
-        read(20, '(20I4)') ig104
 
         do n=1,Ngrid
           if(xpts104(n).lt.0.0.or.ypts104(n).lt.0.0) then
@@ -283,8 +304,7 @@ c     &       rlon,rlat,nret,lrot,crot,srot)
         if(allocated(srot)) deallocate(srot)
         if(allocated(xpts104)) deallocate(xpts104)
         if(allocated(ypts104)) deallocate(ypts104)
-
-        close(20)
+        if(allocated(ig104)) deallocate(ig104)
 
         return
         end

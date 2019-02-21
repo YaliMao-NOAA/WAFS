@@ -7,7 +7,8 @@ c    into the vsdb file
 c    Author: Binbin Zhou
 c            March, 2005
 c            
-                                                                                                                 
+c    Modification: Y. Mao,  20150317, add numreg 34 for WAFS Area2
+
 
 
       INCLUDE 'parm.inc'
@@ -267,7 +268,7 @@ c      write(*,*) 'nchrlevel(ilv)=',nchrlevl
 
 5001                continue
                 else if (mode(iar).eq.2) then                    ! GRID#104  (mode 2)
-                  if (numreg(iar).le.30) then                    !         sub-region
+                  if (numreg(iar).le.30 .or. numreg(iar)==34) then  ! sub-region
                     do 5002 i = 1,ngrid
                     if(continue_mrk(ivr).eq.1.and.
      +               obsvdata(ifh,ivr,ilv,i).lt.0.0 ) goto 5002

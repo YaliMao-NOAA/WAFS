@@ -1,7 +1,8 @@
 c
 c
 c    11/2012 B.Zhou Move from CCS to Zeus/WCOSS, ST_RMBL modified
-c
+c    03/2015 Y Mao add CFHO for ROC
+c                  change wind speed k5 and k4 to set vectormrk.
 
       SUBROUTINE readcntl(numodel,numfcst,numvfdate,numvfyobs,numarea,
      +            numstat,numvarbl,numlevel,numvector)
@@ -522,12 +523,13 @@ C  Modified as:
 
         end if
 
-        if (num.gt.7) then        !has FHO or AFHO or EFHO or SFHO
+        if (num.gt.7) then        !has FHO or AFHO or EFHO or SFHO or CFHO
           nchrfho(1) = len_trim(substr(7))
           fho(1) = substr(7)(1:nchrfho(1))
           
          if(fho(1)(1:1).eq.'F' .or.
-     +      fho(1)(1:1).eq.'E' ) then      !FHO or EFHO
+     +      fho(1)(1:1).eq.'E' .or.
+     +      fho(1)(1:1).eq.'C') then           !FHO or EFHO or CFHO
           fhomrk(1) = num - 7
           do nx = 8, num 
             nchrfhothr(1,nx-7) = len_trim(substr(nx))
@@ -659,7 +661,8 @@ C  Modified as:
              nchrfho(n) = len_trim(substr(6))
              fho(n) = substr(6)(1:nchrfho(n))
             if(fho(n)(1:1).eq.'F' .or.
-     +         fho(n)(1:1).eq.'E' ) then     !FHO or EFHO
+     +         fho(n)(1:1).eq.'E' .or.
+     +         fho(n)(1:1).eq.'C') then !FHO or EFHO or CFHO
             
              fhomrk(n) =  num - 6
              do nx = 7, num
@@ -811,6 +814,10 @@ C  Modified as:
 
        if(k4(n).eq.4.and.k5(n).eq.8.and.k6(n).eq.103) continue_mrk(n)=4  !for hibrid scan reflectivity 
 
+       if(k4(n).eq.19.and.k5(n).eq.20.and.k6(n).eq.100 .and.
+     +      index(fho(n), "CFHO") > 0)
+     +      continue_mrk(n)=8   !for icing ROC
+
       end do
 
         !set anomly mark
@@ -865,7 +872,8 @@ c	END DO
 
        DO ivr = 1, numvarbl
 c        IF (nchrvarbl(ivr).eq.4.and.namvarbl(ivr).eq.'VWND') THEN
-        IF (k5(ivr).eq.32) THEN
+c       Wind speed k4=2 k5=1 in grib2, k5=32 in grib1 - Y Mao
+        IF (k4(ivr).eq.2 .and. k5(ivr).eq.1) THEN
           numvector = numvector + 1
           vectormrk(ivr) = 1
         END IF

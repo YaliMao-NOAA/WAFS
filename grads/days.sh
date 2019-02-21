@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/sh
 
 #  datecalc -- Perderabo's date calculator   
 #

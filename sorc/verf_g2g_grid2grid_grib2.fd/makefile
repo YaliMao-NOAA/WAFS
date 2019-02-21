@@ -3,14 +3,8 @@
 #  This makefile is to compile grid-to-grid all codes
 #  Author: Binbin Zhou
 #          20 Nov 2018
-
-FC=     ifort -convert big_endian
-INC= -I ${IP_INC4} -I ${G2_INC4}
-LIBS=  ${IP_LIB4} ${W3NCO_LIB4} ${W3EMC_LIB4} ${BACIO_LIB4} ${SP_LIB4} ${G2_LIB4} ${JASPER_LIB} ${PNG_LIB} ${Z_LIB}
-FFLAGS = -O3 -auto $(INC)   
-#IP= /gpfs/hps/nco/ops/nwprod/lib/ip/v2.0.0/intel/libip_v2.0.0_4.a
-
-BINDIR= ../../exec
+#  Modification: 
+#    29 Nov 2018: Y Mao, make INC LIBS FFLAGS available at the previous step
 
 SRCS=   gtgdef.f readcntl.f setarea.f \
 	setfcst.f setlevel.f setmodel.f setobtyp.f  \
@@ -20,20 +14,27 @@ SRCS=   gtgdef.f readcntl.f setarea.f \
 	getHGTsfc.f getTndGRIBdata.f getMeanClimData.f sal1l2.f \
 	getAnomlyLevMrk.f val1l2.f afho.f FITWAV_1D.f \
 	esl1l2.f evl1l2.f rhnt.f rhet.f sl1l2_S1.f efho.f \
+	cfho.f getcfho.f \
 	EFS.f getHiresClimData.f \
 	DIST.f PROB.f naefs.f fho_fss.f FSS.f \
 	readGRIB2.f getClimData_2.5deg.f getNAEFSanalysis.f \
 	fhop.f readProbGRIB2.f DIST_special.f  \
 
-OBJ=${SRCS:.f=.o}
+OBJS=	${SRCS:.f=.o}
 
-g2g:	$(OBJ)
-	$(FC) $(FFLAGS) -o verf_g2g_grid2grid_grib2  grid2grid.f $(OBJ) $(LIBS) 
+CMD=	verf_g2g_grid2grid_grib2
+
+$(CMD):	$(OBJS)
+	$(FC) $(FFLAGS) -o $(@) grid2grid.f  $(OBJS)  $(LIBS)
+
 clean:
-	-rm -f $(OBJ) $(CMD)
+	@rm -f $(OBJS)
+
 install:
-	-mv $(CMD) ${BINDIR}/
-check_prereqs:
-	/nwprod/spa_util/check_libs.bash $(LIBS)
-	/nwprod/spa_util/check_incs.bash $(INC)
+	mv  $(CMD) ../../exec/$(CMD).$(MACHINE)
+
+#check_prereqs:
+#	/nwprod/spa_util/check_libs.bash $(LIBS)
+#	/nwprod/spa_util/check_incs.bash $(INC)
+
 ########################################################

@@ -8,6 +8,7 @@ c    all variables, all levels, all requested sub-regions, then write them
 c    into the vsdb file
 c    Author: Binbin Zhou
 c            March, 2005
+c    Modification: Y. Mao,  20150517, add numreg 34 for WAFS Area2
 
       INCLUDE 'parm.inc'
       
@@ -174,6 +175,8 @@ c         end do
           do 70 iar = 1, numarea
            do 60 ivr = 1, numvarbl
              if(fhomrk(ivr).eq.0) goto 60
+             if(continue_mrk(ivr) == 8) cycle ! don't continue if icing ROC
+
              do 55 ifo = 1, fhomrk(ivr)
                do 50 ilv = 1, levels(ivr)
                 if(nodata(ifh,ivr,ilv).eq.1) goto 50
@@ -254,7 +257,7 @@ c                    !write(*,*)'f,o,h=', f, o, h
 501               continue  
                 else if (mode(iar).eq.2) then                    ! GRID#104  (mode 2)
 
-                  if (numreg(iar).le.30) then                    !         sub-region
+                  if (numreg(iar).le.30 .or. numreg(iar)==34) then  ! sub-region
 
                     do 502 i = 1,ngrid
 
@@ -688,6 +691,7 @@ c     +        fcstdata(ifh,ivr,ilv,i).le.-9999.0) ) goto 507  !for echo-top
         do 71 iar = 1, numarea
          do 61 ivr = 1, numvarbl
           if(fhomrk(ivr).eq.0) goto 61
+          if(continue_mrk(ivr) == 8) cycle ! don't continue if icing ROC
           do 56 ifo = 1, fhomrk(ivr)
             do 51 ilv = 1, levels(ivr)
              if(nodata(ifh,ivr,ilv).eq.1) goto 51
@@ -739,6 +743,8 @@ c     +       sumo(ifh,ivr,ilv,iar,iob,ifo)
                 ivfdate = ifh
               do 160 ivr = 1, numvarbl
                if(fhomrk(ivr).eq.0) goto 160
+               if(continue_mrk(ivr) == 8) cycle ! don't continue if icing ROC
+
                do 150 ifo = 1, fhomrk(ivr)
                  do 150 ilv = 1, levels(ivr)
                   if(nodata(ifh,ivr,ilv).eq.1) goto 150

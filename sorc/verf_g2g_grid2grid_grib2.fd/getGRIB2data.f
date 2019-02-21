@@ -76,6 +76,16 @@ c
           if(jpd1.eq.19.and.jpd2.eq.20.and.
      +       trim(grib2file).eq.'fcst.grib.GFS') jpdtn=1   !GEFS's control icing 
 
+        if ( jpd1==19 .and. jpd2==20 .and. grib2file(1:4)=='fcst' ) then
+           if(index(grib2file, 'MEAN') > 0 .or.
+     +          index(grib2file, 'MAX') > 0 ) then
+           ! WAFS icing verification, forecast mean/max Template 4.15, others 4.0
+              jpdtn = 15
+           else
+              jpdtn = 0
+           end if
+        end if
+
         else if (Nmodel.gt.1.and.grib2file(1:4).eq.'obsv') then
          if (model(1:7).eq.'gefs2p5'.or.model(1:7).eq.'cmce2p5'.or.
      +       model(1:8).eq.'naefs2p5'.or.model(1:7).eq.'ecme2p5') then

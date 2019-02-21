@@ -1,4 +1,4 @@
-#!/bin/ksh
+#!/bin/sh
 set -x
 
 #-----------------------------------------------------------------------------
@@ -34,8 +34,6 @@ if [ ! -s $exedir ]; then mkdir -p $exedir; fi
 cd $exedir
 
 export vsdb_data=${vsdb_data:-/climate/save/wx24fy/VRFY/vsdb_data06}
-export NWPROD=${NWPROD:-/nwprod}
-export ndate=${ndate:-$NWPROD/util/exec/ndate}
 export FC=${FC:-ifort}
 export FFLAG=${FFLAG:-" "}
 
@@ -56,7 +54,7 @@ export levlist=${4:-"P800 P700 P600 P500 P400"}
 export edate=${5:-20150425}
 export ndays=${6:-31}
        nhours=`expr $ndays \* 24 - 24`
-       tmp=`$ndate -$nhours ${edate}00 `
+       tmp=`$NDATE -$nhours ${edate}00 `
        sdate=`echo $tmp | cut -c 1-8`
 
 ## forecast cycles to be vefified: 00Z, 06Z, 12Z, 18Z, all
@@ -95,7 +93,7 @@ for model in $mdlist; do
   cdate=$sdate
   while [ $cdate -le $edate ]; do
     echo ${vsdb_data}/${model}_${obsv}_${cdate}.vsdb >> vsdbfiles.txt
-    cdate=`$ndate +24 ${cdate}00 | cut -c 1-8 `  
+    cdate=`$NDATE +24 ${cdate}00 | cut -c 1-8 `  
   done
 done
 

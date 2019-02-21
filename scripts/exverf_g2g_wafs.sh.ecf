@@ -44,21 +44,22 @@ do
     if [[ $vmodel = 'cip' &&  $validationdata =~ "|cip|" ]] || \
        [[ $vmodel = 'gcipconus' &&  $validationdata =~ "|gcipconus|" ]] ; then
       export vgrid=130
-      # Get the observation CIP icing data
-      $USHverf_g2g/verf_g2g_get_wafs.sh $vmodel $vday $vmodel
     fi
   elif [ $vmodel = 'gcip' ] ; then
     if [[ $vmodel = 'gcip' &&  $validationdata =~ "|gcip|" ]] ; then
       export vgrid=45
-      # Get the observation GCIP icing data
-      $USHverf_g2g/verf_g2g_get_wafs.sh $vmodel $vday $vmodel
     fi
   elif [ $vmodel = 'gfs' ] ; then
     if [[ $vmodel = 'gfs' &&  $validationdata =~ "|gfs|" ]] ; then
       export vgrid=45
-      # Get the analysis GFS T,U,V data
-      $USHverf_g2g/verf_g2g_get_wafs.sh $vmodel $vday $vmodel
     fi
+  fi
+
+  # Get the observation/analysis data
+  if [[ $envirv = 'prod' ]] ; then
+      $USHverf_g2g/verf_g2g_get_wafs2.sh $vmodel $vday $vmodel
+  else
+      $USHverf_g2g/verf_g2g_get_wafs.sh $vmodel $vday $vmodel
   fi
 
   if [[ -z $vgrid ]] ; then
@@ -68,7 +69,12 @@ do
   models=`echo $line |awk -F"|" '{print $2}'`
   for model in $models ; do
     # Get the input model forecast data
-    $USHverf_g2g/verf_g2g_get_wafs.sh $model $vday $vmodel
+    if [[ $envirp = 'prod' ]] ; then
+      $USHverf_g2g/verf_g2g_get_wafs2.sh $model $vday $vmodel
+    else
+      $USHverf_g2g/verf_g2g_get_wafs.sh $model $vday $vmodel
+    fi
+
     # Verification of the model output against observation data:
     $USHverf_g2g/verf_g2g_wafs.sh $vday $model $vmodel
   done # model in $models

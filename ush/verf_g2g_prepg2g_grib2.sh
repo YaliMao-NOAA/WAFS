@@ -280,11 +280,11 @@ fi
 }
 
 set -x 
-wgrb=/nwprod/util/exec
-gribindex=${gribindex:-/nwprod/util/exec/grbindex}
 cp $PARMverf_g2g/verf_g2g.grid104 grid#104
 cp $PARMverf_g2g/verf_g2g.regions regions
-
+# for WAFS, UK MET-office defined Area-2 from North to South
+# Grids marked as 34, 4319 gridpoints out of 288*145.
+cp $PARMverf_g2g/verf_g2g.grid45 grid#45
 
 rm -f g2g.ctl
 
@@ -339,13 +339,13 @@ export lat_weight=${lat_weight:-"no"}
      cas=1
      obsv[0]=${tobsv[1]}
      oday[0]=`echo ${obsv[0]} | cut -c 1-8`
-     obsv03[0]=`/nwprod/util/exec/ndate -3 ${obsv[0]}`
+     obsv03[0]=`$NDATE -3 ${obsv[0]}`
      oday03[0]=`echo ${obsv03[0]} | cut -c 1-8`
-     obsv06[0]=`/nwprod/util/exec/ndate -6 ${obsv[0]}`
+     obsv06[0]=`$NDATE -6 ${obsv[0]}`
      oday06[0]=`echo ${obsv06[0]} | cut -c 1-8`
-     obsv12[0]=`/nwprod/util/exec/ndate -12 ${obsv[0]}`
+     obsv12[0]=`$NDATE -12 ${obsv[0]}`
      oday12[0]=`echo ${obsv12[0]} | cut -c 1-8`
-     obsv24[0]=`/nwprod/util/exec/ndate -24 ${obsv[0]}`
+     obsv24[0]=`$NDATE -24 ${obsv[0]}`
      oday24[0]=`echo ${obsv24[0]} | cut -c 1-8`
 
      to=`echo ${obsv[0]} | cut -c 9-10`                           #obsv cycle
@@ -367,14 +367,16 @@ export lat_weight=${lat_weight:-"no"}
      echo ${tfcst[0]}"  "forecasts:Ovservations >> g2g.ctl    
      while [ $t -le $nt ]
      do
-       pass=` /nwprod/util/exec/ndate -${f[$t]} ${obsv[0]}`
+       pass=` $NDATE -${f[$t]} ${obsv[0]}`
        fday[$t]=`echo ${pass} | cut -c 1-8`
        fcst[$t]=$pass
        tf=`echo ${pass} | cut -c 9-10`                                    #fcst cycle
 
 
        if [ ${f[$t]} -lt 10 ] ; then
-         f[$t]='0'${f[$t]}
+#         f[$t]='0'${f[$t]}
+#         in case the original input is 06, instead of 6.
+	  f[$t]=`printf "%02d" 10#${f[$t]}`
        fi
        filefcst[$t]=$fcstdir.${fday[$t]}/$fhead.t${tf}z.${fgrbtype}${f[$t]}$ftm
 
@@ -464,11 +466,11 @@ export lat_weight=${lat_weight:-"no"}
      fi
 
 
-     pass=`/nwprod/util/exec/ndate +${b[0]} ${fcst[0]}`
-     pass03=`/nwprod/util/exec/ndate -3 $pass`
-     pass06=`/nwprod/util/exec/ndate -6 $pass`
-     pass12=`/nwprod/util/exec/ndate -12 $pass`
-     pass24=`/nwprod/util/exec/ndate -24 $pass`
+     pass=`$NDATE +${b[0]} ${fcst[0]}`
+     pass03=`$NDATE -3 $pass`
+     pass06=`$NDATE -6 $pass`
+     pass12=`$NDATE -12 $pass`
+     pass24=`$NDATE -24 $pass`
 
      oday[0]=`echo ${pass} | cut -c 1-8`
      obsv[0]=$pass
@@ -547,11 +549,11 @@ echo ${fday[0]}${tf}${b[0]}" "${oday[0]}${to}00" "${fday[0]}${tf}${b03[0]}" "${o
        fi
 
 
-       pass=`/nwprod/util/exec/ndate +${b[$t]} ${fcst[0]}`
-       pass03=`/nwprod/util/exec/ndate -3 $pass`
-       pass06=`/nwprod/util/exec/ndate -6 $pass`
-       pass12=`/nwprod/util/exec/ndate -12 $pass`
-       pass24=`/nwprod/util/exec/ndate -24 $pass`
+       pass=`$NDATE +${b[$t]} ${fcst[0]}`
+       pass03=`$NDATE -3 $pass`
+       pass06=`$NDATE -6 $pass`
+       pass12=`$NDATE -12 $pass`
+       pass24=`$NDATE -24 $pass`
 
        oday[$t]=`echo ${pass} | cut -c 1-8`
        obsv[$t]=$pass 
@@ -727,9 +729,9 @@ echo CASE $cas Model: $model
               fi
                 #One wind obsv cycle 
 
-                $wgrb/wgrib2 -match  "$u_string" ${fileobsv[0]} |$wgrb/wgrib2 -i  ${fileobsv[0]} -grib uo
+                $WGRIB2 -match  "$u_string" ${fileobsv[0]} |$WGRIB2 -i  ${fileobsv[0]} -grib uo
                 cat uo >>obsv.grib
-                $wgrb/wgrib2 -match  "$v_string" ${fileobsv[0]} |$wgrb/wgrib2 -i  ${fileobsv[0]} -grib vo
+                $WGRIB2 -match  "$v_string" ${fileobsv[0]} |$WGRIB2 -i  ${fileobsv[0]} -grib vo
                 cat vo >>obsv.grib
                 echo  wgrib2ing ${fileobsv[0]} for $u_string and $v_string ..... 
 
@@ -739,17 +741,17 @@ echo CASE $cas Model: $model
                     echo  wgrib2ing ${filefcst[$timelp]} .......
 
                   if [ ${fho[$varslp]:0:5} = 'FHOP>' ] ; then
-                    $wgrb/wgrib2 -match "$u_string"  ${filefcst[$timelp]} |grep "prob >${thr[$varslp]}"|$wgrb/wgrib2 -i ${filefcst[$timelp]} -grib uf
-                    $wgrb/wgrib2 -match "$v_string"  ${filefcst[$timelp]} |grep "prob >${thr[$varslp]}"|$wgrb/wgrib2 -i ${filefcst[$timelp]} -grib vf
+                    $WGRIB2 -match "$u_string"  ${filefcst[$timelp]} |grep "prob >${thr[$varslp]}"|$WGRIB2 -i ${filefcst[$timelp]} -grib uf
+                    $WGRIB2 -match "$v_string"  ${filefcst[$timelp]} |grep "prob >${thr[$varslp]}"|$WGRIB2 -i ${filefcst[$timelp]} -grib vf
                   elif [ ${fho[$varslp]:0:5} = 'FHOP<' ] ; then
-                    $wgrb/wgrib2 -match "$u_string"  ${filefcst[$timelp]} |grep "prob <${thr[$varslp]}"|$wgrb/wgrib2 -i ${filefcst[$timelp]} -grib uf
-                    $wgrb/wgrib2 -match "$v_string"  ${filefcst[$timelp]} |grep "prob <${thr[$varslp]}"|$wgrb/wgrib2 -i ${filefcst[$timelp]} -grib vf
+                    $WGRIB2 -match "$u_string"  ${filefcst[$timelp]} |grep "prob <${thr[$varslp]}"|$WGRIB2 -i ${filefcst[$timelp]} -grib uf
+                    $WGRIB2 -match "$v_string"  ${filefcst[$timelp]} |grep "prob <${thr[$varslp]}"|$WGRIB2 -i ${filefcst[$timelp]} -grib vf
                   elif [ ${fho[$varslp]:0:5} = 'FHOP=' ] ; then
-                    $wgrb/wgrib2 -match "$u_string"  ${filefcst[$timelp]} |grep "prob >=${thr[$varslp]}"|$wgrb/wgrib2 -i ${filefcst[$timelp]} -grib uf
-                    $wgrb/wgrib2 -match "$v_string"  ${filefcst[$timelp]} |grep "prob >=${thr[$varslp]}"|$wgrb/wgrib2 -i ${filefcst[$timelp]} -grib vf
+                    $WGRIB2 -match "$u_string"  ${filefcst[$timelp]} |grep "prob >=${thr[$varslp]}"|$WGRIB2 -i ${filefcst[$timelp]} -grib uf
+                    $WGRIB2 -match "$v_string"  ${filefcst[$timelp]} |grep "prob >=${thr[$varslp]}"|$WGRIB2 -i ${filefcst[$timelp]} -grib vf
                   else
-                    $wgrb/wgrib2 -match "$u_string"  ${filefcst[$timelp]} |$wgrb/wgrib2 -i ${filefcst[$timelp]} -grib uf
-                    $wgrb/wgrib2 -match "$v_string"  ${filefcst[$timelp]} |$wgrb/wgrib2 -i ${filefcst[$timelp]} -grib vf
+                    $WGRIB2 -match "$u_string"  ${filefcst[$timelp]} |$WGRIB2 -i ${filefcst[$timelp]} -grib uf
+                    $WGRIB2 -match "$v_string"  ${filefcst[$timelp]} |$WGRIB2 -i ${filefcst[$timelp]} -grib vf
                   fi
                     cat uf >>fcst.grib
                     cat vf >>fcst.grib
@@ -787,25 +789,25 @@ echo CASE $cas Model: $model
 
 
                 #One cycle obsv
-                $wgrb/wgrib2 -match "$kpds" ${fileobsv[0]}|$wgrb/wgrib2 -i  ${fileobsv[0]} -grib x 
+                $WGRIB2 -match "$kpds" ${fileobsv[0]}|$WGRIB2 -i  ${fileobsv[0]} -grib x 
                 cat x >>obsv.grib
                 echo wgrib2ing ${fileobsv[0]} for $kpds .........
 
                 if [ ${k4[$varslp]}  -eq 16 ] && [ ${k5[$varslp]} -eq 195 ] ; then #MOSAIC HSR use different ID from models
-                  $wgrb/wgrib2 -match "var discipline=0 master_table=2 parmcat=15 parm=15" ${fileobsv[0]}|$wgrb/wgrib2 -i  ${fileobsv[0]} -grib x
+                  $WGRIB2 -match "var discipline=0 master_table=2 parmcat=15 parm=15" ${fileobsv[0]}|$WGRIB2 -i  ${fileobsv[0]} -grib x
                   cat x >>obsv.grib
                   echo wgrib2ing ${fileobsv[0]} for MOSAIC HRS .........
                 fi 
 
 
                 if [ ${k4[$varslp]}  -eq 13 ] && [ ${k5[$varslp]} -eq 195 ] ; then #smoke/dust obsv uses different ID from HYSPLT fcst
-                  $wgrb/wgrib2 -match "DEN:" ${fileobsv[0]}|$wgrb/wgrib2 -i  ${fileobsv[0]} -grib x
+                  $WGRIB2 -match "DEN:" ${fileobsv[0]}|$WGRIB2 -i  ${fileobsv[0]} -grib x
                   cat x >>obsv.grib
                   echo wgrib2ing ${fileobsv[0]} for SMOKE obsv file .....
                 fi 
 
                if [ ${k4[$varslp]}  -eq 20 ] && [ ${k5[$varslp]} -eq 102 ] ; then #NESDIS AOD obsv uses different ID from CMAQ fcst
-                  $wgrb/wgrib2 -match "parmcat=255 parm=255" ${fileobsv[0]}|$wgrb/wgrib2 -i  ${fileobsv[0]} -grib x
+                  $WGRIB2 -match "parmcat=255 parm=255" ${fileobsv[0]}|$WGRIB2 -i  ${fileobsv[0]} -grib x
                   cat x >>obsv.grib
                   echo wgrib2ing ${fileobsv[0]} for AOD obsv file .....
                 fi
@@ -823,22 +825,22 @@ echo CASE $cas Model: $model
 
                   if [ ${fho[$varslp]:0:5} = 'FHOP>' ] ; then
                    if [ $model = 'NARRE' ] && [ ${k4[$varslp]}  -eq 16 ] && [ ${k5[$varslp]} -eq 196 ] ; then # reflectivity in NARRE (from cnvgrib)
-                    $wgrb/wgrib2 -match "parmcat=16 parm=196:" ${filefcst[$timelp]} |grep "prob >${thr[$varslp]}"|$wgrb/wgrib2 -i ${filefcst[$timelp]} -grib y
+                    $WGRIB2 -match "parmcat=16 parm=196:" ${filefcst[$timelp]} |grep "prob >${thr[$varslp]}"|$WGRIB2 -i ${filefcst[$timelp]} -grib y
                    else
-                    $wgrb/wgrib2 -match "$kpds" ${filefcst[$timelp]} |grep "prob >${thr[$varslp]}"|$wgrb/wgrib2 -i ${filefcst[$timelp]} -grib y
+                    $WGRIB2 -match "$kpds" ${filefcst[$timelp]} |grep "prob >${thr[$varslp]}"|$WGRIB2 -i ${filefcst[$timelp]} -grib y
                    fi
                   elif [ ${fho[$varslp]:0:5} = 'FHOP<' ] ; then
-                   $wgrb/wgrib2 -match "$kpds" ${filefcst[$timelp]} |grep "prob <${thr[$varslp]}"|$wgrb/wgrib2 -i ${filefcst[$timelp]} -grib y
+                   $WGRIB2 -match "$kpds" ${filefcst[$timelp]} |grep "prob <${thr[$varslp]}"|$WGRIB2 -i ${filefcst[$timelp]} -grib y
                   elif [ ${fho[$varslp]:0:5} = 'FHOP=' ] ; then
-                   $wgrb/wgrib2 -match "$kpds" ${filefcst[$timelp]} |grep "prob >=${thr[$varslp]}"|$wgrb/wgrib2 -i ${filefcst[$timelp]} -grib y
+                   $WGRIB2 -match "$kpds" ${filefcst[$timelp]} |grep "prob >=${thr[$varslp]}"|$WGRIB2 -i ${filefcst[$timelp]} -grib y
                   else
-                   $wgrb/wgrib2 -match "$kpds" ${filefcst[$timelp]} |$wgrb/wgrib2 -i ${filefcst[$timelp]} -grib y
+                   $WGRIB2 -match "$kpds" ${filefcst[$timelp]} |$WGRIB2 -i ${filefcst[$timelp]} -grib y
                   fi
 
                   #until 20161116, opreational CMAQ is still grib1, after cnvgrib to grib2, its string is IMGD
                   #Only after CMAQ becomes directly output grib2, it is AOTK
                   if [ $model = 'CMAQ' ] && [ ${k4[$varslp]} -eq 20 ] && [ ${k5[$varslp]} -eq 102 ]  ; then
-                   $wgrb/wgrib2 -match "IMGD:" ${filefcst[$timelp]}|$wgrb/wgrib2 -i  ${filefcst[$timelp]} -grib y
+                   $WGRIB2 -match "IMGD:" ${filefcst[$timelp]}|$WGRIB2 -i  ${filefcst[$timelp]} -grib y
                   fi
 
                   cat y >>fcst.grib 
@@ -862,7 +864,7 @@ echo CASE $cas Model: $model
          while [ $varslp -le $nvar ] ; do            # for cloud base/top, need surface height
            if [ ${k4[$varslp]} -eq 3 ] && [ ${k5[$varslp]} -eq 5 ] ; then
              if [ ${k6[$varslp]} -eq 2 ] || [ ${k6[$varslp]} -eq 3 ] ; then
-               $wgrb/wgrib2 -match "HGT:surface" ${filefcst[0]} |$wgrb/wgrib2 -i ${filefcst[0]} -grib sfc.grib2
+               $WGRIB2 -match "HGT:surface" ${filefcst[0]} |$WGRIB2 -i ${filefcst[0]} -grib sfc.grib2
                echo wgrib2ing ${filefcst[0]} for HGT:surface ........... 
                varslp=$nvar
              fi
@@ -904,23 +906,23 @@ echo CASE $cas Model: $model
 
 
                if [ ${fho[$varslp]:0:5} = 'FHOP>' ] ; then
-                  $wgrb/wgrib2 -match "$u_string"  ${filefcst[$timelp]} |grep "prob >${thr[$varslp]}"|$wgrb/wgrib2 -i ${filefcst[$timelp]} -grib uf
-                  $wgrb/wgrib2 -match "$v_string"  ${filefcst[$timelp]} |grep "prob >${thr[$varslp]}"|$wgrb/wgrib2 -i ${filefcst[$timelp]} -grib vf
+                  $WGRIB2 -match "$u_string"  ${filefcst[$timelp]} |grep "prob >${thr[$varslp]}"|$WGRIB2 -i ${filefcst[$timelp]} -grib uf
+                  $WGRIB2 -match "$v_string"  ${filefcst[$timelp]} |grep "prob >${thr[$varslp]}"|$WGRIB2 -i ${filefcst[$timelp]} -grib vf
                elif [ ${fho[$varslp]:0:5} = 'FHOP<' ] ; then
-                  $wgrb/wgrib2 -match "$u_string"  ${filefcst[$timelp]} |grep "prob <${thr[$varslp]}"|$wgrb/wgrib2 -i ${filefcst[$timelp]} -grib uf
-                  $wgrb/wgrib2 -match "$v_string"  ${filefcst[$timelp]} |grep "prob <${thr[$varslp]}"|$wgrb/wgrib2 -i ${filefcst[$timelp]} -grib vf
+                  $WGRIB2 -match "$u_string"  ${filefcst[$timelp]} |grep "prob <${thr[$varslp]}"|$WGRIB2 -i ${filefcst[$timelp]} -grib uf
+                  $WGRIB2 -match "$v_string"  ${filefcst[$timelp]} |grep "prob <${thr[$varslp]}"|$WGRIB2 -i ${filefcst[$timelp]} -grib vf
                 elif [ ${fho[$varslp]:0:5} = 'FHOP=' ] ; then
-                  $wgrb/wgrib2 -match "$u_string"  ${filefcst[$timelp]} |grep "prob >=${thr[$varslp]}"|$wgrb/wgrib2 -i ${filefcst[$timelp]} -grib uf
-                  $wgrb/wgrib2 -match "$v_string"  ${filefcst[$timelp]} |grep "prob >=${thr[$varslp]}"|$wgrb/wgrib2 -i ${filefcst[$timelp]} -grib vf
+                  $WGRIB2 -match "$u_string"  ${filefcst[$timelp]} |grep "prob >=${thr[$varslp]}"|$WGRIB2 -i ${filefcst[$timelp]} -grib uf
+                  $WGRIB2 -match "$v_string"  ${filefcst[$timelp]} |grep "prob >=${thr[$varslp]}"|$WGRIB2 -i ${filefcst[$timelp]} -grib vf
                 else
-                  $wgrb/wgrib2 -match "$u_string"  ${filefcst[$timelp]} |$wgrb/wgrib2 -i ${filefcst[$timelp]} -grib uf
-                  $wgrb/wgrib2 -match "$v_string"  ${filefcst[$timelp]} |$wgrb/wgrib2 -i ${filefcst[$timelp]} -grib vf
+                  $WGRIB2 -match "$u_string"  ${filefcst[$timelp]} |$WGRIB2 -i ${filefcst[$timelp]} -grib uf
+                  $WGRIB2 -match "$v_string"  ${filefcst[$timelp]} |$WGRIB2 -i ${filefcst[$timelp]} -grib vf
                 fi
                 cat uf >>fcst.grib
                 cat vf >>fcst.grib
 
-                $wgrb/wgrib2 -match  "$u_string" ${fileobsv[$timelp]} |$wgrb/wgrib2 -i  ${fileobsv[$timelp]} -grib uo
-                $wgrb/wgrib2 -match  "$v_string" ${fileobsv[$timelp]} |$wgrb/wgrib2 -i  ${fileobsv[$timelp]} -grib vo
+                $WGRIB2 -match  "$u_string" ${fileobsv[$timelp]} |$WGRIB2 -i  ${fileobsv[$timelp]} -grib uo
+                $WGRIB2 -match  "$v_string" ${fileobsv[$timelp]} |$WGRIB2 -i  ${fileobsv[$timelp]} -grib vo
                 cat uo >>obsv.grib
                 cat vo >>obsv.grib
              
@@ -962,23 +964,23 @@ echo CASE $cas Model: $model
               #fi
 
              
-              $wgrb/wgrib2 -match  "$kpds" ${fileobsv[$timelp]} |$wgrb/wgrib2 -i ${fileobsv[$timelp]} -grib x
+              $WGRIB2 -match  "$kpds" ${fileobsv[$timelp]} |$WGRIB2 -i ${fileobsv[$timelp]} -grib x
               cat x >>obsv.grib
 
               if [ ${fho[$varslp]:0:5} = 'FHOP>' ] ; then
 
                   if [ $model = 'NARRE' ] && [ ${k4[$varslp]}  -eq 16 ] && [ ${k5[$varslp]} -eq 196 ] ; then #reflectivity in NARRE (using cnvgrib) 
-                    $wgrb/wgrib2 -match "parmcat=16 parm=196:" ${filefcst[$timelp]} |grep "prob >${thr[$varslp]}"|$wgrb/wgrib2 -i ${filefcst[$timelp]} -grib y
+                    $WGRIB2 -match "parmcat=16 parm=196:" ${filefcst[$timelp]} |grep "prob >${thr[$varslp]}"|$WGRIB2 -i ${filefcst[$timelp]} -grib y
                   else
-                    $wgrb/wgrib2 -match  "$kpds" ${filefcst[$timelp]} |grep "prob >${thr[$varslp]}"|$wgrb/wgrib2 -i ${filefcst[$timelp]} -grib y
+                    $WGRIB2 -match  "$kpds" ${filefcst[$timelp]} |grep "prob >${thr[$varslp]}"|$WGRIB2 -i ${filefcst[$timelp]} -grib y
                   fi
 
               elif [ ${fho[$varslp]:0:5} = 'FHOP<' ] ; then
-               $wgrb/wgrib2 -match  "$kpds" ${filefcst[$timelp]} |grep "prob <${thr[$varslp]}"|$wgrb/wgrib2 -i ${filefcst[$timelp]} -grib y
+               $WGRIB2 -match  "$kpds" ${filefcst[$timelp]} |grep "prob <${thr[$varslp]}"|$WGRIB2 -i ${filefcst[$timelp]} -grib y
               elif [ ${fho[$varslp]:0:5} = 'FHOP=' ] ; then
-               $wgrb/wgrib2 -match  "$kpds" ${filefcst[$timelp]} |grep "prob >=${thr[$varslp]}"|$wgrb/wgrib2 -i ${filefcst[$timelp]} -grib y
+               $WGRIB2 -match  "$kpds" ${filefcst[$timelp]} |grep "prob >=${thr[$varslp]}"|$WGRIB2 -i ${filefcst[$timelp]} -grib y
               else
-               $wgrb/wgrib2 -match  "$kpds" ${filefcst[$timelp]} |$wgrb/wgrib2 -i ${filefcst[$timelp]} -grib y
+               $WGRIB2 -match  "$kpds" ${filefcst[$timelp]} |$WGRIB2 -i ${filefcst[$timelp]} -grib y
               fi
               cat y >>fcst.grib
 
@@ -986,19 +988,19 @@ echo CASE $cas Model: $model
               echo  wgrib2ing ${fileobsv[$timelp]} for $kpds .......
 
                 if [ ${k4[$varslp]}  -eq 16 ] && [ ${k5[$varslp]} -eq 195 ] ; then #MOSAIC HSR use different ID from models
-                  $wgrb/wgrib2 -match "var discipline=0 master_table=2 parmcat=15 parm=15" ${fileobsv[$timelp]}|$wgrb/wgrib2 -i  ${fileobsv[$timelp]} -grib x
+                  $WGRIB2 -match "var discipline=0 master_table=2 parmcat=15 parm=15" ${fileobsv[$timelp]}|$WGRIB2 -i  ${fileobsv[$timelp]} -grib x
                   cat x >>obsv.grib
                   echo wgrib2ing ${fileobsv[$timelp]} for MOSAIC HSR .........
                 fi
 
                 if [ ${k4[$varslp]}  -eq 13 ] && [ ${k5[$varslp]} -eq 195 ] ; then #smoke/dust obsv uses different ID from HYSPLT fcast 
-                  $wgrb/wgrib2 -match "DEN:" ${fileobsv[$timelp]}|$wgrb/wgrib2 -i  ${fileobsv[$timelp]} -grib x
+                  $WGRIB2 -match "DEN:" ${fileobsv[$timelp]}|$WGRIB2 -i  ${fileobsv[$timelp]} -grib x
                   cat x >>obsv.grib
                   echo wgrib2ing ${fileobsv[$timelp]} for SMOKE obsv files .........
                 fi
  
                 if [ ${k4[$varslp]}  -eq 20 ] && [ ${k5[$varslp]} -eq 102 ] ; then #NESDIS AOD obsv uses different ID from CMAQ fcast
-                  $wgrb/wgrib2 -match "IMGD:" ${fileobsv[$timelp]}|$wgrb/wgrib2 -i  ${fileobsv[$timelp]} -grib x
+                  $WGRIB2 -match "IMGD:" ${fileobsv[$timelp]}|$WGRIB2 -i  ${fileobsv[$timelp]} -grib x
                   cat x >>obsv.grib
                   echo wgrib2ing ${fileobsv[$timelp]} for AOD obsv files .........
                 fi
@@ -1021,7 +1023,7 @@ echo CASE $cas Model: $model
        while [ $varslp -le $nvar ] ; do            # for cloud base/top, need surface height
          if [ ${k4[$varslp]} -eq 3 ] && [ ${k5[$varslp]} -eq 5 ] ; then
              if [ ${k6[$varslp]} -eq 2 ] || [ ${k6[$varslp]} -eq 3 ] ; then
-               $wgrb/wgrib2 -match "HGT:surface" ${filefcst[0]} |$wgrb/wgrib2 -i ${filefcst[0]} -grib sfc.grib2
+               $WGRIB2 -match "HGT:surface" ${filefcst[0]} |$WGRIB2 -i ${filefcst[0]} -grib sfc.grib2
                varslp=$nvar
                echo  wgrib2ing ${filefcst[0]} for HGT:surface ........
              fi

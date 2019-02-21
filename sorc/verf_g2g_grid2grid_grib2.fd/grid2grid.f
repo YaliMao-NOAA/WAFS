@@ -44,6 +44,7 @@ C    11/22/2013  B. Zhou, Add FSS stats
 c    01/09/2014  B. Zhou, Modify reliability reli in PROB.f so that can be specific FHO threshold and also can set > or < or =
 c    01/05/2014  B. Zhou Change to grib2 I/O
 c    06/05/2015  B. Zhou Add 2.5x2.5 degree ensemble verification,including CMC and NAEFS analyis processing and clim data
+c    03/15/2015  Y. Mao add CFHO for icing ROC
 c
 c
 C   Variables:
@@ -1060,6 +1061,14 @@ c      ----- stats without anomly --------------------------------------
            write(*,*) 'FHOP done'
 
          end if
+
+         if(trim(namstat(ist)).eq.'CFHO') then
+           call gtCFHO(nvsdb, imodel,ist,numfcst,numvfyobs,numarea,
+     +          numvarbl,numlevel,ngrid,levels,tendencymrk,updown,
+     +          hasdata,fcstdata, obsvdata)
+           write(*,*) 'CFHO done'
+        end if
+
 
         if(trim(namstat(ist)).eq.'EFHO') then  !Note: EFHO and FHO can not put into same user control file at same time (20090717)
            namstat(ist)='FHO'                  !Either verify FHO either verify EFHO, can't verify the two at same time

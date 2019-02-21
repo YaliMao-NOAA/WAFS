@@ -1,5 +1,4 @@
 gfs|twind|
-cip|usfip usmean usmax ukmean ukmax blndmean blndmax fip|
-gcip|usfip usmean usmax ukmean ukmax blndmean blndmax|
-gcipconus|usfip usmean usmax ukmean ukmax blndmean blndmax|
-#gcip|usfip usmean usmax ukmean ukmax blndmean blndmax gfip gfipmean gfipmax|
+cip|gfip usmean usmax ukmean ukmax blndmean blndmax fip|
+gcip|gfip usmean usmax ukmean ukmax blndmean blndmax|
+gcipconus|gfip usmean usmax ukmean ukmax blndmean blndmax|

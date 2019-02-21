@@ -48,9 +48,7 @@ if [[ -z $levels ]] ; then
   levels="9144 8839 8534 8229 7924 7620 7315 7010 6705 6400 6096 5791 5486 5181 4876 4572 4267 3962 3657 3352 3048 2743 2438 2133 1828 1524 1219 914 609 304"
 fi
 
-UTIL=${EXECutil:-/nwprod/util/exec}
-
-ADDSDIR=${ADDSDIR:-/dcom/us007003}
+ADDSDIR=${ADDSDIR:-$DCOMROOT/us007003}
 
 rm $prod_lc.*
 
@@ -64,12 +62,12 @@ for hh in $cycles ; do
            fh2=`printf "%02i" $fh`
            search1=":d=$day$hh:IC${field}:$lvl[.| ]"
  	   search2=":$fh hour fcst:"
-           $UTIL/wgrib2 $file -match "$search1" -match "$search2" -grib x.$lvl
+           $WGRIB2 $file -match "$search1" -match "$search2" -grib x.$lvl
            cat x.$lvl >> adds.${prod_lc}.t${hh}z.f${fh2}
          done #fh
        else # CIP
  	   search1=":d=$day$hh:IC${field}:$lvl"
-           $UTIL/wgrib2 $file -match "$search1" -grib x.$lvl
+           $WGRIB2 $file -match "$search1" -grib x.$lvl
            cat x.$lvl >> adds.${prod_lc}.t${hh}z.f00
        fi
      done # lvl

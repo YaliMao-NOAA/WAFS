@@ -1,5 +1,4 @@
-#!/bin/ksh
-set -xa
+#!/bin/sh
 
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
@@ -10,51 +9,55 @@ set -xa
 #  runs and make maps using GrADS.
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
+. /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/envir_setting.sh
+set -xa
 
 LOGNAME=`whoami`
 WEBSERVER="ymao@emcrzdm"
 WEBDIR="/home/www/emc/htdocs/gmb/icao"
 export doftp="YES"
+export doftp="NO"
 
 ############# Set up environments ##################
-chost=`echo $(hostname) |cut -c 1-1`
-echo $chost
-if [[ $chost == 't' || $chost == 'g' ]] ; then
-  machine=WCOSS
-elif [[ $chost == 'f' ]] ; then
-  machine=ZEUS
+
+# From save/envir_setting.sh
+echo $VSDBsave     #where vsdb database is saved
+echo $NWPROD
+echo $TMP
+echo $GrADS_ROOT
+
+export vsdbhome=$GIT/verf_g2g.v3.0.12	#script home
+export PTMP=`dirname $TMP`		#temporary directory without user name
+export GRADSBIN=$GrADS_ROOT/bin		#GrADS executables
+
+#image magic converter
+if [ $MACHINE = dell ] ; then
+  imagemagick=imagemagick/6.9.9-25
+  module load python/2.7.14
+  export PYTHON=python
+elif [ $MACHINE = cray ] ; then
+  imagemagick=imagemagick-intel-haswell/6.8.3
+  module load python/2.7.14
+  export PYTHON=python
+elif [ $MACHINE = wcoss ] ; then
+  imagemagick=imagemagick/6.8.3-3
+  export PYTHON=/usr/bin/python
 fi
-if [ $machine = WCOSS ] ; then
- vsdbsave=/global/save/$LOGNAME/vsdb/grid2grid                  ;#where vsdb database is saved
-# vsdbsave=/ptmpp1/Yali.Mao/vsdb/grid2grid
- export vsdbhome=/global/save/Yali.Mao/project/verif_g2g.v3.0.0 ;#script home
- export NWPROD=/nwprod
- export PTMP=/ptmpp1                                            ;#temporary directory                          
- export GRADSBIN=/usrx/local/GrADS/2.0.2/bin                    ;#GrADS executables       
- export IMGCONVERT=/usrx/local/ImageMagick/6.8.3-3/bin/convert                ;#image magic converter
- export FC=/usrx/local/intel/composer_xe_2011_sp1.11.339/bin/intel64/ifort    ;#intel compiler
- export FFLAG="-O2 -convert big_endian -FR"                     ;#intel compiler options
- export PYTHON=/usr/bin/python
-elif [ $machine = ZEUS ] ; then
- vsdbsave=/scratch2/portfolios/NCEPDEV/global/save/$LOGNAME/vsdb/grid2grid       ;#where vsdb database is saved
- export vsdbhome=/scratch2/portfolios/NCEPDEV/global/save/Yali.Mao/project/verif_g2g.v3.0.0 ;#script home
- export NWPROD=/scratch2/portfolios/NCEPDEV/global/save/Fanglin.Yang/VRFY/vsdb/nwprod
- export PTMP=/scratch2/portfolios/NCEPDEV/ptmp              ;#temporary directory                          
-#export GRADSBIN=/apps/grads/2.0.1/bin                      ;#GrADS executables       
- export GRADSBIN=/apps/grads/2.0.a9/bin                     ;#GrADS executables       
- export IMGCONVERT=/apps/ImageMagick/ImageMagick-6.7.6-8/bin/convert  ;#image magic converter
- export FC=/apps/intel/composerxe-2011.4.191/composerxe-2011.4.191/bin/intel64/ifort ;#intel compiler
- export FFLAG="-O2 -convert big_endian -FR"                 ;#intel compiler options
- export PYTHON=/usr/bin/python
-fi
+export IMGCONVERT=`modd $imagemagick  2>&1 | grep bin | sed s/[\(\",\)]/\ /g | awk '{print $3}'`
+
+export FC=ifort							# intel compiler
+export FFLAG="-O2 -convert big_endian -FR"			# intel compiler options
+
 
 ## -- data and output directories
 #gather vsdb stats and put in a central location
-rundir0=${rundir:-$PTMP/${LOGNAME}/vsdb_plot}    ;#temporary workplace
+envirp=$1
+envirv=$2
+rundir0=${rundir:-$PTMP/${LOGNAME}/vsdb_plot_$envirp.$envirv}    ;#temporary workplace
 vsdball=$rundir0/vsdb_data
 mkdir -p $vsdball; cd $vsdball || exit 8
-if [ -s  ${vsdball}/wafs ] ; then rm ${vsdball}/wafs ; fi
-ln -fs $vsdbsave/wafs  ${vsdball}/.
+if [ -s  $vsdball/wafs ] ; then rm $vsdball/wafs ; fi
+ln -fs $VSDBsave/wafs/$envirp.$envirv  $vsdball/wafs
 export vsdb_data=$vsdball/wafs                            ;#where all vsdb data are
 export makemap=${makemap:-"YES"}                          ;#whether or not to make maps
 export mapdir=${mapdir:-${rundir0}/web}                   ;#place where maps are saved locally
@@ -63,17 +66,17 @@ export scoredir=${scoredir:-$rundir0/score}               ;#place to save scorec
 mkdir -p $rundir0 $mapdir $scoredir
 
 ## -- verification dates
-export sdate=${sdate:-${1:-20150421}}        	          ;#forecast starting date
-export edate=${edate:-${2:-20150525}}                 	  ;#forecast ending date
-export vlength=${vlength:-${3:-36}}                 	  ;#forecast length in hour
+export sdate=${sdate:-20181201}				;#forecast starting date
+export edate=${edate:-20181231}				;#forecast ending date
+export vlength=${vlength:-36}				;#forecast length in hour
 #  observation choices: gfs gcip gcipconus cip
-export observation=${observation:-${4:-"gfs"}}
+export observation=${observation:-"gfs"}
 if [ $observation = gfs ] ; then
   fcycle="00 06 12 18" ;#forecast cycles for wind t
 else
   fcycle="00 03 06 09 12 15 18 21" ;#forecast cycles for icip
 fi
-export fcycle=${5:-$fcycle}                                ;#forecast cycles
+export fcycle=${3:-$fcycle}                                ;#forecast cycles
 
 ## -- verification parameters (dynamic ones)
 

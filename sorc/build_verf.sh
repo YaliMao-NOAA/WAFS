@@ -15,8 +15,8 @@ mkdir -p ../exec
 # Unfortunately Dell doesn't support ip.v2 which includes gdswiz etc.
 # verf_g2g_grid2grid_grib2.fd is not modifed for WAFS yet, so use verf_g2g_grid2grid.fd
 
-#for dir in verf_g2g_grid2grid.fd verf_g2g_icing_convert.fd verf_g2g_ceiling_adjust.fd verf_g2g_grid2grid_grib2.fd verf_g2g_convert.fd ; do
-for dir in verf_g2g_grid2grid.fd verf_g2g_icing_convert.fd ; do
+#for dir in verf_g2g_grid2grid_grib2.fd verf_g2g_icing_convert.fd verf_g2g_ceiling_adjust.fd verf_g2g_convert.fd ; do
+for dir in verf_g2g_grid2grid_grib2.fd verf_g2g_icing_convert.fd ; do
 #================================================
 ######## Part 1: setup individual FFLAGS ########
 #================================================

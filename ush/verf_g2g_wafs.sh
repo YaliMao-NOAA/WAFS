@@ -16,8 +16,8 @@ PAST1=$1
 model=$2
 obsv=$3
 
-OBSVDIR=${OBSVDIR:-/com/verf/prod/wafs}
-FCSTDIR=${FCSTDIR:-/com/verf/prod/wafs}
+# OBSVDIR defined in jobs/JVERF_GRID2GRID_WAFS
+# FCSTDIR defined in jobs/JVERF_GRID2GRID_WAFS
 
 #(1) Set parameters
 # Observation and model files are copied and stored   
@@ -68,24 +68,21 @@ for HH in $HHSobsv ; do
 
   $USHverf_g2g/verf_g2g_prepg2g_grib2.sh < user.ctl >output.prepg2g.${obsv}.${model}
 
-  $USHverf_g2g/verf_g2g_fitsg2g_grib2.sh<temp
+  if [ -s obsv.grib.${mdl}_$vgrid ] ; then
+      $USHverf_g2g/verf_g2g_fitsg2g_grib2.sh<temp
+  else
+      echo obsv.grib.${mdl}_$vgrid is empty, skip vsdb calculation
+  fi
 
   echo "verf_g2g_ref.sh done for " ${PAST1}${HH} $vgrid
 done
 
 
 # Combine the vsdb files for each model
-if [ ! -d $COMVSDB/wafs ] ; then
-  mkdir -p $COMVSDB/wafs
-fi
 rm -rf ${model}_${PAST1}.vsdb
 MODEL=`echo $model | tr '[a-z]' '[A-Z]'`
 for HH in $HHSobsv ; do
-  cat ${MODEL}_${vgrid}_${PAST1}${HH}.vsdb >> $COMVSDB/wafs/${model}_${obsv}_${PAST1}.vsdb
+  cat ${MODEL}_${vgrid}_${PAST1}${HH}.vsdb >> $COMVSDB/${model}_${obsv}_${PAST1}.vsdb
 done
 
 rm -rf *${MODEL}*.vsdb
-
-
-
-
