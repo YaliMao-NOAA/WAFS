@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/ksh
 
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
@@ -16,17 +16,17 @@ LOGNAME=`whoami`
 WEBSERVER="ymao@emcrzdm"
 WEBDIR="/home/www/emc/htdocs/gmb/icao"
 export doftp="YES"
-export doftp="NO"
 
 ############# Set up environments ##################
 
 # From save/envir_setting.sh
 echo $VSDBsave     #where vsdb database is saved
+# export VSDBsave=/gpfs/td1/emc/global/save/Yali.Mao/vsdb/grid2grid
 echo $NWPROD
 echo $TMP
 echo $GrADS_ROOT
 
-export vsdbhome=$GIT/verf_g2g.v3.0.12	#script home
+export vsdbhome=$HOMEgit/verf_g2g.v3.0.12	#script home
 export PTMP=`dirname $TMP`		#temporary directory without user name
 export GRADSBIN=$GrADS_ROOT/bin		#GrADS executables
 
@@ -46,7 +46,7 @@ fi
 export IMGCONVERT=`modd $imagemagick  2>&1 | grep bin | sed s/[\(\",\)]/\ /g | awk '{print $3}'`
 
 export FC=ifort							# intel compiler
-export FFLAG="-O2 -convert big_endian -FR"			# intel compiler options
+export FFLAG="-O2 -mcmodel large -shared-intel -convert big_endian -FR"			# intel compiler options
 
 
 ## -- data and output directories

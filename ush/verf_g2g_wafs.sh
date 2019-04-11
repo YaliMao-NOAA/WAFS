@@ -82,7 +82,8 @@ done
 rm -rf ${model}_${PAST1}.vsdb
 MODEL=`echo $model | tr '[a-z]' '[A-Z]'`
 for HH in $HHSobsv ; do
-  cat ${MODEL}_${vgrid}_${PAST1}${HH}.vsdb >> $COMVSDB/${model}_${obsv}_${PAST1}.vsdb
+  cat ${MODEL}_${vgrid}_${PAST1}${HH}.vsdb >> ${model}_${obsv}_${PAST1}.vsdb
 done
+mv ${model}_${obsv}_${PAST1}.vsdb $COMVSDB/${model}_${obsv}_${PAST1}.vsdb
 
 rm -rf *${MODEL}*.vsdb

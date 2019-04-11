@@ -20,7 +20,7 @@ colors = ["blue","red", "DarkGreen","Fuchsia", "aqua"]
 
 usage = "python vsdbroc.py datafile variable region obsv"
 if len(sys.argv) != 5:
-    print usage
+    print (usage)
     quit()
 
 fig = plt.figure(figsize=(8, 8), dpi=100)
@@ -104,11 +104,11 @@ with open(filename) as f:
     ax.set_xlabel('False Alarm Rate', size=20)
     ax.xaxis.set_label_coords(0.5, -0.075)
     ax.set_ylabel('Hit Rate', size=20)
-    ax.text(0.0,1.025, "ICING ROC against "+obsv.upper(), size=20)
+    ax.text(0.0,1.04, "ICING ROC against "+obsv.upper(), size=20)
     title= "on "+preslevl+"mb, fcst hour="+fhour 
-    ax.text(1.0,1.025, title, style='italic',horizontalalignment='right',size=17)
+    ax.text(1.0,1.015, title, style='italic',horizontalalignment='right',size=17)
 
-    print fhour, preslevl, nproducts
+    print (fhour, preslevl, nproducts)
 
     i = -1
 
@@ -145,8 +145,8 @@ with open(filename) as f:
       for k in range(0, npoints):
         info = f.readline()
         thrd, aa, bb, cc, dd, hit, falm, bias = info.split()
-        x.append(falm)
-        y.append(hit)
+        x.append(float(falm))
+        y.append(float(hit))
 
 #==================================================
 #       html values at each threshold
@@ -207,7 +207,7 @@ with open(filename) as f:
     ax.set_yticks([0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1])
 
     #plt.show()
-    print "save plot to file:", imagefile
+    print ("save plot to file:", imagefile)
     plt.savefig(imagefile, format='png')
 
 #==================================================

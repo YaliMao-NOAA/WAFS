@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/ksh
 
 #BSUB -oo 
 #BSUB -eo 

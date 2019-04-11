@@ -20,7 +20,7 @@ colors = ["blue","red", "DarkGreen","Fuchsia", "aqua"]
 
 usage = "python vsdbbias.py datafile variable region obsv"
 if len(sys.argv) != 5:
-    print usage
+    print (usage)
     quit()
 
 fig = plt.figure(figsize=(8, 8), dpi=100)
@@ -56,7 +56,7 @@ with open(filename) as f:
     title= "on "+preslevl+"mb, fcst hour="+fhour 
     ax.text(1.0,1.05, title, style='italic',horizontalalignment='right', va='top',size=17,transform = ax.transAxes)
 
-    print fhour, preslevl, nproducts
+    print (fhour, preslevl, nproducts)
 
     i = -1
 
@@ -81,8 +81,8 @@ with open(filename) as f:
       for k in range(0, npoints):
         info = f.readline()
         thrd, aa, bb, cc, dd, hit, falm, bias = info.split()
-        x.append(thrd)
-        y.append(bias)
+        x.append(float(thrd))
+        y.append(float(bias))
 
 
       # preparing individual or pair of products
@@ -125,6 +125,6 @@ with open(filename) as f:
 #    ax.set_yticks([0,.1,.2,.3,.4,.5,.6,.7,.8,.9,1])
 
     #plt.show()
-    print "save plot to file:", imagefile
+    print ("save plot to file:", imagefile)
     plt.savefig(imagefile, format='png')
 
