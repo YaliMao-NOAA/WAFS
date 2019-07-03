@@ -57,9 +57,9 @@ do
 
   # Get the observation/analysis data
   if [[ $envirv = 'prod' ]] ; then
-      $USHverf_g2g/verf_g2g_get_wafs2.sh $vmodel $vday $vmodel
-  else
       $USHverf_g2g/verf_g2g_get_wafs.sh $vmodel $vday $vmodel
+  else
+      $USHverf_g2g/verf_g2g_get_wafs2.sh $vmodel $vday $vmodel
   fi
 
   if [[ -z $vgrid ]] ; then
@@ -70,9 +70,9 @@ do
   for model in $models ; do
     # Get the input model forecast data
     if [[ $envirp = 'prod' ]] ; then
-      $USHverf_g2g/verf_g2g_get_wafs2.sh $model $vday $vmodel
-    else
       $USHverf_g2g/verf_g2g_get_wafs.sh $model $vday $vmodel
+    else
+      $USHverf_g2g/verf_g2g_get_wafs2.sh $model $vday $vmodel
     fi
 
     # Verification of the model output against observation data:

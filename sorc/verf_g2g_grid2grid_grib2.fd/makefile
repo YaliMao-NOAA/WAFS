@@ -23,7 +23,7 @@ SRCS=   gtgdef.f readcntl.f setarea.f \
 OBJS=	${SRCS:.f=.o}
 
 CMD=	verf_g2g_grid2grid_grib2
-LIBS=	${IP_LIB8}
+#LIBS=	${IP_LIB8}
 
 $(CMD):	$(OBJS)
 	$(FC) $(FFLAGS) -o $(@) grid2grid.f  $(OBJS)  $(LIBS)
