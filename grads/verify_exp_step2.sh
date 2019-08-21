@@ -9,29 +9,44 @@
 #  runs and make maps using GrADS.
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
-. /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/envir_setting.sh
+if [[ `hostname` =~ ^tfe ]] ; then
+   . /scratch4/NCEPDEV/global/noscrub/Yali.Mao/git/save/envir_setting.sh
+else
+   . /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/envir_setting.sh
+fi
 set -xa
 
 LOGNAME=`whoami`
 WEBSERVER="ymao@emcrzdm"
 WEBDIR="/home/www/emc/htdocs/gmb/icao"
-export doftp="YES"
+if [[ `hostname` =~ ^tfe ]] ; then
+   export doftp="NO"
+else
+   export doftp="YES"
+fi
 
 ############# Set up environments ##################
 
 # From save/envir_setting.sh
 echo $VSDBsave     #where vsdb database is saved
-# export VSDBsave=/gpfs/td1/emc/global/save/Yali.Mao/vsdb/grid2grid
 echo $NWPROD
 echo $TMP
 echo $GrADS_ROOT
 
 export vsdbhome=$HOMEgit/verf_g2g.v3.0.12	#script home
 export PTMP=`dirname $TMP`		#temporary directory without user name
-export GRADSBIN=$GrADS_ROOT/bin		#GrADS executables
+if [[ `hostname` =~ ^tfe ]] ; then
+   export GRADSBIN=/apps/grads/2.0.2/bin
+else
+   export GRADSBIN=$GrADS_ROOT/bin		#GrADS executables
+fi
 
 #image magic converter
-if [ $MACHINE = dell ] ; then
+if [ $MACHINE = theia ] ; then
+  imagemagick=imagemagick/7.0.5
+  module load intelpython/3.6.1.0
+  export PYTHON=/apps/intel/intelpython3/bin/python
+elif [ $MACHINE = dell ] ; then
   imagemagick=imagemagick/6.9.9-25
   module load python/2.7.14
   export PYTHON=python
@@ -43,7 +58,10 @@ elif [ $MACHINE = wcoss ] ; then
   imagemagick=imagemagick/6.8.3-3
   export PYTHON=/usr/bin/python
 fi
-export IMGCONVERT=`modd $imagemagick  2>&1 | grep bin | sed s/[\(\",\)]/\ /g | awk '{print $3}'`
+export IMGCONVERT=`module display $imagemagick  2>&1 | grep bin | sed s/[\(\",\)]/\ /g | awk '{print $3}'`
+if [[ ! $IMGCONVERT == */convert ]] ; then
+    IMGCONVERT=$IMGCONVERT/convert
+fi
 
 export FC=ifort							# intel compiler
 export FFLAG="-O2 -mcmodel large -shared-intel -convert big_endian -FR"			# intel compiler options
@@ -103,7 +121,8 @@ for obsv in $observation ; do
     obsv=gcip
     models="ukmax ukmean usmax usmean blndmax blndmean"
   else
-    models="ukmax ukmean usmax usmean blndmax blndmean"
+#    models="ukmax ukmean usmax usmean blndmax blndmean"
+    models=" usmax usmean blndmax blndmean"
   fi
 
   export obsvlist=$obsv # gcipall => gcip
@@ -117,17 +136,17 @@ for region in  $regions ; do
     export rundir=${rundir0}/$obsv.$reg1
     mkdir -p $rundir
 
-# ------------------------------------------------------------------------------
+# -------------------------------------------------
     if [ $obsv = gfs ] ; then
 #A) rms and bias of WIND and T ( for gfs only)
-# ------------------------------------------------------------------------------
+# -------------------------------------------------
       export vhrlist="00 06 12 18"
       export vtype=pres
       export vnamlist="T WIND"
       export levlist="P850 P700 P600 P500 P400 P300 P250 P200 P150 P100"
       bsubstring=vsdbplot.$obsv.$reg1.twind
     else
-# ------------------------------------------------------------------------------
+# -------------------------------------------------
 #B) ROC of icing potential
       export vhrlist="00 03 06 09 12 15 18 21"
       export vtype=pres

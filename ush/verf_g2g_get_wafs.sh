@@ -58,7 +58,7 @@ if [[ $valid =~ cip ]] ; then
 
   if [ $model_name = cip ] ; then    # Observation CIP data, every 3 hours
     # re-organize CIP data for each HH, outputs are adds.cip.t${hh}z.f00
-    export ADDSDIR=${CIPDIR:-$DCOMROOT/us007003/}
+    export ADDSDIR=${CIPDIR:-$DCOMROOT/prod/}
     # will convert to adds.cip.t${hh}z.f00 or adds.fip.t${hh}z.f00
     ksh $USHverf_g2g/verf_g2g_icing_convertadds.sh CIP PRB $vday "$HLEVELSicing"
     #CIP is on hybrid levels, needs to be converted on pressure levels:
@@ -123,7 +123,7 @@ if [[ $valid =~ cip ]] ; then
 
   elif [ $model_name = fip ] ; then
     # re-organize FIP data for each HH and FH, outputs are adds.fip.t${hh}z.f$fh
-    export ADDSDIR=${COMINFIP:-$DCOMROOT/us007003}
+    export ADDSDIR=${COMINFIP:-$DCOMROOT/prod}
     ksh $USHverf_g2g/verf_g2g_icing_convertadds.sh FIP PRB $vday "$HLEVELSicing"
     #FIP is on hybrid levels, needs to be converted on pressure levels:
     for hh in $HHOBS3 ; do
@@ -149,7 +149,7 @@ elif [ $valid = gfs ] ; then
 
   if [ $model_name = gfs ] ; then	# analysis GFS data, every 6 hours
     for hh in $HHOBS6 ; do        # 00 06 12 18
-      imfile=$COMINGFSV.$vday/$hh/gfs.t${hh}z.master.grb2anl
+      imfile=$COMINGFSV.$vday/$hh/gfs.t${hh}z.pgrb2.0p25.anl
       for lvl in $PLEVELStwind ; do
         $WGRIB2 $imfile -match ":TMP:$lvl mb:" $matchgrid  t.$lvl
         $WGRIB2 $imfile -match  "GRD:$lvl mb:" $matchgrid uv.$lvl
@@ -167,7 +167,7 @@ elif [ $valid = gfs ] ; then
       if [[ -s $outfile ]] ; then
 	  continue
       fi
-      imfile=$COMINGFSP.$vday/$hh/gfs.t${hh}z.master.grb2f$ff
+      imfile=$COMINGFSP.$vday/$hh/gfs.t${hh}z.pgrb2.0p25.f$ff
       for lvl in $PLEVELStwind ; do
         $WGRIB2 $imfile -match ":TMP:$lvl mb:" $matchgrid  t.$lvl
         $WGRIB2 $imfile -match  "GRD:$lvl mb:" $matchgrid uv.$lvl

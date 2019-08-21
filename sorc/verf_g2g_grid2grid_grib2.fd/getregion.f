@@ -231,7 +231,7 @@ c
         allocate(srot(ngrid))
         allocate(xpts104(ngrid))
         allocate(ypts104(ngrid))
-
+        
 
         iopt=1
         fill=-9999.0
@@ -258,7 +258,16 @@ c     &       rlon,rlat,nret,lrot,crot,srot)
 
 
         ! add grid#45 mask file for UK MET defined area 2 - Yali Mao
-        if (gribid == 45) then
+        N=index(model,"TWIND")
+        N=N+index(model,"GFIP")
+        N=N+index(model,"USMEAN")
+        N=N+index(model,"USMAX")
+        N=N+index(model,"UKMEAN")
+        N=N+index(model,"UKMAX")
+        N=N+index(model,"BLNDMEAN")
+        N=N+index(model,"BLNDMAX")
+        if (N>0) then
+           write(*,*) "Irregular region for WAFS product verification"
            gridfile = 'grid#45'
            id = 45
            nx104=288

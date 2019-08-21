@@ -48,13 +48,13 @@ if [[ -z $levels ]] ; then
   levels="9144 8839 8534 8229 7924 7620 7315 7010 6705 6400 6096 5791 5486 5181 4876 4572 4267 3962 3657 3352 3048 2743 2438 2133 1828 1524 1219 914 609 304"
 fi
 
-ADDSDIR=${ADDSDIR:-$DCOMROOT/us007003}
+ADDSDIR=${ADDSDIR:-$DCOMROOT/prod}
 
 rm $prod_lc.*
 
 #for hh in 00 01 02 03 04 05 06 07 08 09 10 11 12 13 14 15 16 17 18 19 20 21 22 23 ; do
 for hh in $cycles ; do
-  file=$ADDSDIR/$day/wgrbbul/adds_$prod_lc/ADDS_${prod_uc}_$hh
+  file=$ADDSDIR/$day/wgrbbul/adds_${prod_lc}/ADDS_${prod_uc}_$hh
   if [ -e $file ] ; then
      for lvl in $levels ; do
        if [ $prod_uc = "FIP" ] ; then

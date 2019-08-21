@@ -2,7 +2,11 @@
 
 SHELL=/bin/sh
 
-. /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/modules_setting.sh
+if [[ `hostname` =~ ^tfe ]] ; then
+   . /scratch4/NCEPDEV/global/noscrub/Yali.Mao/git/save/modules_setting.sh
+else
+   . /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/modules_setting.sh
+fi
 
 set -x
 

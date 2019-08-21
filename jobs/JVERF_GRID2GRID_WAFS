@@ -79,14 +79,14 @@ export vday=${vday:-$PDYm1}
 #---------------------------------
 # Global WAFS icing forecast, $PDY will be appended.
 export COMINUS=${COMINUS:-$COMROOT/gfs/${envir}/gfs} # US mean max
-export COMINUK=${COMINUK:-$DCOMROOT/us007003}            # UK mean max
+export COMINUK=${COMINUK:-$DCOMROOT/prod}            # UK mean max
 export COMINBLND=${COMINBLND:-$COMROOT/gfs/${envir}/gfs} # blended
 export COMINGFIP=${COMINGFIP:-$COMROOT/gfs/${envir}/gfs} # high resolution
 # Regional icing forecast, $PDY will be appended.
-export COMINFIP=${COMINFIP:-$DCOMROOT/us007003}
+export COMINFIP=${COMINFIP:-$DCOMROOT/prod}
 # Raw input of WAFS icing validation/analysis data
 #---------------------------------
-export CIPDIR=${CIPDIR:-$DCOMROOT/us007003}
+export CIPDIR=${CIPDIR:-$DCOMROOT/prod}
 # $PDY will be appended.
 export GCIPDIR=${GCIPDIR:-$COMROOT/gfs/${envir}/gfs}
 # Raw input of Wind/Temp, forecast
