@@ -8,6 +8,7 @@ c    Author: Binbin Zhou
 c            March, 2005
 c            
 c    Modification: Y. Mao,  20150317, add numreg 34 for WAFS Area2
+c                  Y. Mao, Aug 2019, add wind direction verification, with wind speed limit by using continue_mrk
 
 
 
@@ -90,6 +91,7 @@ C
       integer  nchrffho(mxvrbl),nchrffhothr(mxvrbl,20),ffhomrk(mxvrbl)
       real rsfhothr(mxvrbl,20)
       real rffhothr(mxvrbl,20)
+      real :: speed
 
 
       COMMON /g2g/cyyyyfcst,cmmfcst,cddfcst,chhfcst,cfffcst,
@@ -209,7 +211,15 @@ c      write(*,*) 'nchrlevel(ilv)=',nchrlevl
             if(continue_mrk(ivr).eq.5 .and.
      +      fcstdata(ifh,ivr,ilv,i).le. 0.0) goto 5001 ! for fog
 
- 
+            if(continue_mrk(ivr)==11.and.
+     +           (obsvdata(ifh,ivr,ilv,i) < 5. .or.
+     +            fcstdata(ifh,ivr,ilv,i) < 5.) )  goto 5001 ! for wind direction, don't verify if wind speed is too low
+            if(continue_mrk(ivr) >= 20) then
+               speed = 0.514444 * (continue_mrk(ivr)) ! WAFS wind speed, applied to forecast only
+               if(fcstdata(ifh,ivr,ilv,i) < speed .or. 
+     +            obsvdata(ifh,ivr,ilv,i) < 5. ) goto 5001
+            end if
+
             if(continue_mrk(ivr).eq.4) then             !minus dBZ means very small reflectivity 
               if(obsvdata(ifh,ivr,ilv,i).lt.0.)
      +         obsvdata(ifh,ivr,ilv,i)=10.0**obsvdata(ifh,ivr,ilv,i)
@@ -297,6 +307,14 @@ c      write(*,*) 'nchrlevel(ilv)=',nchrlevl
      +        (obsvdata(ifh,ivr,ilv,i).le.0.0.or.  
      +         fcstdata(ifh,ivr,ilv,i).le.0.0) )  goto 5002  ! for ceiling
 
+            if(continue_mrk(ivr)==11.and.
+     +           (obsvdata(ifh,ivr,ilv,i) < 5. .or.
+     +            fcstdata(ifh,ivr,ilv,i) < 5.) )  goto 5002 ! for wind direction, don't verify if wind speed is too low
+            if(continue_mrk(ivr) >= 20) then
+               speed = 0.514444 * (continue_mrk(ivr)) ! WAFS wind speed, applied to forecast only
+               if(fcstdata(ifh,ivr,ilv,i) < speed .or.
+     +            obsvdata(ifh,ivr,ilv,i) < 5. ) goto 5002
+            end if
 
             if (continue_mrk(ivr).eq.4 .and.
      +       (obsvdata(ifh,ivr,ilv,i).le.-100.0.or.
@@ -324,8 +342,6 @@ c      write(*,*) 'nchrlevel(ilv)=',nchrlevl
                 obsvdata(ifh,ivr,ilv,i)=0.0
               end if
             end if
-
-
 
                       if(region_id(i).eq.numreg(iar)) then
 
@@ -507,7 +523,6 @@ c      write(*,*) 'nchrlevel(ilv)=',nchrlevl
      +        (obsvdata(ifh,ivr,ilv,i).le.0.0.or.  
      +         fcstdata(ifh,ivr,ilv,i).le.0.0) )  goto 5005  ! for ceiling
 
-
                         if(region_latlon(1,i).ge.ptr1(2,iar).and.        !  |
      +                     region_latlon(1,i).le.ptr2(2,iar)) then       !  |
                           sumdata(ifh,ivr,ilv,iar,iob) =                 !  x(ptr1(1), ptr1(2))  
@@ -563,7 +578,6 @@ c      write(*,*) 'nchrlevel(ilv)=',nchrlevl
             if(continue_mrk(ivr).eq.3 .and.
      +      obsvdata(ifh,ivr,ilv,i).eq.0.0) goto 5006  !for RTMA RH case
 
-                                                                         !
                         if(region_latlon(2,i).ge.ptr1(1,iar).and.        !       x -----------------x 
      +                     region_latlon(2,i).le.ptr2(1,iar)) then       ! (ptr1(1), ptr1(2))   (ptr2(1), ptr2(2))
                           sumdata(ifh,ivr,ilv,iar,iob) =                 !  where ptr1(2) = ptr2(2)  
@@ -625,6 +639,14 @@ c      write(*,*) 'nchrlevel(ilv)=',nchrlevl
             if(continue_mrk(ivr).eq.5 .and.
      +      fcstdata(ifh,ivr,ilv,i).le. 0.0) goto 5007 ! for fog
 
+            if(continue_mrk(ivr)==11.and.
+     +           (obsvdata(ifh,ivr,ilv,i) < 5. .or.
+     +            fcstdata(ifh,ivr,ilv,i) < 5.) )  goto 5007 ! for wind direction, don't verify if wind speed is too low
+            if(continue_mrk(ivr) >= 20) then
+               speed = 0.514444 * (continue_mrk(ivr)) ! WAFS wind speed, applied to forecast only
+               if(fcstdata(ifh,ivr,ilv,i) < speed .or.
+     +            obsvdata(ifh,ivr,ilv,i) < 5. ) goto 5007
+            end if
 
             if(continue_mrk(ivr).eq.5.and.
      +        (obsvdata(ifh,ivr,ilv,i).le.0.0.or.  

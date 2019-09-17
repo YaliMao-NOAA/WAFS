@@ -129,7 +129,7 @@ for vnam in $vnamlist; do
   fi
 
 # -- search data for all models; write out binary data, create grads control file
-  if [ $vnam = "WIND" ] ; then
+  if [[ $vnam =~ "WIND" ]] ; then
    $srcgrads/gen_wind_pres.sh $vtype $vnam $reg "$levlist" $edate $ndays "${fcycle}" $vlength $fhout $outname1 $maskmiss "$mdlist" $obsv
    PLOTTYPES="3" # only plot type 3
   elif [ $vnam = "ICIP" ] ; then

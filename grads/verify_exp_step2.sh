@@ -106,7 +106,7 @@ for obsv in $observation ; do
   export obsvfolder=$obsv # keep gcipall for folder
 
   if [[ $obsv == gcip || $obsv == gfs || $obsv == gcipall ]] ; then
-    regions="G45 G45/NHM G45/TRP G45/SHM G45/AR2 G45/ASIA G45/NPCF G45/AUNZ G45/NAMR"
+    regions="G45 G45/NHM G45/TRP G45/SHM G45/AR2 G45/ASIA G45/NPCF G45/AUNZ G45/NAMR G45/EAST"
   else
     regions="G130"
   fi
@@ -138,11 +138,12 @@ for region in  $regions ; do
 
 # -------------------------------------------------
     if [ $obsv = gfs ] ; then
-#A) rms and bias of WIND and T ( for gfs only)
+#A) rms and bias of WIND VECTOR/DIRECTION and T ( for gfs only)
 # -------------------------------------------------
       export vhrlist="00 06 12 18"
       export vtype=pres
-      export vnamlist="T WIND"
+      export vnamlist="T DIRECTION WIND WIND80"
+#      export vnamlist="T WIND WIND80"
       export levlist="P850 P700 P600 P500 P400 P300 P250 P200 P150 P100"
       bsubstring=vsdbplot.$obsv.$reg1.twind
     else

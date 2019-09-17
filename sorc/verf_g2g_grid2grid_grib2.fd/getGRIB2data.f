@@ -195,7 +195,7 @@ c        jpd9=ff(nfcst)     !Forecast time or accumulation beginning time
 
         yyyy=yy(nfcst)+2000
  
-        if(jpd1.eq.2.and.jpd2.eq.1) then         !Wind 
+        if((jpd1==2.and.jpd2==1) .or. (jpd1==2.and.jpd2==0)) then !Wind speed, vector, direction
 
           do np = 1, levels(nvar)
 
@@ -242,12 +242,28 @@ c        jpd9=ff(nfcst)     !Forecast time or accumulation beginning time
             else
               v(nfcst,nvar,np,:)=gfld%fld(:)
             end if
- 
- 
-              data(nfcst,nvar,np,:) = sqrt(
-     &           u(nfcst,nvar,np,:)*u(nfcst,nvar,np,:)+
-     &           v(nfcst,nvar,np,:)*v(nfcst,nvar,np,:) )
- 
+  
+            ! Calculate wind speed and direction, which are for SL1L2.
+            ! 1) Wind vector is for VL1L2. If VL1L2 verifies against 
+            !    wind speed>=80knots, 80knots is input in vectormrk in readcntl.f.
+            !    Wind vector is processed in VL1L2, not here.
+            ! 2) Wind direction has the minimum wind speed set in continue_mrk in readcntl.f.
+            if(iret == 0) then
+               if(jpd1==2 .and. jpd2==1) then
+                  if (trim(namvarbl(nvar)) == "SPEED") then
+                     data(nfcst,nvar,np,:) = sqrt(
+     &                    u(nfcst,nvar,np,:)*u(nfcst,nvar,np,:)+
+     &                    v(nfcst,nvar,np,:)*v(nfcst,nvar,np,:) )
+                  end if
+               end if
+               if(jpd1==2 .and. jpd2==0) then
+                  if(index(namvarbl(nvar), "DIRECTION") > 0) then
+                     data(nfcst,nvar,np,:)=atan2(v(nfcst,nvar,np,:),
+     &                    u(nfcst,nvar,np,:))*180./3.1415926
+                  end if
+               end if
+            end if
+
           end do
   
         else                    !Non-wind

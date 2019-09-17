@@ -818,6 +818,19 @@ C  Modified as:
      +      index(fho(n), "CFHO") > 0)
      +      continue_mrk(n)=8   !for icing ROC
 
+       ! Because WAFS wind speed, which will black out continue_mrk from 20-100 for other uses
+       if(k4(n)==2 .and. k5(n)==0 .and. k6(n)==100) then
+          continue_mrk(n)=11    ! For wind direction, basic minimum speed, 5m/s
+          ldirection=len_trim(namvarbl(n))-
+     +                len_trim("DIRECTION")
+          ! For wind direction, WAFS minimum wind speed in knots(>=20)
+          if(ldirection > 0) then
+             substr=namvarbl(n)(10:10+ldirection)
+             read(substr,*) continue_mrk(n)
+             continue_mrk(n) = continue_mrk(n)
+          end if
+       end if
+
       end do
 
         !set anomly mark
@@ -876,6 +889,11 @@ c       Wind speed k4=2 k5=1 in grib2, k5=32 in grib1 - Y Mao
         IF (k4(ivr).eq.2 .and. k5(ivr).eq.1) THEN
           numvector = numvector + 1
           vectormrk(ivr) = 1
+          lvector=len_trim(namvarbl(ivr))-len_trim("WIND")
+          if(lvector > 0) then
+             substr=namvarbl(ivr)(5:5+lvector)
+             read(substr,*) vectormrk(ivr)
+          end if
         END IF
        END DO         
 

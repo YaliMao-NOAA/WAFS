@@ -9,6 +9,7 @@ c
 c March, 2005, Author: Binbin Zhou
 c April, 2007, Changed weighting method for variances, Fanglin Yang
 c    Modification: Y. Mao,  20150317, add numreg 34 for WAFS Area2
+c                  Y. Mao, Aug 2019, add wind speed limits for verificaiton by using vectormrk>1 value
 
 
       INCLUDE 'parm.inc'
@@ -115,6 +116,8 @@ C
       real area_factor(maxpts)
       COMMON /weight/area_factor
 
+      real :: speed
+
 
       DATA blank /' '/
       DATA equal /'='/
@@ -188,6 +191,11 @@ c      end do
                        uob=uobsv(ifh,ivr,ilv,i)
                        vob=vobsv(ifh,ivr,ilv,i)
 
+                       if(vectormrk(ivr) > 1) then ! WAFS wind speed limit, applied to forecast only
+                          speed=sqrt(ufc*ufc+vfc*vfc) ! knots=>m/s
+                          if(speed < 0.514444 * vectormrk(ivr)) cycle
+                       end if
+
                        uf(ifh,ivr,ilv,iar,iob) = 
      +                  uf(ifh,ivr,ilv,iar,iob) + ufc*area_factor(i)
     
@@ -227,6 +235,11 @@ c      end do
                        vfc=vfcst(ifh,ivr,ilv,i)
                        uob=uobsv(ifh,ivr,ilv,i)
                        vob=vobsv(ifh,ivr,ilv,i)
+
+                       if(vectormrk(ivr) > 1) then ! WAFS wind speed limit, applied to forecast only
+                          speed=sqrt(ufc*ufc+vfc*vfc) ! knots=>m/s
+                          if(speed < 0.514444 * vectormrk(ivr)) cycle
+                       end if
 
                        uf(ifh,ivr,ilv,iar,iob) =
      +                  uf(ifh,ivr,ilv,iar,iob) + ufc*area_factor(i)
@@ -271,6 +284,11 @@ c      end do
                        uob=uobsv(ifh,ivr,ilv,i)
                        vob=vobsv(ifh,ivr,ilv,i)
 
+                       if(vectormrk(ivr) > 1) then ! WAFS wind speed limit, applied to forecast only
+                          speed=sqrt(ufc*ufc+vfc*vfc) ! knots=>m/s
+                          if(speed < 0.514444 * vectormrk(ivr)) cycle
+                       end if
+
                        uf(ifh,ivr,ilv,iar,iob) =
      +                  uf(ifh,ivr,ilv,iar,iob) + ufc*area_factor(i)
                                                                                                                                                            
@@ -311,6 +329,11 @@ c      end do
                        vfc=vfcst(ifh,ivr,ilv,i)
                        uob=uobsv(ifh,ivr,ilv,i)
                        vob=vobsv(ifh,ivr,ilv,i)
+
+                       if(vectormrk(ivr) > 1) then ! WAFS wind speed limit, applied to forecast only
+                          speed=sqrt(ufc*ufc+vfc*vfc) ! knots=>m/s
+                          if(speed < 0.514444 * vectormrk(ivr)) cycle
+                       end if
 
                        uf(ifh,ivr,ilv,iar,iob) =
      +                  uf(ifh,ivr,ilv,iar,iob) + ufc*area_factor(i)
@@ -356,6 +379,11 @@ c      end do
                        uob=uobsv(ifh,ivr,ilv,i)
                        vob=vobsv(ifh,ivr,ilv,i)
 
+                       if(vectormrk(ivr) > 1) then ! WAFS wind speed limit, applied to forecast only
+                          speed=sqrt(ufc*ufc+vfc*vfc) ! knots=>m/s
+                          if(speed < 0.514444 * vectormrk(ivr)) cycle
+                       end if
+
                        uf(ifh,ivr,ilv,iar,iob) =
      +                  uf(ifh,ivr,ilv,iar,iob) + ufc*area_factor(i)
 
@@ -397,6 +425,11 @@ c      end do
                        vfc=vfcst(ifh,ivr,ilv,i)
                        uob=uobsv(ifh,ivr,ilv,i)
                        vob=vobsv(ifh,ivr,ilv,i)
+
+                       if(vectormrk(ivr) > 1) then ! WAFS wind speed limit, applied to forecast only
+                          speed=sqrt(ufc*ufc+vfc*vfc) ! knots=>m/s
+                          if(speed < 0.514444 * vectormrk(ivr)) cycle
+                       end if
 
                        uf(ifh,ivr,ilv,iar,iob) =
      +                  uf(ifh,ivr,ilv,iar,iob) + ufc*area_factor(i)
@@ -442,6 +475,11 @@ c      end do
                        vfc=vfcst(ifh,ivr,ilv,i)
                        uob=uobsv(ifh,ivr,ilv,i)
                        vob=vobsv(ifh,ivr,ilv,i)
+
+                       if(vectormrk(ivr) > 1) then ! WAFS wind speed limit, applied to forecast only
+                          speed=sqrt(ufc*ufc+vfc*vfc) ! knots=>m/s
+                          if(speed < 0.514444 * vectormrk(ivr)) cycle
+                       end if
 
                        uf(ifh,ivr,ilv,iar,iob) =
      +                  uf(ifh,ivr,ilv,iar,iob) + ufc*area_factor(i)
