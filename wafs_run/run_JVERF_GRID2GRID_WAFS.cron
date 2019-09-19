@@ -1,0 +1,60 @@
+#!/bin/bash
+
+########################################################
+# WAFS Verification package
+########################################################
+
+########################################################
+# Only run the script on develop machine:
+# 1st letter of developMachine & thisMachine must match
+########################################################
+developMachine=`cat /etc/dev`
+thisMachine=`hostname` 
+if [ `echo $developMachine | cut -c 1-1` != `echo $thisMachine | cut -c 1-1` ] ; then
+  exit
+fi
+
+#*******************************************************
+# It is loaded by .bashrc as well
+. /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/envir_setting.sh
+
+set -x
+
+user=`whoami`
+export vday=${vday:-`$NDATE -24 | cut -c1-8`}
+
+vsdbsave=$HOMEnoscrub/vsdb/grid2grid/wafs
+mkdir -p  $vsdbsave
+
+
+########################################################
+#### Step 1: create vsdb files                      ####
+########################################################
+sh $HOMEsave/wafs_run/run_JVERF_GRID2GRID_WAFS
+
+########################################################
+#### Step 2: ftp vsdb to tempest and wcoss/save folder #
+########################################################
+
+# to tempest
+
+local=/ptmpp1/$user
+dataDir=vsdb/grid2grid/wafs
+
+remote=/gmb/wd20ym/vsdb
+remoteServer=wd20ym@tempest
+
+echo $local/$dataDir/blndmean_gcipconus_$vday.vsdb
+
+if [[ -s $local/$dataDir/blndmean_gcipconus_$vday.vsdb ]] ; then
+  cd $local
+  rsync -avP $local/$dataDir/. ${remoteServer}:${remote}/.
+
+  # to wcoss/save folder
+  rsync -avP $local/$dataDir/. $vsdbsave/.
+
+else
+  echo "No verification vsdb result is generated. Please check."
+  echo "No verification vsdb result is generated on $vday." | mailx -s "VSDB verification is not generated." yali.mao@noaa.gov
+fi
+exit

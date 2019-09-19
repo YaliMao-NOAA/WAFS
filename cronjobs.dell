@@ -1,0 +1,66 @@
+# For operational
+# collect GFIP and GCIP to rzdm FTP server, plus plotting and maintenance
+# http://www.emc.ncep.noaa.gov/gmb/icao/grdplot/plot.html
+#==================================================
+05 06 * * * export prod=prod; export cyc=00;  sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.cron  > /gpfs/dell3/ptmp/Yali.Mao/gfipgcipgtg2rzdm.$cyc 2>&1
+05 12 * * * export prod=prod; export cyc=06;  sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.cron  > /gpfs/dell3/ptmp/Yali.Mao/gfipgcipgtg2rzdm.$cyc 2>&1
+05 18 * * * export prod=prod; export cyc=12;  sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.cron  > /gpfs/dell3/ptmp/Yali.Mao/gfipgcipgtg2rzdm.$cyc 2>&1
+05 00 * * * export prod=prod; export cyc=18;  sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.cron  > /gpfs/dell3/ptmp/Yali.Mao/gfipgcipgtg2rzdm.$cyc 2>&1
+
+
+#For FV3GFS parallel
+# collect GFIP and GCIP to rzdm FTP server, plus plotting and maintenance
+# derive parallel icing if needed
+# http://www.emc.ncep.noaa.gov/gmb/icao/fv3plot/plot.html
+#==================================================
+55 10 * * * export prod=para; export cyc=00 ; sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.cron 1 > /gpfs/dell3/ptmp/Yali.Mao/fv3.gfipgcipgtg2rzdm.$cyc 2>&1
+55 16 * * * export prod=para; export cyc=06 ; sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.cron 1 > /gpfs/dell3/ptmp/Yali.Mao/fv3.gfipgcipgtg2rzdm.$cyc 2>&1
+55 22 * * * export prod=para; export cyc=12 ; sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.cron 1 > /gpfs/dell3/ptmp/Yali.Mao/fv3.gfipgcipgtg2rzdm.$cyc 2>&1
+55 04 * * * export prod=para; export cyc=18 ; sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.cron 1 > /gpfs/dell3/ptmp/Yali.Mao/fv3.gfipgcipgtg2rzdm.$cyc 2>&1
+
+
+# Run GCIP operational in case a satellite is changed
+# between 2 GFS implementations.
+#==================================================
+55 05 * * * export cyc=00 ; export hb=5 ; sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/scripts/GCIP.prod.rerun.sh 1 > /gpfs/dell3/ptmp/Yali.Mao/gcip.rerun.$cyc 2>&1
+55 11 * * * export cyc=06 ; export hb=5 ; sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/scripts/GCIP.prod.rerun.sh 1 > /gpfs/dell3/ptmp/Yali.Mao/gcip.rerun.$cyc 2>&1
+55 17 * * * export cyc=12 ; export hb=5 ; sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/scripts/GCIP.prod.rerun.sh 1 > /gpfs/dell3/ptmp/Yali.Mao/gcip.rerun.$cyc 2>&1
+55 23 * * * export cyc=18 ; export hb=5 ; sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/scripts/GCIP.prod.rerun.sh 1 > /gpfs/dell3/ptmp/Yali.Mao/gcip.rerun.$cyc 2>&1
+
+
+# Run vsdb verification
+# Save results at $VSDBsave/wafs=/gpfs/dell2/emc/modeling/noscrub/Yali.Mao/vsdb/wafs
+#==================================================
+# Suggestion: allow 3 hours for each run to complete if a few days need to make up
+00 15 * * *  sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/wafs_run/run_JVERF_GRID2GRID_WAFS.sh prod para 1 > /gpfs/dell3/ptmp/Yali.Mao/vsdb.prod.para.$(date -d @$(( $(date +"\%s") - 24*3600))  +\%Y\%m\%d) 2>&1
+00 15 * * *  sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/wafs_run/run_JVERF_GRID2GRID_WAFS.sh para para 1 > /gpfs/dell3/ptmp/Yali.Mao/vsdb.para.para.$(date -d @$(( $(date +"\%s") - 24*3600))  +\%Y\%m\%d) 2>&1
+00 15 * * *  sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/wafs_run/run_JVERF_GRID2GRID_WAFS.sh prod prod 1 > /gpfs/dell3/ptmp/Yali.Mao/vsdb.prod.prod.$(date -d @$(( $(date +"\%s") - 24*3600))  +\%Y\%m\%d) 2>&1
+00 15 * * *  sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/wafs_run/run_JVERF_GRID2GRID_WAFS.sh para prod 1 > /gpfs/dell3/ptmp/Yali.Mao/vsdb.para.prod.$(date -d @$(( $(date +"\%s") - 24*3600))  +\%Y\%m\%d) 2>&1
+
+#00 00 30 * * export vday=20190119 ; sh -l /gpfs/dell3/ptmp/Yali.Mao/run_JVERF_GRID2GRID_WAFS.sh prod prod 1 > /gpfs/dell3/ptmp/Yali.Mao/vsdb.prod.prod.$vday 2>&1
+#00 00 30 * * export vday=20190119 ; sh -l /gpfs/dell3/ptmp/Yali.Mao/run_JVERF_GRID2GRID_WAFS.sh prod prod 1 > /gpfs/dell3/ptmp/Yali.Mao/vsdb.prod.prod.$vday 2>&1
+#00 00 30 * * export vday=20190119 ; sh -l /gpfs/dell3/ptmp/Yali.Mao/run_JVERF_GRID2GRID_WAFS.sh prod prod 1 > /gpfs/dell3/ptmp/Yali.Mao/vsdb.prod.prod.$vday 2>&1
+#00 00 30 * * export vday=20190119 ; sh -l /gpfs/dell3/ptmp/Yali.Mao/run_JVERF_GRID2GRID_WAFS.sh prod prod 1 > /gpfs/dell3/ptmp/Yali.Mao/vsdb.prod.prod.$vday 2>&1
+
+
+# Plot verification from vsdb
+#==================================================
+# export observation=gfs || export observation=gcip || export observation=cip || export observation=gcipconus || export observation=gcipall
+# export sdate=20150421;export edate=20150602; sh /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/verf_g2g.v3.0.12/grads/verify_exp_step2.sh prod prod 1 > /gpfs/dell3/ptmp/Yali.Mao/verify.plot.$observation 2>&1
+
+
+# tranfer nemsio data to NCAR
+# run on Cray, not on Dell since Dell can't connect to NCAR's ftp server
+#==================================================
+# blank blank blank blank blank blank blank blank blank blank blank blank
+
+
+# transfer FAA to rzdm (taken from Geoff Manikin) 
+# ftp://ftp.emc.ncep.noaa.gov/gmb/wafs/faa/
+#==================================================
+25 19  * * *  sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/wafs_faa/drive_wafs 1 > /gpfs/dell3/ptmp/Yali.Mao/faa.err 2>&1
+
+
+# run post icing/gtg/both from archived NEMSIO data
+#==================================================
+#50 15 26 * *  sh /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/wafs_run/run_post_gfs_Grib2.archive_nemsio.cron fv3gtg_archive gtg 20180801 20180818 "00 06 12 18" "06 12 18 24 30 36" 2019_18summer 1>/gpfs/dell3/ptmp/Yali.Mao/fv3gtg_archive.log 2>&1

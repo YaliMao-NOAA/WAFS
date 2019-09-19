@@ -1,0 +1,193 @@
+
+if [ $HOMEnoscrub != $NOSCRUB ] ; then
+   alias syncgit='rsync -avP $HOMEgit/. $NOSCRUB/git/. --delete'
+fi
+
+# check whether the verification cronjob is turned on yet
+if [[ `hostname` =~ ^[g|t|l|s][0-9]{1} ]] ; then
+  a="`ls /gpfs/*/ptmp/Yali.Mao/vsdb/grid2grid/wafs/blndmean_gcipconus*.vsdb`"
+  a=`echo $a | cut -d' ' -f1`
+  if [[ ! -s $a ]] ; then
+    echo "The verification cronjob may not be turned on yet. Please check."
+    echo "The verification cronjob may not be turned on yet" | mailx -s "VSDB verification failed!!!" yali.mao@noaa.gov
+  fi
+fi
+
+#export PS1="\u@\h \w> "
+export PS1="[\w]$ "
+# prompt
+#if [ $?prompt ]; then          # shell is interactive.
+#    alias setprompt='set prompt="../$cwd/"'  # option cwd:t for tail
+#    alias cd='cd \!* ; setprompt'
+#    alias pushd='pushd \!* ; setprompt'
+#    alias popd='popd \!* ; setprompt'
+#    setprompt
+#fi
+
+export SVN_EDITOR='emacs -nw'
+export GIT_EDITOR='emacs -nw'
+export EDITOR='emacs -nw'
+
+export TERM=xterm-256color
+xrdb -load ~/.Xresources
+alias xterm='xterm -fn 9x15'
+alias emacs='emacs -nw '
+
+alias wcoss='function _wcoss() {
+              if [[ `/bin/hostname | cut -c1-1` == 't' ]] ; then
+                if [[  `/bin/hostname` != 't10a1' ]] ; then
+                  ssh -X t10a1
+                fi
+              else
+                if [[  `/bin/hostname` != 'g10a1' ]] ; then
+                  ssh -X g10a1
+                fi
+              fi
+            }; _wcoss '
+alias xterms="xterm -geometry 175x72+2+2 &
+              xterm -geometry 175x72+2+2 &
+              xterm -geometry 175x72+2+2 &
+              xterm -geometry 175x72+2+2 &"
+
+alias mxterms="xterm -geometry 155x55+30+5 &
+               xterm -geometry 155x55+30+5 &
+               xterm -geometry 155x55+30+5 &
+               xterm -geometry 155x55+30+5 &"
+
+# RZDM
+alias zdm='scp ymao@emcrzdm:/home/ftp/emc/unaff/ymao/'
+alias rzdm='ssh -X ymao@emcrzdm'
+# TEMPEST
+alias tempest='ssh -X wd20ym@tempest'
+alias linux='ssh -X wd20ym@emc-lw-ymao'
+# ssh to NOMAD
+alias nomad='ssh -X yali.mao@emc-ls-nomad7.ncep.noaa.gov'
+# file transfer to theia
+alias theia='scp -p Yali.Mao@dtn-theia.fairmont.rdhpcs.noaa.gov:/scratch4/NCEPDEV/stmp3/Yali.Mao/.'
+
+alias history='history 60'
+alias h='history'
+
+alias ls='ls --color=tty'
+alias lt='ls -ltr --color=tty --time-style=+"%Y-%m-%d %H:%M:%S"'
+alias ll='ls -l --color=tty'
+alias moda='module avail'
+alias modd='module display'
+
+
+com1=/gpfs/*1/nco/ops/com
+com2=/gpfs/*2/nco/ops/com
+comh=/gpfs/hps/nco/ops/com
+comd=$COMROOT
+com0=/gpfs/hps/nco/ops/com
+dcom=/gpfs/*1/nco/ops/dcom
+
+NWPROD1=/gpfs/*1/nco/ops/nwprod
+NWPROD2=/gpfs/*2/nco/ops/nwprod
+NWPROD0=/gpfs/hps/nco/ops/nwprod
+
+HOMEsave1=/gpfs/*1/emc/global/save/Yali.Mao
+HOMEsave0=/gpfs/hps3/emc/global/noscrub/Yali.Mao
+
+HOMEnoscrub1=/gpfs/*1/emc/global/noscrub/Yali.Mao
+HOMEnoscrub0=/gpfs/hps3/emc/global/noscrub/Yali.Mao
+
+TMP1=/gpfs/*1/ptmp/Yali.Mao
+TMP2=/gpfs/*2/ptmp/Yali.Mao
+TMP0=/gpfs/hps/ptmp/Yali.Mao
+
+# User specific aliases and functions (machine related)
+
+export PROJ="$HOMEsave/project"
+
+# git/gerrit configuration:
+export GIT_SSH=$HOMEsave/git/config.ssh
+
+#
+####
+alias proj='cd $PROJ'
+alias save='cd $HOMEsave'
+alias run='cd $HOMEsave/wafs_run'
+alias noscrub='cd $HOMEnoscrub'
+alias gitp='cd $HOMEnoscrub/git'
+alias vsdb='cd $HOMEnoscrub/vsdb/wafs'
+alias post='cd $HOMEnoscrub/git/EMC_gtg_ncar'
+
+alias cronl='crontab -l'
+alias crone='emacs $HOMEsave/cronjobs.$MACHINE'
+alias crons='crontab $HOMEsave/cronjobs.$MACHINE'
+
+#
+alias tmp='cd $TMP'
+# Goto NWS source code folder
+alias sorc='cd $NWPROD'
+
+alias regression="echo /gpfs/hps3/emc/global/noscrub/Hui-Ya.Chuang/post_regression_test/scripts/"
+
+mkdir -p $TMP
+
+alias msync="echo rsync -avP \(from\)$SAVE/vsdb/grid2grid/wafs/. \(to\)wd20ym@tempest:/gmb/wd20ym/vsdb/."
+alias mycmp='files=`ls` ; for file in $files ; do  cmp /stmpp1/Geoffrey.Manikin/wafs/$file $file ; done'
+alias mydiff='ksh $HOMEsave/scripts/diff.sh'
+alias diffr='diff -ry --suppress-common-lines '
+alias igrep='grep -i '
+alias rgrep='grep -r '
+alias nosvn='grep -v svn'
+alias lsd='ls -ld */'
+alias lsda='echo "`ls -Cd .*/`" "`ls -Cd */`"'
+
+alias mydegrib2='$HOMEsave/grib2/degrib2'
+
+#alias g130='function _g130() {
+#               wgrib2 $1 -new_grid_winds earth -new_grid lambert:-95:25 -126.138:451:13545 16.281:337:13545 $1.g130
+#            }; _g130'
+
+alias adds="echo ksh $HOMEgit/g2g_verif.v3.0.0/ush/verf_g2g_icing_convertadds.sh CIP\|FIP PRB\|SEV YYYYMMDDHH [levels]"
+alias plot="echo ksh $HOMEsave/grads/plotWafs.sh conus potential grb2file"
+
+alias output="echo /gpfs/dell1/nco/ops/com/output/prod ; ls -l /gpfs/dell1/nco/ops/com/output/prod | grep -v tar.xz"
+alias outputh="echo /gpfs/hps/nco/ops/com/output/para ; ls -l /gpfs/hps/nco/ops/com/output/para | grep -v tar.xz"
+
+alias para="ll /gpfs/hps/nco/ops/com/gfs/para ; echo /gpfs/hps/nco/ops/com/gfs/para/gfs.`$NDATE|cut -c1-8`/"
+
+alias master="ls -l $comd/gfs/prod/gfs.`$NDATE|cut -c1-8`/00/gfs.t00z.master.grb2f006"
+alias   wafs="ls -l $comd/gfs/prod/gfs.`$NDATE|cut -c1-8`/00/gfs.t00z.wafs_grb45f06*"
+alias   gcip="ls -l $comd/gfs/prod/gfs.`$NDATE|cut -c1-8`/00/gfs*gcip*"
+alias     us="ls -l $comd/gfs/prod/gfs.`$NDATE|cut -c1-8`/00/gfs.t00z.wafs_grb45f06.grib2"
+alias  blend="ls -l $comd/gfs/prod/gfs.`$NDATE|cut -c1-8`/00/WAFS_blended_`$NDATE|cut -c1-8`00f06.grib2"
+alias   flux="ls -l $comd/gfs/prod/gfs.`$NDATE|cut -c1-8`/00/gfs.t00z.sf06 /com2/gfs/prod/gfs.`$NDATE|cut -c1-8`/gfs.t00z.sfluxgrbf06"
+alias uk="ls -l $dcom/us007003/`$NDATE|cut -c1-8`/wgrbbul/ukmet_wafs/EGRR_WAFS_unblended_`$NDATE|cut -c1-8`_00z_t06.grib2"
+alias cip="ls -l $dcom/us007003/`$NDATE|cut -c1-8`/wgrbbul/adds_cip/*"
+alias fip="ls -l $dcom/us007003/`$NDATE|cut -c1-8`/wgrbbul/adds_fip/*"
+alias gtg="ls -l $com2/gtg/prod/gtg.`$NDATE|cut -c1-8`/gtg.t00z.edr.f*.grb2"
+alias rap="ls -l $comh/rap/prod/rap.`$NDATE|cut -c1-8`/rap.t00z.awp130bgrbf03.grib2"
+alias nam="ls -l $com1/nam/prod/nam.`$NDATE|cut -c1-8`/nam.t00z.awip3203.tm00"
+alias radar="ls -l $com1/hourly/prod/radar.`$NDATE|cut -c1-8`/refd3d.t01z*"
+alias metar="ls -l $dcom/us007003/ldmdata/obs/surface/metar/*"
+
+alias wcossnomad='sudo -u emc.nomad -i'
+
+alias gm='function _gm() {
+              if [ $1 = "2" ] ; then 
+                $G2CTL -verf $2 > $2.ctl
+                gribmap -i  $2.ctl
+                sed "s/\*\* (.*)/\*\* /g" -i $2.ctl
+              else
+                $HOMEsave/grads/grib2ctl.pl -verf $1 > $1.ctl
+                gribmap -i  $1.ctl
+              fi
+            }; _gm'
+alias wgrib25='sh $HOMEsave/scripts/0p25.sh'
+alias htargtg='function _htargtg(){
+      		 htar -tvf /NCEPPROD/hpssprod/runhistory/rh$1/$1$2/$1$2$3/gpfs_dell1_nco_ops_com_gfs_prod_gfs.$1$2${3}_$4.gfs.tar ./gfs.$1$2$3/$4/*gtg*grb2f???
+               }; _htargtg'
+
+
+
+#alias cpgb='function _cpgb(){
+#              if [ $1 = "2" ] ; then 
+#                wgrib2 $2 -new_grid_winds earth -new_grid lambert:-95:25 -126.138:451:13545 16.281:337:13545 $3
+#              else
+#                copygb -g130 -i2,1 -x $1 $2
+#              fi
+#            }; _cpgb'

@@ -1,0 +1,96 @@
++ cd /stmp/Geoffrey.Manikin/wafs
++ scp gdas.zt.2013091118 wd20mg@emcrzdm:/home/people/emc/ftp/mmb/mmbpll/wafs/.
+******************WARNING**WARNING**WARNING******************
+
+This is a National Weather Service (NWS) computer system.  NWS 
+computer systems are provided for the processing of Official 
+U.S. Government information only.  All data contained on NWS 
+computer systems is owned by the NWS and may be monitored, 
+intercepted, recorded, read, copied, or captured in any manner 
+and disclosed in any manner, by authorized personnel.
+
+	THERE IS NO RIGHT OF PRIVACY IN THIS SYSTEM
+
+System personnel may give to law enforcement officials any 
+potential evidence of crime found on NWS computer systems.  
+USE OF THIS SYSTEM BY ANY USER, AUTHORIZED OR UNAUTHORIZED, 
+CONSTITUTES CONSENT TO THIS MONITORING, INTERCEPTION, RECORDING, 
+READING, COPYING, OR CAPTURING and DISCLOSURE.
+
+******************WARNING**WARNING**WARNING******************
+
++ scp wafs_grib wafs_hold wafs_wgrib wafs.zt.2013091100 wafs.zt.2013091100.unsorted wafs.zt.2013091112 wafs.zt.2013091112.unsorted wd20mg@emcrzdm:/home/people/emc/ftp/mmb/mmbpll/wafs/.
+******************WARNING**WARNING**WARNING******************
+
+This is a National Weather Service (NWS) computer system.  NWS 
+computer systems are provided for the processing of Official 
+U.S. Government information only.  All data contained on NWS 
+computer systems is owned by the NWS and may be monitored, 
+intercepted, recorded, read, copied, or captured in any manner 
+and disclosed in any manner, by authorized personnel.
+
+	THERE IS NO RIGHT OF PRIVACY IN THIS SYSTEM
+
+System personnel may give to law enforcement officials any 
+potential evidence of crime found on NWS computer systems.  
+USE OF THIS SYSTEM BY ANY USER, AUTHORIZED OR UNAUTHORIZED, 
+CONSTITUTES CONSENT TO THIS MONITORING, INTERCEPTION, RECORDING, 
+READING, COPYING, OR CAPTURING and DISCLOSURE.
+
+******************WARNING**WARNING**WARNING******************
+
++ exit
+
+------------------------------------------------------------
+Sender: LSF System <lsfadmin@g10a1f>
+Subject: Job 926478: <wafs.ftp> in cluster <gyre> Done
+
+Job <wafs.ftp> was submitted from host <g14a2f> by user <Geoffrey.Manikin> in cluster <gyre>.
+Job was executed on host(s) <g10a1f>, in queue <transfer>, as user <Geoffrey.Manikin> in cluster <gyre>.
+</tmp/.lsbtmp10341> was used as the home directory.
+</meso/save/Geoffrey.Manikin/wafs> was used as the working directory.
+Started at Thu Sep 12 12:56:03 2013
+Results reported at Thu Sep 12 12:56:11 2013
+
+Your job looked like:
+
+------------------------------------------------------------
+# LSBATCH: User input
+#! /bin/ksh
+#
+#BSUB -J wafs.ftp
+#BSUB -oo /meso/save/Geoffrey.Manikin/wafs/wafsftp.out
+#BSUB -eo /meso/save/Geoffrey.Manikin/wafs/wafsftp.out
+#BSUB -n 1
+#BSUB -W 00:30
+#BSUB -q transfer
+#BSUB -P GFS-MTN
+#BSUB -R "affinity[core]"
+#BSUB -R "rusage[mem=300]"
+
+set -x
+
+cd /stmp/Geoffrey.Manikin/wafs
+
+scp gdas* wd20mg@emcrzdm:/home/people/emc/ftp/mmb/mmbpll/wafs/.
+scp wafs* wd20mg@emcrzdm:/home/people/emc/ftp/mmb/mmbpll/wafs/.
+
+exit
+
+------------------------------------------------------------
+
+Successfully completed.
+
+Resource usage summary:
+
+    CPU time :               0.20 sec.
+    Max Memory :             6 MB
+    Average Memory :         6.00 MB
+    Total Requested Memory : 300.00 MB
+    Delta Memory :           294.00 MB
+    (Delta: the difference between total requested memory and actual max usage.)
+    Max Processes :          5
+    Max Threads :            6
+
+The output (if any) is above this job summary.
+

@@ -1,0 +1,12 @@
+# tranfer nemsio data to NCAR
+# run on Cray, not on Dell since Dell can't connect to NCAR's ftp server
+#==================================================
+# cycles and fhours are optional to be "export"
+00 18  *  * * export fhours="012 018 024 036" ; sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/scripts/nemsio2ncar_to_hpss.sh ncopara > /gpfs/hps/ptmp/Yali.Mao/nemsio2ncar_to_hpss.ncopara.log 2>&1
+
+#09 20 08 * * sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/scripts/nemsio2ncar_to_hpss.makeup.sh > /gpfs/hps/ptmp/Yali.Mao/nemsio2ncar_to_hpss.ncopara.makeup.log 2>&1
+
+# run post icing/gtg/both from archived NEMSIO data
+#==================================================
+
+35 20 14 * *  bash -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/wafs_run/run_post_gfs_Grib2.archive_nemsio.cron uk_icsev icing 20180625 20180731 "00 06 12 18" "06 12 18 24 30 36" 2019_18summer > /gpfs/hps/ptmp/Yali.Mao/fv3gtg_archive.log 2>&1

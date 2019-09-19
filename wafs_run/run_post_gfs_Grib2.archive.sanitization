@@ -1,0 +1,37 @@
+#!/bin/sh
+#set -x
+
+rootdir=/ptmpp1/Yali.Mao
+
+cd $rootdir
+
+dirs=`ls | grep ^g2g | grep "[0-9]$"`
+
+for dir in $dirs ; do
+  cd $rootdir/$dir
+  PDY=`echo $dir | cut -c 5-12`
+  complete=yes
+
+  for hh in 00 06 ; do
+    for fh in 06 12 18 24 30 36 ; do
+      masterfile=gfs.t${hh}z.master.grb2f$fh
+      if [ ! -e $masterfile ] ; then
+	complete=no
+        echo "$dir/$masterfile doesn't exist"
+      else
+	current=`date +%s`
+	last_modified=`stat -c "%Y" $masterfile`
+	if [ $(($current-$last_modified)) -lt 180 ]; then
+	  complete=no
+	  echo $dir/$masterfile is not completed yet.
+	fi
+      fi
+    done
+  done
+
+  if [ $complete = 'yes' ] ; then
+    echo $dir is completed and its working directory is removed
+    cd ..
+    rm -r $dir.working
+  fi
+done

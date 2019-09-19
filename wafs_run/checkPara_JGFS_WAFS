@@ -1,0 +1,61 @@
+#!/bin/sh
+
+set -x
+
+#############################################
+# compare parallel product to operational
+#############################################
+NET=gfs
+RUN=gfs
+
+
+PDY=${PDY:-`cut -c 7-14 /com2/date/t00z`}
+cyc=${cyc:-00}
+
+PRODCOMOUT=/com/gfs/prod/gfs.$PDY
+PRODPCOM=/pcom/gfs
+PARACOMOUT=/com2/gfs/para/gfs.$PDY
+PARAPCOM=/pcom2/para/gfs
+
+for gid in 37 38 39 40 41 42 43 44 ; do
+  for fcsthrs in 06 12 18 24 30 36 ; do
+
+    job=gfs_wafs_f${fcsthrs}_${cyc}
+
+    # comparing $COMOUT products
+    cmp $PRODCOMOUT/wafs${NET}${gid}.t${cyc}z.gribf${fcsthrs} $PARACOMOUT/wafs${NET}${gid}.t${cyc}z.gribf${fcsthrs}
+    cmp $PRODCOMOUT/wafs${NET}${gid}.t${cyc}z.gribf${fcsthrs}.grib2 $PARACOMOUT/wafs${NET}${gid}.t${cyc}z.gribf${fcsthrs}.grib2
+
+    # $PCOM data on develop machine may be out of date, so skip the comparison
+    continue
+    #stdpcom=/ptmpp2/Jiayi.Peng/data
+
+    # comparing $PCOM products
+    if [ $fcsthrs -eq 30 ] ; then
+      sets=b
+      for fhr in 12 18 24 30 ; do
+	  cmp $PRODPCOM/com.wafs${cyc}${fhr}${sets}.$job $PARAPCOM/com.wafs${cyc}${fhr}${sets}.$job
+	  cmp $PRODPCOM/xtrn.wfs${NET}${cyc}${fhr}${sets}.$job $PARAPCOM/xtrn.wfs${NET}${cyc}${fhr}${sets}.$job
+      done
+      sets=
+      for fhr in 00 06 ; do
+	  cmp $PRODPCOM/com.wafs${cyc}${fhr}${sets}.$job $PARAPCOM/com.wafs${cyc}${fhr}${sets}.$job
+	  cmp $PRODPCOM/xtrn.wfs${NET}${cyc}${fhr}${sets}.$job $PARAPCOM/xtrn.wfs${NET}${cyc}${fhr}${sets}.$job
+      done
+    fi
+    if [ $fcsthrs -ge 12 -a $fcsthrs -le 30 ] ; then
+      sets=a
+      cmp $PRODPCOM/com.wafs${cyc}${fcsthrs}${sets}.$job $PARAPCOM/com.wafs${cyc}${fcsthrs}${sets}.$job
+      cmp $PRODPCOM/xtrn.wfs${NET}${cyc}${fcsthrs}${sets}.$job $PARAPCOM/xtrn.wfs${NET}${cyc}${fcsthrs}${sets}.$job
+    elif  [ $fcsthrs -ge 36 ] ; then
+      sets=
+      cmp $PRODPCOM/com.wafs${cyc}${fcsthrs}${sets}.$job $PARAPCOM/com.wafs${cyc}${fcsthrs}${sets}.$job
+      cmp $PRODPCOM/xtrn.wfs${NET}${cyc}${fcsthrs}${sets}.$job $PARAPCOM/xtrn.wfs${NET}${cyc}${fcsthrs}${sets}.$job
+    # elif [ $fcsthrs -le 36 ] ; then 
+    #   no comparison
+    fi
+  done
+done
+
+exit
+

@@ -1,0 +1,126 @@
+#!/bin/sh
+
+#BSUB -cwd /gpfs/hps/ptmp/Yali.Mao
+#BSUB -oo /gpfs/hps/ptmp/Yali.Mao/post_gtg.o%J
+#BSUB -eo /gpfs/hps/ptmp/Yali.Mao/post_gtg.o%J
+#BSUB -J post_gtg.Cray
+#BSUB -extsched 'CRAYLINUX[]'
+#BSUB -W 00:10
+#BSUB -q debug
+#BSUB -P GFS-T2O
+#BSUB -M 1000
+
+export NODES=8
+export ntasks=72
+export ptile=12
+export threads=1
+export APRUN="aprun -j 1 -n${ntasks} -N${ptile} -d${threads} -cc depth"
+
+export OMP_NUM_THREADS=$threads
+
+# this script mimics operational GFS post processing production
+export MP_LABELIO=yes
+
+
+. $MODULESHOME/init/bash
+export IOBUF_PARAMS="*:size=32M:count=4:verbose"
+
+module use -a /opt/cray/craype/default/modulefiles
+module use -a /opt/cray/ari/modulefiles
+module use -a /gpfs/hps/nco/ops/nwprod/modulefiles
+module use -a /usrx/local/prod/modulefiles
+
+module load PrgEnv-intel cray-mpich
+module load cfp-intel-sandybridge
+module load iobuf
+module use /gpfs/hps/nco/ops/nwprod/modulefiles
+module load prod_envir
+module load grib_util/1.0.3
+module load prod_util
+# load iobuf along with the following 2 modules to show taskid
+#module swap pmi/5.0.6-1.0000.10439.140.2.ari pmi/5.0.11
+#module swap intel intel/16.3.210
+
+module list
+
+set -xa
+
+####################################
+# Specify NET and RUN Name and model
+####################################
+export RUN=gfs
+export NET=gfs
+export envir=prod
+export COMROOT=/gpfs/hps/ptmp/emc.glopara/com2
+# define my own COMROOT(files are matched by run_gtg_post.sh.cray.cron)
+export COMROOT=/gpfs/hps/ptmp/Yali.Mao/com2
+export NWROOT=/gpfs/hps/nco/ops/nwprod
+export NWROOTprod=/gpfs/hps/nco/ops/nwprod
+export KEEPDATA=YES
+
+export PDY=20161019
+export cyc=00
+export cycle=t${cyc}z
+export post_times=06
+fh=$post_times
+
+export COMIN=$COMROOT/${NET}/${envir}/${RUN}.${PDY}
+
+# specify your output and working directory
+export user=`whoami`
+export COMOUT=/gpfs/hps/ptmp/${user}/${NET}/${envir}/${RUN}.${PDY}
+mkdir -p $COMOUT
+export DATA=/gpfs/hps/ptmp/${user}/gtg.working.$PDY.$$.$fh
+rm -rf $DATA; mkdir -p $DATA
+cd $DATA
+
+####################################
+# SENDSMS  - Flag Events on SMS
+# SENDCOM  - Copy Files From TMPDIR to $COMOUT
+# SENDDBN  - Issue DBNet Client Calls
+# RERUN    - Rerun posts from beginning (default no)
+# VERBOSE  - Specify Verbose Output in global_postgp.sh
+####################################
+export SAVEGES=NO
+export SENDSMS=NO
+export SENDCOM=YES
+export SENDDBN=NO
+export RERUN=NO
+export VERBOSE=YES
+
+#export HOMEglobal=/gpfs/hps3/emc/global/noscrub/emc.glopara/svn/gfs/q3fy17_final/global_shared.v14.1.0
+export HOMEglobal=/gpfs/hps/nco/ops/nwprod/global_shared.v14.0.0
+export FIXglobal=$HOMEglobal/fix
+export HOMEgfs=/gpfs/hps3/emc/global/noscrub/Yali.Mao/git/EMC_post_liveupp
+
+export FIXgfs=/gpfs/hps3/emc/global/noscrub/emc.glopara/git/fv3gfs/fix
+export PARMpost=${HOMEgfs}/parm
+#export POSTGPSH=${HOMEgfs}/ush/global_nceppost.sh
+export POSTGPEXEC=$HOMEgfs/exec/ncep_post.cray
+#
+#export PostFlatFile=$HOMEgfs/parm/postxconfig-NT-GFS.txt
+export POSTGRB2TBL=$HOMEgfs/parm/params_grib2_tbl_new
+#
+export nemsioget=$HOMEglobal/exec/nemsio_get
+
+#export crtm_ver=${crtm_ver:-v2.0.6}
+## For FIXCRTM satellite in scripts/exgfs_nceppost.sh.ecf
+#export hwrf_ver=v10.0.6
+#export util_ver=v1.0.0
+#export g2tmpl_ver=v1.3.0
+
+export MSTF=NO
+export FLXF=NO
+export PGBF=NO
+export PGB1F=NO
+export GOESF=NO
+export GTGF=YES
+export KEEPDATA=YES
+
+date
+
+$HOMEgfs/jobs/J_NCEPPOST
+
+date
+
+echo $?

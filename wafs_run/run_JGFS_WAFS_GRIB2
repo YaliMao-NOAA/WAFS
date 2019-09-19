@@ -1,0 +1,118 @@
+#BSUB -oo /ptmpp1/Yali.Mao/out_wafs_grib2
+#BSUB -eo /ptmpp1/Yali.Mao/err_wafs_grib2
+#BSUB -n 48
+#BSUB -J test_wafs2
+#BSUB -W 00:10
+#BSUB -q "debug"
+#BSUB -R span[ptile=8]
+#BSUB -x
+#PBS -l vmem=32G
+#BSUB -a poe
+#BSUB -P GFS-T2O
+
+############# testing job ################
+job=JGFS_WAFS_GRIB2
+
+set -xa
+
+export NWROOT=/nwprod
+export COMROOT=/com
+export PCOMROOT=/pcom
+export NWROOTp1=/nwprod
+export DCOMROOT=/dcom
+export util_ver=v1.0.0
+
+USER=`whoami`
+
+
+### envir: prod/dev/para/bkup/ges/test bkup2/ges2/para2/prod2/prd_p6
+###=======================###
+export envir=prod
+
+### NET: gfs/para/parallel-test/nam/rap/ dump/ens/nawips/nesdis/
+export NET=gfs
+
+export RUN=gfs
+
+###=======================###
+export cyc=${cyc:-06}
+
+#export PDY=`cut -c 7-14 /com/date/t${cyc}z`
+export PDY=20160216
+
+### job related, overwritten by HOMEgfs
+###=======================###
+export model_ver=v1.0.0
+
+### control DBN
+export SENDDBN=NO
+
+   export DATA=/ptmpp1/${USER}/wafs_grb${cyc}
+   export jlogfile=/$DATA/jlogfile
+#   export HOMEgfs=/global/save/Yali.Mao/project/wafs_trunk
+   export HOMEgfs=/global/save/Yali.Mao/project/gfs_nco_20160129
+   export COMOUT=/ptmpp1/${USER}/wafs2.$PDY
+   export PCOM=/ptmpp1/${USER}/pcom/wafs2
+
+#export COMIN=/com/${NET}/${envir}/${RUN}.${PDY}
+
+   export SHOUR=06
+   export EHOUR=09
+   export FHINC=03
+
+sh $HOMEgfs/jobs/$job
+
+#############################################
+# compare the output
+#############################################
+
+# the standard data to be compared to
+stdout=/com/${NET}/$envir/${RUN}.${PDY}
+if [ $envir = prod ]; then
+  stdpcom=/pcom/wafs
+else
+  stdpcom=/pcom/${envir}/wafs
+fi
+
+ffhr=$SHOUR
+
+cd $COMOUT
+# Filter 775mb and 750mb since the operational 775mb is going to be replaced by 750mb
+while test $ffhr -le $EHOUR ; do
+  # cmp $COMOUT/gfs.t${cyc}z.wafs_grb45f${ffhr} $stdout/gfs.t${cyc}z.wafs_grb45f${ffhr}
+  wgrib $COMOUT/gfs.t${cyc}z.wafs_grb45f${ffhr} | grep -v ":kpds7=750:" | wgrib -i -grib $COMOUT/gfs.t${cyc}z.wafs_grb45f${ffhr} -o my.grb
+  wgrib $stdout/gfs.t${cyc}z.wafs_grb45f${ffhr} | grep -v ":kpds7=775:" | wgrib -i -grib $stdout/gfs.t${cyc}z.wafs_grb45f${ffhr} -o com.grb
+  cmp my.grb com.grb
+
+  # cmp $COMOUT/gfs.t${cyc}z.wafs_grb45f${ffhr}.grib2 $stdout/gfs.t${cyc}z.wafs_grb45f${ffhr}.grib2
+  wgrib2 $COMOUT/gfs.t${cyc}z.wafs_grb45f${ffhr}.grib2 | grep -v "750 mb" | wgrib2 -i $COMOUT/gfs.t${cyc}z.wafs_grb45f${ffhr}.grib2 -grib my.grb2
+  wgrib2 $stdout/gfs.t${cyc}z.wafs_grb45f${ffhr}.grib2 | grep -v "775 mb" | wgrib2 -i $stdout/gfs.t${cyc}z.wafs_grb45f${ffhr}.grib2 -grib com.grb2
+  cmp my.grb2 com.grb2
+
+  # cmp $COMOUT/gfs.t${cyc}z.wafs_grb45f${ffhr}.nouswafs.grib2 $stdout/gfs.t${cyc}z.wafs_grb45f${ffhr}.nouswafs.grib2
+  wgrib2 $COMOUT/gfs.t${cyc}z.wafs_grb45f${ffhr}.nouswafs.grib2 | grep -v "750 mb" | wgrib2 -i $COMOUT/gfs.t${cyc}z.wafs_grb45f${ffhr}.nouswafs.grib2 -grib my45.grb2
+  wgrib2 $stdout/gfs.t${cyc}z.wafs_grb45f${ffhr}.nouswafs.grib2 | grep -v "775 mb" | wgrib2 -i $stdout/gfs.t${cyc}z.wafs_grb45f${ffhr}.nouswafs.grib2 -grib com45.grb2
+  cmp my45.grb2 com45.grb2
+
+  # cmp $PCOM/grib2.t${cyc}z.wafs_grbf${ffhr}.45 $stdpcom/grib2.t${cyc}z.wafs_grbf${ffhr}.45
+  wgrib2 $PCOM/grib2.t${cyc}z.wafs_grbf${ffhr}.45 | grep -v "750 mb" | wgrib2 -i $PCOM/grib2.t${cyc}z.wafs_grbf${ffhr}.45 -grib mypcom.grb2
+  wgrib2 $stdpcom/grib2.t${cyc}z.wafs_grbf${ffhr}.45 | grep -v "775 mb" | wgrib2 -i $stdpcom/grib2.t${cyc}z.wafs_grbf${ffhr}.45 -grib pcom.grb2
+  cmp mypcom.grb2 pcom.grb2
+
+  # cmp $PCOM/grib2.t${cyc}z.wafs_grb_wifsf${ffhr}.45 $stdpcom/grib2.t${cyc}z.wafs_grb_wifsf${ffhr}.45
+  wgrib2 $PCOM/grib2.t${cyc}z.wafs_grb_wifsf${ffhr}.45 | grep -v "750 mb" | wgrib2 -i $PCOM/grib2.t${cyc}z.wafs_grb_wifsf${ffhr}.45 -grib mypcomwifs.grb2
+  wgrib2 $stdpcom/grib2.t${cyc}z.wafs_grb_wifsf${ffhr}.45 | grep -v "775 mb" | wgrib2 -i $stdpcom/grib2.t${cyc}z.wafs_grb_wifsf${ffhr}.45 -grib pcomwifs.grb2
+  cmp mypcomwifs.grb2 pcomwifs.grb2
+  
+
+  ffhr=`expr $ffhr + $FHINC`
+  if test $ffhr -lt 10
+  then
+     ffhr=0${ffhr}
+  fi
+
+done
+
+
+exit
+

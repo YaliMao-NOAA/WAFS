@@ -1,0 +1,100 @@
+2016082212
+2016082112
+20160821
+before 00
+HTAR: HTAR FAILED
+HTAR: HTAR FAILED
+wgrib empty
+ho 2016082212
++ /meso/save/Geoffrey.Manikin/wafs/advtime 2016082212 -24 -1
++ ymdhm1=2016082112
++ echo 2016082112
++ echo 2016082112
++ cut -c1-8
++ ymdm1=20160821
++ echo 20160821
++ /meso/save/Geoffrey.Manikin/wafs/faa_qsub_daily.sh 20160821
++ FINC=12
++ SCRIPTS=/meso/save/Geoffrey.Manikin/wafs/
++ COPYGB=/nwprod/util/exec/copygb
++ NDATE=/nwprod/util/exec/ndate
++ PDY1=20160821
++ PDY2=20160821
++ '[' 1 -eq 2 ']'
++ '[' 8 -ne 8 -0 8 -ne 8 ']'
+/meso/save/Geoffrey.Manikin/wafs/faa_qsub_daily.sh: line 12: [: too many arguments
++ PDY=20160821
++ '[' 20160821 -ge 20160821 ']'
++ DATA=/stmpp1/Geoffrey.Manikin/faa.20160821
++ '[' '!' -d /stmpp1/Geoffrey.Manikin/faa.20160821 ']'
++ mkdir -p /stmpp1/Geoffrey.Manikin/faa.20160821
++ cd /stmpp1/Geoffrey.Manikin/faa.20160821
++ echo 'before 00'
++ /meso/save/Geoffrey.Manikin/wafs/grid2gdas.sh 2016082100 gdas
+mkdir: cannot create directory `/stmpp1/Geoffrey.Manikin/wafs': File exists
++ WGRIB=/nwprod/util/exec/wgrib
++ SCRIPTS=/meso/save/Geoffrey.Manikin/wafs/
++ COPYGB_PARM=/meso/save/Geoffrey.Manikin/wafs/merge_copygb.parm
++ COPYGB_IOPT=1
++ TIMEX=/meso/save/Geoffrey.Manikin/bin/timex
++ CDATE=2016082100
+++ /nwprod/util/exec/ndate -168 2016082100
++ cdatem7=2016081400
++ '[' 10 -ne 10 ']'
++ prodsuite=gdas
+++ echo 2016082100
+++ cut -c1-8
++ pdy=20160821
+++ echo 2016082100
+++ cut -c9-10
++ cyc=t00z
++ '[' gdas = gfs ']'
++ '[' gdas = gdas ']'
++ qual=gdas1
++ dir=gfs
++ wafs_grib=gdas.zt.2016082100_tmp
++ wafs_grib2=gdas.zt.2016082100
++ wafs_grib_old=gdas.zt.2016081400
++ proddir=/com/gfs/prod/gdas.20160821
++ file=pgrbanl
++ prodfile=/com/gfs/prod/gdas.20160821/gdas1.t00z.pgrbanl
++ '[' '!' -s /com/gfs/prod/gdas.20160821/gdas1.t00z.pgrbanl ']'
++ proddir=/stmpp1/Geoffrey.Manikin/faa.20160821
++ prodfile=/stmpp1/Geoffrey.Manikin/faa.20160821/gdas1.t00z.pgrbanl
++ '[' '!' -s /stmpp1/Geoffrey.Manikin/faa.20160821/gdas1.t00z.pgrbanl ']'
++ cd /stmpp1/Geoffrey.Manikin/faa.20160821
+++ echo t00z
+++ cut -c2-3
++ /meso/save/Geoffrey.Manikin/wafs//hpss_gdas_faa.sh 20160821 00
++ pdy=20160821
++ hh=00
+++ echo 20160821
+++ cut -c1-4
++ yyyy=2016
+++ echo 20160821
+++ cut -c5-6
++ mm=08
++ '[' 2016082100 -ge 20050101 ']'
++ tarfile=/hpssprod/runhistory/rh2016/201608/20160821/com_gfs_prod_gdas.2016082100.tar
++ set +e
++ htar -xvf /hpssprod/runhistory/rh2016/201608/20160821/com_gfs_prod_gdas.2016082100.tar ./gdas1.t00z.pgrbanl
+[connecting to hpsscore1.fairmont.rdhpcs.noaa.gov/1217]
+ERROR: [FATAL] no such HPSS archive file: /hpssprod/runhistory/rh2016/201608/20160821/com_gfs_prod_gdas.2016082100.tar
+###WARNING  htar returned non-zero exit status.
+            72 = /usrx/local/hpss/bin/htar -xvf /hpssprod/runhistory/rh2016/201608/20160821/com_gfs_prod_gdas.2016082100.tar ./gdas1.t00z.pgrbanl
++ htar -xvf /hpssprod/runhistory/rh2016/201608/20160821/com_gfs_prod_gdas.2016082100.tar ./gdas1.t00z.pgrbf06
+[connecting to hpsscore1.fairmont.rdhpcs.noaa.gov/1217]
+ERROR: [FATAL] no such HPSS archive file: /hpssprod/runhistory/rh2016/201608/20160821/com_gfs_prod_gdas.2016082100.tar
+###WARNING  htar returned non-zero exit status.
+            72 = /usrx/local/hpss/bin/htar -xvf /hpssprod/runhistory/rh2016/201608/20160821/com_gfs_prod_gdas.2016082100.tar ./gdas1.t00z.pgrbf06
++ '[' 72 -ne 0 ']'
++ continue
++ set -e
++ prodfile=/stmpp1/Geoffrey.Manikin/faa.20160821/gdas1.t00z.pgrbanl
++ /nwprod/util/exec/wgrib -v /stmpp1/Geoffrey.Manikin/faa.20160821/gdas1.t00z.pgrbanl
+could not open file: /stmpp1/Geoffrey.Manikin/faa.20160821/gdas1.t00z.pgrbanl
++ f=wgrib
++ '[' '!' -s wgrib ']'
++ echo wgrib empty
++ exit 1
++ exit

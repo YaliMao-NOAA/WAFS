@@ -1,0 +1,31 @@
+
+Mon Oct 10 2005  Bob Kistler
+Updated Thu Aug 21 2014  Geoff Manikin
+Updated Wed Aug 17 2016  Geoff Manikin
+Updated Tue Aug 23 2016  Yali Mao
+
+
+Since December 2000, EMC has collaborated with Gene Fortunato <eugene.j.fortunato@faa.gov> and his colleaguee tarek.ctr.el-wakil@faa.gov in their efforts in calibrating aircraft altimiters. We supply to them gdas pressure grib heights and temperatures on two grid formats: 4xdaily 1x1 global, and 2xdaily wafs grids 39 and 40, i.e. those covering North America. For the sake of history, prior to this collaboration the FAA had been paying the UKMET for to deliver their versions of grids 39 and 40. All this was accomplished with the grib utility programs 
+/nwprod/util/exec/copygb and /nwprod/util/exec/wgrib 
+
+The parent directory for the job and scripting on wcoss is /global/save/Yali.Mao/save/wafs_faa/
+The driver that should run each day in cron is drive_wafs   It submits faa_qsub.sh which creates the 1x1 and wafs grids with reqpective calls to grid2gdas.sh and grid2wafs.sh     The cronjob should be launched around 1250Z each day.
+
+stream lines:
+1) drive_wafs => 
+2) faa_qsub_daily.sh =>
+3) /grid2gdas.sh   -\
+   \grid2wafs.sh   -/
+4) hpss_gdas_faa.sh
+
+The script tries to run some hpss jobs which end up failing.  I haven't tried to get these to work, as I don't see a need to archive the files.    You could certainly comment out those commands.
+
+The files are ftp'ed to ymao@emcrzdm:/home/people/emc/ftp/gmb/wafs/faa/.   via the run_wafs_ftp script.
+In addition files fron 7 days ago are deleted 
+The web site is: ftp://ftp.emc.ncep.noaa.gov/gmb/wafs/faa/
+
+The primary contact is Cyndy Newcomb  cynthia.ctr.newcomb@faa.gov    She'll let you know if any files are missing.  
+
+Problems:
+
+Outages on WCOSS often cause the cronjob to be missed.   The job I use to recover missing files is  faa_qsub_daily.sh $PDY [$PDY2], launched by drive_wafs_catchup where $PDY is yyyymmdd. 

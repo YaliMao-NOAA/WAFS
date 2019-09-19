@@ -1,0 +1,101 @@
+#BSUB -oo /ptmpp1/Yali.Mao/out_blending
+#BSUB -eo /ptmpp1/Yali.Mao/err_blending
+#BSUB -n 48
+#BSUB -J test_blnd
+#BSUB -W 00:10
+#BSUB -q "debug"
+#BSUB -R span[ptile=8]
+#BSUB -x
+#PBS -l vmem=32G
+#BSUB -a poe
+#BSUB -P GFS-T2O
+
+############# testing job ################
+job=JGFS_WAFS_BLENDING
+
+set -xa
+
+USER=`whoami`
+
+### utility version
+###=======================###
+export util_ver=v1.0.0
+
+### envir: prod/dev/para/bkup/ges/test bkup2/ges2/para2/prod2/prd_p6
+###=======================###
+export envir=prod
+
+### NET: gfs/para/parallel-test/nam/rap/ dump/ens/nawips/nesdis/
+export NET=gfs
+
+export RUN=gfs
+
+###=======================###
+export cyc=${cyc:-00}
+
+#export PDY=`cut -c 7-14 /com/date/t${cyc}z`
+export PDY=20160216
+
+### job related, overwritten by HOMEgfs
+###=======================###
+export model_ver=v1.0.0
+
+### control DBN
+export SENDDBN_NTC=NO
+export SENDDBN_GB2=NO
+export COMROOT=/com
+
+   export DATA=/ptmpp1/${USER}/wafs_blnd${cyc}
+   export jlogfile=/$DATA/jlogfile
+#   export HOMEgfs=/global/save/Yali.Mao/project/wafs_branch
+   export HOMEgfs=/global/save/Yali.Mao/project/gfs_nco_20160129
+   export COMOUT=/ptmpp1/${USER}/blnd.$PDY
+   #if [ $envir = prod ]; then
+   #  PCOM=/pcom/wafs
+   #else
+   #  PCOM=/pcom/${envir}/wafs
+   #fi
+   export PCOM=/ptmpp1/${USER}/pcom/blnd
+
+#export COMIN_US=$pcom
+export COMINus=/pcom/wafs
+
+export COMINuk=/dcom/us007003/$PDY/wgrbbul/ukmet_wafs
+
+   export SHOUR=06
+   export EHOUR=09
+   export FHINC=03
+
+sh $HOMEgfs/jobs/$job
+
+#############################################
+# compare the output
+#############################################
+
+# the standard data to be compared to
+stdout=/com/${NET}/$envir/${RUN}.${PDY}
+if [ $envir = prod ]; then
+  stdpcom=/pcom/wafs
+else
+  stdpcom=/pcom/${envir}/wafs
+fi
+
+ffhr=$SHOUR
+
+while test $ffhr -le $EHOUR ; do
+
+  cmp $COMOUT/WAFS_blended_${PDY}${cyc}f${ffhr}.grib2 $stdout/WAFS_blended_${PDY}${cyc}f${ffhr}.grib2
+
+  # cmp $pcom/grib2.t${cyc}z.WAFS_blended_f${ffhr} $stdpcom/grib2.t${cyc}z.WAFS_blended_f${ffhr}
+
+  ffhr=`expr $ffhr + $FHINC`
+  if test $ffhr -lt 10
+  then
+     ffhr=0${ffhr}
+  fi
+
+done
+
+
+exit
+

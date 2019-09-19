@@ -1,0 +1,60 @@
+#!/bin/sh
+
+. /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/envir_setting.sh
+set -xa
+
+export HOME_scripts=$HOMEsave/wafs_faa
+export COMROOT=$COMROOThps
+
+#-----------------------
+if  [ $# -ge 1 ] ; then
+#-----------------------
+
+# check all input dates are in good format
+for ymdm1 in $@ ; do
+    if [[ ${#ymdm1} -ne 8 || ! $ymdm1 =~ ^-?[0-9]+$ ]] ; then
+	echo "Input contains an invalid date as YYYYMMDD"
+    else
+	ymdms=" $ymdm1"
+    fi
+done
+
+#-----------------------
+fi
+#-----------------------
+
+
+#-----------------------
+if  [ -z $ymdms ] ; then
+#-----------------------
+
+ymdh=`cut -c 7-16 $COMROOT/date/t06z`
+echo $ymdh
+ymdhm1="`$HOME_scripts/advtime ${ymdh} -24 -1`"
+echo $ymdhm1
+ymdm1=`echo $ymdhm1 | cut -c1-8`
+echo $ymdm1
+
+ymdms=$ymdm1
+#-----------------------
+fi
+#-----------------------
+
+for ymdm1 in $ymdms ; do
+
+$HOME_scripts/faa_qsub_daily.sh ${ymdm1}
+#$HOME_scripts/run_wafs_ftp
+
+if [[ -z $cutoffdate ]] ; then
+    cutoffdate=$ymdm1
+fi
+
+done
+
+# remove data on rzdm ftp server if 10 days before
+cutoffdate=${cutoffdate}00
+cutoffdate=`$HOME_scripts/advtime $cutoffdate -240 -1`
+cutoffdate=`echo $cutoffdate | cut -c1-8`
+ssh ymao@emcrzdm "ksh ~/scripts/wafs_faa_maintenance.sh $cutoffdate"
+
+exit

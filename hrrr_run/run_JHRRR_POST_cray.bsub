@@ -1,0 +1,92 @@
+#!/bin/sh
+
+#BSUB -cwd /gpfs/hps/ptmp/Yali.Mao
+#BSUB -oo /gpfs/hps/ptmp/Yali.Mao/hrrr_post.o%J
+#BSUB -eo /gpfs/hps/ptmp/Yali.Mao/hrrr_post.o%J
+#BSUB -J hrrr_post.Cray
+#BSUB -extsched 'CRAYLINUX[]'
+#BSUB -W 00:30
+#BSUB -q debug
+#BSUB -P GFS-T2O
+#BSUB -M 1000
+
+export NODES=2
+export ntasks=48
+export ptile=24
+export threads=1
+export APRUN="aprun -j 1 -n${ntasks} -N${ptile} -d${threads} -cc depth"
+
+export OMP_NUM_THREADS=$threads
+
+# this script mimics operational GFS post processing production
+export MP_LABELIO=yes
+
+
+. $MODULESHOME/init/sh
+export IOBUF_PARAMS="*:size=32M:count=4:verbose"
+module load PrgEnv-intel cray-mpich
+module load cfp-intel-sandybridge
+module load iobuf
+module use /gpfs/hps/nco/ops/nwprod/modulefiles
+module load prod_envir
+module load grib_util/1.0.3
+module load prod_util/1.0.24
+# load iobuf along with the following 2 modules to show taskid
+#module swap pmi/5.0.6-1.0000.10439.140.2.ari pmi/5.0.11
+#module swap intel intel/16.3.210
+
+set -xa
+
+####################################
+# Specify NET and RUN Name and model
+####################################
+#export RUN=gfs
+#export NET=gfs
+export envir=prod
+#export COMROOT=/gpfs/hps/ptmp/emc.glopara/com2
+# define my own COMROOT(files are matched by run_gtg_post.sh.cray.cron)
+#export COMROOT=/gpfs/hps/nco/ops/com
+#export NWROOT=/gpfs/hps/nco/ops/nwprod
+#export NWROOTprod=/gpfs/hps/nco/ops/nwprod
+#export KEEPDATA=YES
+
+PDY=`$NDATE -2`
+export cyc=`echo $PDY | cut -c 9-10`
+export PDY=`echo $PDY | cut -c 1-8`
+export PDY=20180315
+export cyc=12
+export fhr=09
+export job=hrrr_post_f$fhr_$cyc
+
+export COMIN=/gpfs/tp2/nco/ops/nwges/prod/hrrr/hrrrges_sfc
+#export COMIN=/gpfs/tp1/ptmp/Yali.Mao/hrrr_post_prod_18_f06.data
+export COMOUT=/gpfs/hps/ptmp/Yali.Mao/hrrr/test/hrrr.$PDY
+
+export CRTM=/gpfs/*/nco/ops/nwprod/fix/crtm_2.0.5
+export WGRIB2=/gpfs/gp2/nco/ops/nwprod/hrrr.v2.0.14/exec/hrrr_wgrib2
+
+export DATA_IN=/gpfs/hps/ptmp/Yali.Mao
+
+# The purpose is to run HRRR job using post_branch/exec under HRRR's vertical structure
+# Keep the modified scripts/parms here to maintain versions under svn
+
+export HOMEhrrr=/gpfs/hps3/emc/global/save/Yali.Mao/project/hrrr.v2.0.9
+#export EXEChrrr=/gpfs/hps3/emc/global/save/Yali.Mao/project/post_branch/exec
+export EXEChrrr=/gpfs/hps3/emc/global/noscrub/Yali.Mao/git/EMC_post_gtg/exec
+
+# copy versioned scripts/parms to HRRR vertical structure before running a job
+DIRVER=/gpfs/hps3/emc/global/save/Yali.Mao/save/hrrr_run
+cp $DIRVER/exhrrr_post.sh.ecf           $HOMEhrrr/scripts/.
+cp $DIRVER/JHRRR_POST                   $HOMEhrrr/jobs/.
+cp $DIRVER/hrrr_post_avblflds.xml       $HOMEhrrr/parm/.
+#cp $DIRVER/hrrr_postcntrl_gtg.xml       $HOMEhrrr/parm/.
+cp $DIRVER/hrrr_postcntrl.xml           $HOMEhrrr/parm/.
+#cp $DIRVER/hrrr.GTG_postxconfig-NT.txt  $HOMEhrrr/parm/postxconfig-NT.txt
+#cp $DIRVER/hrrr_postxconfig-NT.txt      $HOMEhrrr/parm/postxconfig-NT.txt
+cp $DIRVER/hrrr.all_postxconfig-NT.txt  $HOMEhrrr/parm/postxconfig-NT.txt
+cp $DIRVER/gtg.config.hrrr              $HOMEhrrr/parm/.
+cp $DIRVER/hrrr_params_grib2_tbl_new    $HOMEhrrr/parm/.
+cp $DIRVER/hrrr_smartinit.sh            $HOMEhrrr/ush/.
+
+# CALL executable job script here
+$HOMEhrrr/jobs/JHRRR_POST

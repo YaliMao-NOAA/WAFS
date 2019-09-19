@@ -1,0 +1,6 @@
+# run post icing/gtg/both from archived NEMSIO data
+#==================================================
+#56 23 07 * * sh /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/wafs_run/run_post_gfs_Grib2.archive_nemsio.cron fv3gtg_archive gtg 20180116 20180131  "00 06 12 18" "06 12 18  24 30 36" 2019_17winter  > /ptmpp1/Yali.Mao/fv3gtg_archive.log 2>&1
+#50 16 10 * * sh /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/wafs_run/run_post_gfs_Grib2.archive_nemsio.cron fv3gtg_archive gtg 20180201 20180228  "00 06 12 18" "06 12 18  24 30 36" 2019_17winter  > /ptmpp1/Yali.Mao/fv3gtg_archive.log1 2>&1
+
+15 22 13 * *  sh /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/wafs_run/run_post_gfs_Grib2.archive_nemsio.cron uk_icsev icing 20190306 20190430 "00 06 12 18" "06 12 18 24 30 36" 2019_18summer 1>/ptmpp1/Yali.Mao/fv3gtg_archive.log 2>&1

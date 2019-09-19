@@ -1,0 +1,139 @@
+
+# run post G2G/GFS/GFIS from archived data
+#==================================================
+#30 18 14 * *  sh /global/save/Yali.Mao/save/wafs_run/run_post_gfs_Grib2.archive_retro.cntl gtg 20180622 20180622 "00 06" "006 012" > /ptmpp1/Yali.Mao/gtg.archive.20180622 2>&1
+
+#sanitizing for GTG
+#15 13 * * *  sh /global/save/Yali.Mao/save/wafs_run/run_post_gfs_Grib2.archive.sanitization >  /ptmpp1/Yali.Mao/gtg.archive.sanitize 2>&1
+
+# run post RAP GTG, save data under ptmp
+00 * * * * . /usrx/local/Modules/default/init/ksh; module load lsf ics ibmpe; bsub < /gpfs/dell2/emc/modeling/save/Yali.Mao/save/rap_run/run_JRAP_POST_wcoss.bsub > /ptmpp1/Yali.Mao/rap.bsub.txt 2>&1
+
+
+#      01                          02                    -----sample date
+#============================ ==========================
+#00(03) 06(09) 12(15) 18(21)                             -----cycle time(operational GFS data)
+# |      |      |      |----------------|
+# |      |      |----------------|      |
+# |      |----------------|      |      |
+# |----------------|      |      |      |
+#                 15     21     03     09     15     21  ------verifyFIP
+#                                       10:30            ------run_icing2vsdb.sh
+
+#2>/dev/null
+
+# transfer FAA to rzdm (taken from Geoff Manikin) 
+# ftp://ftp.emc.ncep.noaa.gov/gmb/wafs/faa/
+#==================================================
+30 10  * * * . /usrx/local/Modules/default/init/ksh; module load lsf ics ibmpe; sh /global/save/Yali.Mao/save/wafs_faa/drive_wafs >  /ptmpp1/Yali.Mao/faa.err 2>&1
+
+
+# transfer NEMSIO to NCAR
+# ftp.rap.ucar.edu
+#==================================================
+#23 14 1 6 * . /usrx/local/Modules/default/init/ksh; module load lsf ics ibmpe; sh /global/save/Yali.Mao/save/scripts/nemsio2ucar.sh 18 20180524 "00 06 12 18" 12 8 >  /ptmpp1/Yali.Mao/nemsio2ucar.18.err 2>&1
+# 20160701-20160715 ndays=16
+24 14 4 6 * . /usrx/local/Modules/default/init/ksh; module load lsf ics ibmpe; sh /global/save/Yali.Mao/save/scripts/nemsio2ucar.sh 16 20160701 "00 06 12 18" 12 16 > /ptmpp1/Yali.Mao/nemsio2ucar.16.err 2>&1
+# 20170709-20170724 ndays=16
+25 14 4 6 * . /usrx/local/Modules/default/init/ksh; module load lsf ics ibmpe; sh /global/save/Yali.Mao/save/scripts/nemsio2ucar.sh 17 20170709 "00 06 12 18" 12 16 > /ptmpp1/Yali.Mao/nemsio2ucar.17.err 2>&1
+25 18  * * * . /usrx/local/Modules/default/init/ksh; module load lsf ics ibmpe; sh /global/save/Yali.Mao/save/scripts/nemsio2ucar.sh rt >  /ptmpp1/Yali.Mao/nemsio2ucar.rt.err 2>&1
+
+
+# collect GFIP and GCIP to rzdm FTP server, plus plotting and maintenance
+# http://www.emc.ncep.noaa.gov/gmb/icao/grdplot/plot.html
+#==================================================
+#50 05 * * * export cyc=00;  sh /global/save/Yali.Mao/save/scripts/GCIP_GFIP_2_rzdm.sh  > /ptmpp1/Yali.Mao/gfipgcip2rzdm.$cyc 2>&1
+#50 11 * * * export cyc=06;  sh /global/save/Yali.Mao/save/scripts/GCIP_GFIP_2_rzdm.sh  > /ptmpp1/Yali.Mao/gfipgcip2rzdm.$cyc 2>&1
+#50 17 * * * export cyc=12;  sh /global/save/Yali.Mao/save/scripts/GCIP_GFIP_2_rzdm.sh  > /ptmpp1/Yali.Mao/gfipgcip2rzdm.$cyc 2>&1
+#50 23 * * * export cyc=18;  sh /global/save/Yali.Mao/save/scripts/GCIP_GFIP_2_rzdm.sh  > /ptmpp1/Yali.Mao/gfipgcip2rzdm.$cyc 2>&1
+
+
+55 05 * * * export cyc=00;  sh /global/save/Yali.Mao/save/scripts/GCIP_GFIP_GTG_2_rzdm.sh  > /ptmpp1/Yali.Mao/gfipgcipgtg2rzdm.$cyc 2>&1
+55 11 * * * export cyc=06;  sh /global/save/Yali.Mao/save/scripts/GCIP_GFIP_GTG_2_rzdm.sh  > /ptmpp1/Yali.Mao/gfipgcipgtg2rzdm.$cyc 2>&1
+55 17 * * * export cyc=12;  sh /global/save/Yali.Mao/save/scripts/GCIP_GFIP_GTG_2_rzdm.sh  > /ptmpp1/Yali.Mao/gfipgcipgtg2rzdm.$cyc 2>&1
+55 23 * * * export cyc=18;  sh /global/save/Yali.Mao/save/scripts/GCIP_GFIP_GTG_2_rzdm.sh  > /ptmpp1/Yali.Mao/gfipgcipgtg2rzdm.$cyc 2>&1
+
+# archive gtg data to HPSS under /NCEPDEV/emc-global/5year/Yali.Mao/gtg_backup
+#==================================================
+00 12 * * * sh /global/save/Yali.Mao/save/scripts/archive_wafs.sh gtg gtg_backup >  /ptmpp1/Yali.Mao/archive_wafs.gtg  2>&1
+
+# For AWC: unblended wafs FTP to emcrzdm
+# ftp://ftp.emc.ncep.noaa.gov/unaff/ymao/wafs.prod/
+#==================================================
+30 10 * * * sh /global/save/Yali.Mao/save/wafs_run/run_AWC.cron > /ptmpp1/Yali.Mao/ftp2awc.err 2>&1
+
+# run post GFIS
+#==================================================
+# run new version of GFIS and upload data to rzdm FTP server, plus plotting and maintenance
+#50 05 * * * export cyc=00; sh /global/save/Yali.Mao/save/wafs_run/run_post_gfs_Grib2.cron > /ptmpp1/Yali.Mao/gfip.cron.$cyc 2>&1
+#50 11 * * * export cyc=06; sh /global/save/Yali.Mao/save/wafs_run/run_post_gfs_Grib2.cron > /ptmpp1/Yali.Mao/gfip.cron.$cyc 2>&1
+#50 17 * * * export cyc=12; sh /global/save/Yali.Mao/save/wafs_run/run_post_gfs_Grib2.cron > /ptmpp1/Yali.Mao/gfip.cron.$cyc 2>&1
+#50 23 * * * export cyc=18; sh /global/save/Yali.Mao/save/wafs_run/run_post_gfs_Grib2.cron > /ptmpp1/Yali.Mao/gfip.cron.$cyc 2>&1
+
+#40 04 * * * export PDY=20150718;export cyc=12; sh /global/save/Yali.Mao/save/wafs_run/run_post_gfs_Grib2.cron > /ptmpp1/Yali.Mao/gfip.cron.$PDY$cyc.cmd 2>&1
+
+
+# Run GCIP
+#==================================================
+# run GCIP 5 hours later than each cycle, plus plotting and maintenance
+#00 05 * * * export cyc=00; sh /global/save/Yali.Mao/save/wafs_run/run_JGFS_WAFS_GCIP.cron > /ptmpp1/Yali.Mao/gcip.cron.$cyc 2>&1
+#00 11 * * * export cyc=06; sh /global/save/Yali.Mao/save/wafs_run/run_JGFS_WAFS_GCIP.cron > /ptmpp1/Yali.Mao/gcip.cron.$cyc 2>&1
+#00 17 * * * export cyc=12; sh /global/save/Yali.Mao/save/wafs_run/run_JGFS_WAFS_GCIP.cron > /ptmpp1/Yali.Mao/gcip.cron.$cyc 2>&1
+#00 23 * * * export cyc=18; sh /global/save/Yali.Mao/save/wafs_run/run_JGFS_WAFS_GCIP.cron > /ptmpp1/Yali.Mao/gcip.cron.$cyc 2>&1
+
+#42 12 * * * export PDY=20150420; export cyc=00; sh /global/save/Yali.Mao/save/wafs_run/run_JGFS_WAFS_GCIP.cron > /ptmpp1/Yali.Mao/gcip.cron.$cyc.cmd 2>&1
+
+# Run verification vsdb
+#==================================================
+#verify against GCIP/CIP yesterday
+
+00 06 * * * sh /global/save/Yali.Mao/save/wafs_run/run_JVERF_GRID2GRID_WAFS.cron > /ptmpp1/Yali.Mao/verificiation.g2g.err 2>&1
+
+#12 20 * * * export vday=20161230; sh /global/save/Yali.Mao/save/wafs_run/run_JVERF_GRID2GRID_WAFS.cron > /ptmpp1/Yali.Mao/verificiation.g2g.err.cmd.$vday 2>&1
+
+#00 00 * * *  export vday=20150807; export VMODELS="|gfs|"; sh /global/save/Yali.Mao/save/wafs_run/run_JVERF_GRID2GRID_WAFS.cron > /ptmpp1/Yali.Mao/verificiation.g2g.err.cmd.$vday 2>&1
+
+# Plot verification
+#==================================================
+# export sdate=20150421;export edate=20150602;export observation=gfs;sh /global/save/Yali.Mao/project/verif_g2g.v3.0.0/grads/verify_exp_step2.sh >verify.plot.gfs 2>&1 & 
+# icing verification plotting uses python, which can not be used in a cronjob yet.
+# export sdate=20150522;export edate=20150602;export observation=gcip;sh /global/save/Yali.Mao/project/verif_g2g.v3.0.0/grads/verify_exp_step2.sh >verify.plot.gcip 2>&1 & 
+# export sdate=20150522;export edate=20150602;export observation=cip;sh /global/save/Yali.Mao/project/verif_g2g.v3.0.0/grads/verify_exp_step2.sh >verify.plot.cip 2>&1 &
+# export sdate=20150522;export edate=20150602;export observation=gcipconus;sh /global/save/Yali.Mao/project/verif_g2g.v3.0.0/grads/verify_exp_step2.sh >verify.plot.gcipconus 2>&1 &
+# export sdate=20150522;export edate=20150722;export observation=gcipall;sh /global/save/Yali.Mao/project/verif_g2g.v3.0.0/grads/verify_exp_step2.sh >verify.plot.gcipall 2>&1 &
+
+
+#30 19  * * * sh /global/save/Yali.Mao/verif/icing/run_gcip2vsdb.sh blnd us uk gfip `/nwprod/util/exec/ndate -48 | cut -c1-8` >/ptmpp1/Yali.Mao/gcip2vsdb.err 2>&1
+#15 5,11,17,23 * * *  sh /global/save/Yali.Mao/wafs/gfis/post/run_gen_gfis.cron 1>/ptmpp1/Yali.Mao/gfis.log 2>/ptmpp1/Yali.Mao/gfis.err
+
+# wafs FTP to emcrzdm
+#==================================================
+#01 00 * * * ksh /global/save/Yali.Mao/save/scripts/ftp_wafs.sh exp plot $PDY$cyc >/ptmpp1/Yali.Mao/ftp_wafs.sh.err$PDY$cyc 2>&1
+
+
+# Run FIP for verification
+#==================================================
+# fip GFS
+#01 03,09,15,21 * * *  ksh /global/save/Yali.Mao/wafs/fipVf/verifyFIP.sh GFS      1>/ptmpp1/Yali.Mao/verifGFS.log    2>/ptmpp1/Yali.Mao/verifGFS.err
+# fip NAM
+#01 02,08,14,20 * * *  ksh /global/save/Yali.Mao/wafs/fipVf/verifyFIP.sh NAM 180  1>/ptmpp1/Yali.Mao/verifNAM180.log 2>/ptmpp1/Yali.Mao/verifNAM180.err
+#01 02,08,14,20 * * *  ksh /global/save/Yali.Mao/wafs/fipVf/verifyFIP.sh NAM 221  1>/ptmpp1/Yali.Mao/verifNAM221.log 2>/ptmpp1/Yali.Mao/verifNAM221.err
+# fip RAP
+#01 01,07,13,19 * * *  ksh /global/save/Yali.Mao/wafs/fipVf/verifyFIP.sh RAP 130  1>/ptmpp1/Yali.Mao/verifRAP130.log 2>/ptmpp1/Yali.Mao/verifRAP130.err
+#01 01,07,13,19 * * *  ksh /global/save/Yali.Mao/wafs/fipVf/verifyFIP.sh RAP 252  1>/ptmpp1/Yali.Mao/verifRAP252.log 2>/ptmpp1/Yali.Mao/verifRAP252.err
+
+# Run vsdb (CONUS)
+#==================================================
+# The run time depends on FIP verification 
+# The latest finish time is 18z of yesterday for gfip(GFS)
+#01 10 * * * ksh /global/save/Yali.Mao/verif/icing/run_cip2vsdb.sh blnd us uk gfip nam rap fip 1>/ptmpp1/Yali.Mao/cip2vsdb.log 2>/ptmpp1/Yali.Mao/cip2vsdb.err
+
+
+#=================================================
+# run grads images
+#01 10 * * * ksh /global/save/Yali.Mao/save/scripts/grads_images_4nomad.sh blnd us uk gfip fip rap nam 1>/ptmpp1/Yali.Mao/grads_images.log 2>/ptmpp1/Yali.Mao/grads_images.err
+
+#=================================================
+# check max wind 4UK
+#39 07 * * * ksh /global/save/Yali.Mao/4UK/runnable_wafs_intdsk.sh "06 12 18 24 30 36" 1>/ptmpp1/Yali.Mao/checkMaxWind.log 2>/ptmpp1/Yali.Mao/checkMaxWind.err 
+#

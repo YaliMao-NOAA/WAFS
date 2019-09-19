@@ -1,0 +1,2 @@
+#ssh -F /global/save/Yali.Mao/save/git/config $*
+ssh -F $SAVE/git/config $*

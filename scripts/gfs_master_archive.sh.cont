@@ -1,0 +1,212 @@
+#!/bin/ksh
+
+set -x
+
+source ~/.bashrc
+
+#**************************************************************
+#  generate master file (for gfip/g2g/gfs) from archived sigma files
+#-------------------------------------------------------------
+# 2 steps:
+#   1) extract sf$fh and sfluxgrbf$fh from HPSS
+#   2) bsub a job to generate master file
+#
+# becaues of frequent interruption caused by computer unaccessable,
+# extract sigma files only when files do not exist
+#
+# working folder constructions:
+#   /ptmpp1/Yali.Mao/$prod.YYYYMMDD
+#
+# tips:
+#   $postscript: _working for pressure level
+#               _specific.grid for hybrid level
+#**************************************************************
+
+function printUsage {
+  echo "usage: /global/save/Yali.Mao/scripts/gfs_master_archive.sh  gfip/g2g/gfs(product) YYYYMMDD(start date) YYYYMMDD(end date) cycle(s) fhour(s)"
+  echo '  Tips: use quotations for a list of cycles/fhours'
+}
+
+#====================================================
+#arguments
+#====================================================
+if [ $# -lt 5 ]; then
+  printUsage
+  exit
+fi
+
+# when using logical operator, can't use '[[ ]]', must use '[ ]'
+if [ $1 != "gfip" -a $1 != "g2g" -a $1 != "gfs" -a $1 != "gfip.cont" ] ; then
+  echo "Prodcution type is not supported" 
+  printUsage
+  exit
+fi
+prod=$1
+
+start_date=$2"00" # add "00" to convert to YYYYMMDDHH
+end_date=$3"00"
+
+# check dates are in good shape
+if [[ `/nwprod/util/exec/ndate 0 $start_date 2>/dev/null` != $start_date ]]; then
+  echo "Start date is not in good format YYYYMMDD."
+  printUsage
+  exit
+fi
+if [[ `/nwprod/util/exec/ndate 0 $end_date 2>/dev/null` != $end_date ]]; then
+  echo "End date is not in good format YYYYMMDD."
+  printUsage
+  exit
+fi
+
+cycles=$4
+fhours=$5
+
+#====================================================
+# Basic settings
+#====================================================
+user=`whoami`
+wdir=/ptmpp1/$user
+
+# --------- where sigma and flux files are from -----
+hpss=/NCEPPROD/2year/hpssprod/runhistory
+#hpssdir=/NCEPPROD/hpssprod/runhistory/rh${yyyy}/${yyyy}${mm}/${yyyy}${mm}${dd} 
+        #2.5-deg, bufr etc
+#hpssdir1=/NCEPPROD/1year/hpssprod/runhistory/rh${yyyy}/${yyyy}${mm}/${yyyy}${mm}${dd}
+        #1-deg grib up to 192hr, 0.5-deg grib2 up to 192hr
+#hpssdir2=/NCEPPROD/2year/hpssprod/runhistory/rh${yyyy}/${yyyy}${mm}/${yyyy}${mm}${dd}
+        #sigma, sfc flux etc
+#hpsstmp=/NCEPPROD/1year/hpssprod/runhistory/rh2010/save
+
+
+#====================================================
+# Begin to process...
+#====================================================
+
+#increase end_date by one day for convenience of comparison
+end_date=`/nwprod/util/exec/ndate 24 $end_date`
+
+while [[ $start_date < $end_date ]]; do
+
+  tyear=`echo $start_date | cut -c1-4`
+  tmonth=`echo $start_date | cut -c1-6`
+  tdate=${start_date%??}
+
+  # where sigma and flux files are from
+  hpssDate=${hpss}/rh${tyear}/${tmonth}/${tdate}
+
+  # where sigma and flux files are extracted to
+  indirDate=$wdir/gfip.flux.$tdate
+  mkdir -p $indirDate
+
+  for hh in $cycles ; do
+
+    #====================================================
+    # extract sf$fh and sfluxgrbf$fh files
+    #====================================================
+    cd $indirDate
+    for fh in $fhours ; do
+
+      # do not extract files if they already exist
+      sigmafile=./gfs.t${hh}z.sf${fh}
+      fluxfile=./gfs.t${hh}z.sfluxgrbf${fh}
+      # sfacefile=./gfs.t${hh}z.bf${fh} # surface file. For instantaneous precipitation, it is required; otherwise it will use accumulated precipitation
+
+      #if [ -e $sigmafile -a -e $fluxfile -a -e $sfacefile ]; then
+      #  if [ `ls -l $sigmafile | awk '{ print $5}'` -gt 500000000 -a `ls -l $fluxfile | awk '{ print $5}'` -gt 180000000  -a `ls -l $sfacefile | awk '{ print $5}'` -gt 200000000 ]; then
+      if [ -e $sigmafile -a -e $fluxfile ] ; then
+	if [ `ls -l $sigmafile | awk '{ print $5}'` -gt 500000000 -a `ls -l $fluxfile | awk '{ print $5}'` -gt 180000000  ]; then
+	  continue
+	fi
+      fi
+
+      /usrx/local/hpss/htar -xvf ${hpssDate}/com_gfs_prod_gfs.${tdate}${hh}.sigma.tar    $sigmafile &
+      /usrx/local/hpss/htar -xvf ${hpssDate}/com_gfs_prod_gfs.${tdate}${hh}.sfluxgrb.tar $fluxfile &
+      #htar -xvf ${hpssDate}/com_gfs_prod_gfs.${tdate}${hh}.surface.tar  $sfacefile &
+      wait
+    done #fh
+
+
+products="gfip gfip.cont"
+for prod in $products ; do
+  if [ $prod = "gfip" ] ; then
+   postscript=/global/save/Yali.Mao/post/run_exgfs_nceppost.sh.sms_working
+   postexe=/global/save/Yali.Mao/wafs/gfis/src/ncep_post
+   controlfile=/global/save/Yali.Mao/wafs/gfis/post/gfs_cntrl.parm_GFIP
+   dataDir=$wdir/gfip.$tdate
+  else
+   postscript=/global/save/Yali.Mao/post/run_exgfs_nceppost.sh.sms_working
+   postexe=/global/save/Yali.Mao/wafs/gfis/src_continuous_severity/ncep_post
+   controlfile=/global/save/Yali.Mao/wafs/gfis/post/gfs_cntrl.parm_GFIP
+   dataDir=$wdir/gfip.$tdate.cont
+  fi
+  mkdir -p $dataDir 
+
+    # this file wll be created by bsub post script
+    modelFile=$dataDir/gfs.t${hh}z.master.grbf
+
+    cd $dataDir
+    for fh in $fhours ; do
+
+      cp $postscript runpostscript.$hh$fh
+      sed -e "s|data0=.*|data0=$dataDir|" -e "s|COMIN=.*|COMIN=$indirDate|" \
+          -e  "s|CTLFILE=.*|CTLFILE=$controlfile|" -e "s|POSTGPEXEC=.*|POSTGPEXEC=$postexe|" runpostscript.$hh$fh > runpostscript.tmp.$hh$fh
+
+      #====================================================
+      # bsub a job to generate model master file if it doesn't exist
+      #====================================================
+
+      existing=false
+      if [ -e $modelFile$fh ]; then
+	if [ `ls -l $modelFile$fh | awk '{ print $5}'` -gt 300000000 ]; then
+	  existing=true
+	fi
+      fi
+
+      if [ $existing != "true" ] ; then
+
+        sed -e "s/PDY=[0-9]*/PDY=${tdate}/"  -e "s/cyc=[0-9]*/cyc=${hh}/" -e "s/allFhours=.*/allFhours=$fh/" runpostscript.tmp.$hh$fh > runpostscript.$hh$fh
+
+	jobSubmit=`/usrx/local/lsf/9.1/linux2.6-glibc2.3-x86_64/bin/bsub < runpostscript.$hh$fh`
+	rm runpostscript.$hh$fh runpostscript.tmp.$hh$fh
+	jobID=`echo $jobSubmit | sed -e 's/.*Job <//g' | sed -e 's/> is.*//'`
+
+        # Wait till this job is done
+	result=`/usrx/local/lsf/9.1/linux2.6-glibc2.3-x86_64/bin/bjobs | grep $jobID`
+	while [[ -n $result ]]; do
+	  sleep 60
+	  result=`/usrx/local/lsf/9.1/linux2.6-glibc2.3-x86_64/bin/bjobs | grep $jobID`
+	done
+
+      fi # file exists or not
+
+      #====================================================
+      # follow up
+      #====================================================
+      # keep only icing potential and severity
+      /usrx/local/GrADS/2.0.2/bin/wgrib $modelFile$fh  | grep "kpds5=\(168\|175\):kpds6=100" | /usrx/local/GrADS/2.0.2/bin/wgrib -i $modelFile$fh  -grib -o icingonly.$hh$fh
+      # copygb to grid 252
+      /nwprod/util/exec/copygb -xg252 -i2 icingonly.$hh$fh $dataDir/gfs.t${hh}z.gfip.grbf${fh}
+      rm icingonly.$hh$fh
+
+remoteDir=/home/ftp/emc/unaff/ymao/gfip_history/gfip.$tdate
+remoteSever=ymao@emcrzdm.ncep.noaa.gov
+ssh $remoteSever "mkdir -p $remoteDir" 2>/dev/null # create the folder if not existing
+if [ $prod = "gfip" ] ; then
+  scp -p $dataDir/gfs.t${hh}z.gfip.grbf${fh} $remoteSever:$remoteDir/.   >$wdir/hist.transfer.error 2>&1 &
+else
+  scp -p $dataDir/gfs.t${hh}z.gfip.grbf${fh} $remoteSever:$remoteDir/gfs.t${hh}z.gfip.grbf${fh}.cont   >$wdir/hist.transfer.error.cont 2>&1 &
+fi
+
+    done # fh in $fhours
+done # products
+
+  done # hh in $cycles
+
+  start_date=`/nwprod/util/exec/ndate 24 $start_date`
+done
+
+#set -A joblist
+#ijob=0
+#joblist[$ijob]="$jobID ${tdate}$hh"
+#ajob=`echo ${joblist[$ijob]} | awk -F" " '{print $1}'`
+#jobtime=`echo ${joblist[$ijob]} | awk -F" " '{print $2}'`

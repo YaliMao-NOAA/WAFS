@@ -1,0 +1,84 @@
+#!/bin/sh
+
+#BSUB -L /bin/sh
+#BSUB -J %E%rap_post
+#BSUB -o  /ptmpp1/Yali.Mao/rap/output/rap_post.o%J
+#BSUB -e  /ptmpp1/Yali.Mao/rap/output/rap_post.o%J
+#BSUB -n 24
+#BSUB -W 00:15
+#BSUB -q debug
+#BSUB -R "span[ptile=4]"
+#BSUB -R affinity[core(2):distribute=balance]
+#BSUB -P GFS-T2O
+#BSUB -x
+#BSUB -a poe
+
+
+export OMP_NUM_THREADS=1
+export MP_TASK_AFFINITY=core:$OMP_NUM_THREADS
+export MP_EUILIB=us
+export MP_MPILIB=mpich2
+export OMP_STACKSIZE=1G
+export MP_STDOUTMODE=unordered
+export MP_LABELIO=yes
+export MP_TASK_AFFINITY=core
+export FOR_DISABLE_STACK_TRACE=true
+export decfort_dump_flag=y
+
+. /usrx/local/Modules/default/init/bash
+module purge
+module load ibmpe
+# ics module must be consistent (or higher?) with modulefiles/post/v7.0.0-wcoss
+module load ics/15.0.3
+module load lsf
+module load prod_util
+module load grib_util
+
+module load ibmpe ics lsf
+export MP_COMPILER=intel
+export MP_LABELIO=yes
+
+# EXPORT list here
+
+set -x
+
+export SENDDBN=NO
+export RM_TMPDIR=YES
+
+export envir=prod
+export PDY=20170829
+export cyc=18
+PDY=`$NDATE -2`
+export cyc=`echo $PDY | cut -c 9-10`
+export PDY=`echo $PDY | cut -c 1-8`
+export fhr=06
+export job=rap_post_f$fhr_$cyc
+
+export COMIN=/gpfs/hps/nco/ops/nwges/prod/rap/rapges
+export COMOUT=/ptmpp1/Yali.Mao/rap/test/rap.$PDY
+
+export CRTM=/gpfs/*/nco/ops/nwprod/fix/crtm_2.0.5
+export WGRIB2=/nwprod2/rap.v3.0.15/exec/rap_wgrib2
+
+export DATA_IN=/ptmpp1/Yali.Mao
+
+# The purpose is to run RAP job using post_branch/exec under RAP's vertical structure
+# Keep the modified scripts/parms here to maintain versions under svn
+
+export HOMErap=/global/save/Yali.Mao/project/rap.v3.0.9
+export EXECrap=/global/save/Yali.Mao/project/post_branch/exec
+
+export APRUN=mpirun.lsf
+
+# copy versioned scripts/parms to RAP vertical structure before running a job
+DIRVER=/global/save/Yali.Mao/save/rap_run
+cp $DIRVER/exrap_post.sh.ecf           $HOMErap/scripts/.
+cp $DIRVER/JRAP_POST                   $HOMErap/jobs/.
+cp $DIRVER/postcntrl_rap_gtg.xml       $HOMErap/parm/.
+cp $DIRVER/rap.GTG_postxconfig-NT.txt  $HOMErap/parm/.
+cp $DIRVER/rap_post_avblflds.xml       $HOMErap/parm/.
+cp $DIRVER/gtg.config.rap              $HOMErap/parm/.
+cp $DIRVER/rap_params_grib2_tbl_new    $HOMErap/parm/.
+
+# CALL executable job script here
+$HOMErap/jobs/JRAP_POST

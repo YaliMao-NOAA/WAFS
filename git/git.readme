@@ -1,0 +1,12 @@
+Concepts:
+
+git repositories (code checkin, revision control) <-> svn
+
+gerrit (code review, control access to git)       <-> SVN repository
+    https://vlab.ncep.noaa.gov/code-review
+
+redmine project (track issue, project management) <-> trac
+    https://vlab.ncep.noaa.gov/redmine
+
+Jenkins (contious intergration)
+    https://vlab.ncep.noaa.gov/jenkins

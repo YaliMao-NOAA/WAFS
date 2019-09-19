@@ -1,0 +1,118 @@
+#!/bin/sh
+
+########################################################
+# 1) Upload icing and turbulence grib2 data to rzdm ftp server
+# 2) Making plots and upload to rzdm www website
+#
+# critical things:
+#
+# para: run own job card
+# prod: operational products
+# 
+# later on to be modified:
+# 1. fhour/fh in GCIP_GFIP_GTG_2_rzdm.sh, change to 3 digits for para after termination of GFS parallel in Sep 2019
+# 2. cronjob stops para run after 'old' GFS retires in Sep 2019
+########################################################
+
+# 1) /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.cron
+# 2) /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.sh
+# 3) bsub < $HOMEsave/wafs_run/run_post_gfs_Grib2.nemsio.driver.$MACHINE
+#    !!! needs compiling!!! $HOMEgit/EMC_gtg_ncar
+# 4) /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/grads/plotWafs.sh
+#    !!! needs compiling!!! ICSEVconvert=$HOMEgit/verf_g2g.v3.0.12/exec/verf_g2g_icing_convert.$MACHINE
+
+#*******************************************************
+# It is loaded by .bashrc as well
+if [[ `hostname` =~ ^tfe ]] ; then
+   . /scratch4/NCEPDEV/global/noscrub/Yali.Mao/git/save/envir_setting.sh
+   export RSYNC=echo
+   export SSH=echo
+else
+   . /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/envir_setting.sh
+   export RSYNC=rsync
+   export SSH=ssh
+fi
+
+set -xa
+date
+export PDY=${PDY:-`$NDATE -3 | cut -c1-8`}
+
+#export PDY=20190709
+#export COMROOT=/scratch4/NCEPDEV/stmp3/Yali.Mao/test
+
+# prod: para - experimental, run own job card
+#       prod - operational
+export prod=${prod:-para}
+
+if [ $prod = test ] ; then
+#   DATA is for running a job card
+#   EMC/Developer's parallel
+    export DATA=$TMP/fv3_para_working_$cyc
+    rm -r $DATA
+    mkdir -p $DATA
+    cd $DATA
+
+    export DATAROOTplot=$TMP/gfs_${prod}_rzdm_plotting_$cyc
+
+    export remoteData=/home/ftp/emc/unaff/ymao/wafs.$prod/gfs.$PDY
+    export remotePlot=/home/www/emc/htdocs/gmb/icao/${prod}_plot
+elif [ $prod = prod ] ; then
+    cd $TMP
+
+    export DATAROOTplot=$TMP/gfs_${prod}_rzdm_plotting_$cyc
+
+    export remoteData=/home/ftp/emc/unaff/ymao/wafs.$prod/gfs.$PDY
+    export remotePlot=/home/www/emc/htdocs/gmb/icao/${prod}_plot
+
+else
+#   NCO parallel
+    cd $TMP
+    export DATAROOTplot=$TMP/gfs_${prod}_rzdm_plotting_$cyc
+
+    export remoteData=/home/ftp/emc/unaff/ymao/wafs.$prod/gfs.$PDY
+    export remotePlot=/home/www/emc/htdocs/gmb/icao/${prod}_plot
+
+fi
+
+rm -r $DATAROOTplot
+
+# Split forecast hours to 2 lists to decrease thread creations,
+# otherwise there are error message on Theia: 
+# libgomp: Thread creation failed: Resource temporarily unavailable
+fhours1="003 006 009 012 015 018 021"
+fhours2="024 027 030 033 036 000"
+# 000 and 003 needs more time than others because of GCIP.
+# Put 000 at the last of the list to be 'waited'
+for fh in $fhours1 ; do
+  export fh
+  sh $HOMEsave/scripts/GCIP_GFIP_GTG_2_rzdm.sh &
+done
+wait
+for fh in $fhours2 ; do
+  export fh
+  sh $HOMEsave/scripts/GCIP_GFIP_GTG_2_rzdm.sh &
+done
+wait
+sleep 30 # 000 and 003 might be finished in  seconds apart
+
+########################################################
+####        cleanup grib data and plottings if      ####
+####        older than 'endDate', keep up to 3 days ####
+########################################################                                                                                                             
+dates=$PDY
+dates="$dates `$NDATE -1 ${PDY}00 | cut -c1-8`"
+echo "cyc=$cyc"
+if [[ $cyc <  18 ]] ; then
+    dates="$dates `$NDATE -25 ${PDY}00 | cut -c1-8`"
+fi
+
+if [[ `hostname` =~ ^tfe ]] ; then
+  echo $PDY $cyc $dates > $TMP/GCIP_GFIP_GTG_2_rzdm.list
+else
+  if  [ $prod = prod ] ; then
+    ssh ymao@emcrzdm "ksh ~/scripts/wafs_web.ftp_maintenance.sh $prod $cyc $dates"
+  elif  [ $prod = para ] ; then
+    ssh ymao@emcrzdm "ksh ~/scripts/wafs_web.ftp_maintenance.sh $prod $cyc $dates"
+  fi
+fi
+date
