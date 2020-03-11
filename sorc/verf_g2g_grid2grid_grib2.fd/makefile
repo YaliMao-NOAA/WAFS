@@ -23,10 +23,46 @@ SRCS=   gtgdef.f readcntl.f setarea.f \
 OBJS=	${SRCS:.f=.o}
 
 CMD=	verf_g2g_grid2grid_grib2
-#LIBS=	${IP_LIB8}
+
+INCS   = -I$(SFCIO_INC4) \
+           -I$(NEMSIO_INC) \
+           -I$(SIGIO_INC4) \
+           -I$(G2_INC4) \
+           -I$(G2TMPL_INC) \
+           -I$(GFSIO_INC4) \
+           -I$(W3EMC_INC4) \
+           -I$(CRTM_INC) \
+	   -I$(IP_INC4)
+
+
+LIBS     = $(WRFIO_LIB) \
+           $(G2TMPL_LIB) \
+           $(G2_LIB4) \
+           $(JASPER_LIB) \
+           $(PNG_LIB) \
+           $(Z_LIB) \
+           $(NEMSIO_LIB) \
+           $(GFSIO_LIB4) \
+           $(SIGIO_LIB4) \
+           $(SFCIO_LIB4) \
+           $(IP_LIB4) \
+           $(SP_LIB4) \
+           $(W3EMC_LIB4) \
+           $(W3NCO_LIB4) \
+           $(BACIO_LIB4) \
+           $(CRTM_LIB)
+
+FC=	ifort
+
+.f.o:
+	$(FC) $(FFLAGS) $(INCS) -c $<
+
+.f90.o:
+	$(FC) $(FFLAGS) $(INCS) -c $<
+
 
 $(CMD):	$(OBJS)
-	$(FC) $(FFLAGS) -o $(@) grid2grid.f  $(OBJS)  $(LIBS)
+	$(FC)  -o $(@)  grid2grid.f  $(OBJS)  $(LIBS)
 
 clean:
 	@rm -f $(OBJS)

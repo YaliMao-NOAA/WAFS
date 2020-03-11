@@ -2,15 +2,20 @@
 
 SHELL=/bin/sh
 
-if [[ `hostname` =~ ^tfe ]] ; then
-   . /scratch4/NCEPDEV/global/noscrub/Yali.Mao/git/save/modules_setting.sh
-else
-   . /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/modules_setting.sh
-fi
+#. ~/.bashrc
+module purge
+ . /etc/profile
+ . /etc/profile.d/modules.sh
+moduledir=`dirname $(readlink -f ../modulefiles/verf)`
+module use ${moduledir}
+module load verf/v3.0.12
+
 
 set -x
 
 module list
+
+echo IP_LIB4= $IP_INC4 $IP_LIB4
 
 curdir=`pwd`
 

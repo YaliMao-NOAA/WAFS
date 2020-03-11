@@ -212,8 +212,8 @@ c      write(*,*) 'nchrlevel(ilv)=',nchrlevl
      +      fcstdata(ifh,ivr,ilv,i).le. 0.0) goto 5001 ! for fog
 
             if(continue_mrk(ivr)==11.and.
-     +           (obsvdata(ifh,ivr,ilv,i) < 5. .or.
-     +            fcstdata(ifh,ivr,ilv,i) < 5.) )  goto 5001 ! for wind direction, don't verify if wind speed is too low
+     +           (obsvdata(ifh,ivr,ilv,i) > 5. .or.
+     +            fcstdata(ifh,ivr,ilv,i) > 5.) )  goto 5001 ! for wind direction, don't verify if wind speed is more than 10 knots
             if(continue_mrk(ivr) >= 20) then
                speed = 0.514444 * (continue_mrk(ivr)) ! WAFS wind speed, applied to forecast only
                if(fcstdata(ifh,ivr,ilv,i) < speed .or. 
@@ -308,8 +308,8 @@ c      write(*,*) 'nchrlevel(ilv)=',nchrlevl
      +         fcstdata(ifh,ivr,ilv,i).le.0.0) )  goto 5002  ! for ceiling
 
             if(continue_mrk(ivr)==11.and.
-     +           (obsvdata(ifh,ivr,ilv,i) < 5. .or.
-     +            fcstdata(ifh,ivr,ilv,i) < 5.) )  goto 5002 ! for wind direction, don't verify if wind speed is too low
+     +           (obsvdata(ifh,ivr,ilv,i) > 5. .or.
+     +            fcstdata(ifh,ivr,ilv,i) > 5.) )  goto 5002 ! for wind direction, don't verify if wind speed is more than 10 knots
             if(continue_mrk(ivr) >= 20) then
                speed = 0.514444 * (continue_mrk(ivr)) ! WAFS wind speed, applied to forecast only
                if(fcstdata(ifh,ivr,ilv,i) < speed .or.
@@ -640,8 +640,8 @@ c      write(*,*) 'nchrlevel(ilv)=',nchrlevl
      +      fcstdata(ifh,ivr,ilv,i).le. 0.0) goto 5007 ! for fog
 
             if(continue_mrk(ivr)==11.and.
-     +           (obsvdata(ifh,ivr,ilv,i) < 5. .or.
-     +            fcstdata(ifh,ivr,ilv,i) < 5.) )  goto 5007 ! for wind direction, don't verify if wind speed is too low
+     +           (obsvdata(ifh,ivr,ilv,i) > 5. .or.
+     +            fcstdata(ifh,ivr,ilv,i) > 5.) )  goto 5007 ! for wind direction, don't verify if wind speed is more than 10 knots
             if(continue_mrk(ivr) >= 20) then
                speed = 0.514444 * (continue_mrk(ivr)) ! WAFS wind speed, applied to forecast only
                if(fcstdata(ifh,ivr,ilv,i) < speed .or.

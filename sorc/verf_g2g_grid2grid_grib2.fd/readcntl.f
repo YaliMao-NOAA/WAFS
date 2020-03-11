@@ -820,10 +820,10 @@ C  Modified as:
 
        ! Because WAFS wind speed, which will black out continue_mrk from 20-100 for other uses
        if(k4(n)==2 .and. k5(n)==0 .and. k6(n)==100) then
-          continue_mrk(n)=11    ! For wind direction, basic minimum speed, 5m/s
+          continue_mrk(n)=11    ! For wind direction, max speed, 5m/s
           ldirection=len_trim(namvarbl(n))-
      +                len_trim("DIRECTION")
-          ! For wind direction, WAFS minimum wind speed in knots(>=20)
+          ! For wind direction, WAFS max wind speed in knots(<=10)
           if(ldirection > 0) then
              substr=namvarbl(n)(10:10+ldirection)
              read(substr,*) continue_mrk(n)

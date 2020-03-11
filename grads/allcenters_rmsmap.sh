@@ -31,9 +31,7 @@ export doftp=
 
 export vsdbhome=                 ;#script home, CHANGE TO YOUR SCRIPT HOLDER 
 export srcgrads=$vsdbhome/grads
-export NWPROD=
 export PTMP=
-export ndate=$NWPROD/util/exec/ndate
 export GRADSBIN=                 	 ;#grads executable
 export IMGCONVERT=                       ;#image magic converter 
 export FC=                               ;#compiler

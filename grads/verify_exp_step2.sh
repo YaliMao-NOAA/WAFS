@@ -9,11 +9,8 @@
 #  runs and make maps using GrADS.
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
-if [[ `hostname` =~ ^tfe ]] ; then
-   . /scratch4/NCEPDEV/global/noscrub/Yali.Mao/git/save/envir_setting.sh
-else
-   . /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/envir_setting.sh
-fi
+. ~/.bashrc
+
 set -xa
 
 LOGNAME=`whoami`
@@ -29,23 +26,23 @@ fi
 
 # From save/envir_setting.sh
 echo $VSDBsave     #where vsdb database is saved
-echo $NWPROD
 echo $TMP
 echo $GrADS_ROOT
 
 export vsdbhome=$HOMEgit/verf_g2g.v3.0.12	#script home
 export PTMP=`dirname $TMP`		#temporary directory without user name
-if [[ `hostname` =~ ^tfe ]] ; then
+if [[ `hostname` =~ ^h ]] ; then
    export GRADSBIN=/apps/grads/2.0.2/bin
 else
    export GRADSBIN=$GrADS_ROOT/bin		#GrADS executables
 fi
 
 #image magic converter
-if [ $MACHINE = theia ] ; then
+if [ $MACHINE = hera ] ; then
   imagemagick=imagemagick/7.0.5
-  module load intelpython/3.6.1.0
-  export PYTHON=/apps/intel/intelpython3/bin/python
+  module load contrib
+  module load anaconda/latest
+  export PYTHON=/contrib/anaconda/anaconda3/latest/bin/python
 elif [ $MACHINE = dell ] ; then
   imagemagick=imagemagick/6.9.9-25
   module load python/2.7.14
@@ -69,8 +66,8 @@ export FFLAG="-O2 -mcmodel large -shared-intel -convert big_endian -FR"			# inte
 
 ## -- data and output directories
 #gather vsdb stats and put in a central location
-envirp=$1
-envirv=$2
+envirp=${envirp:-$1}
+envirv=${envirv:-$2}
 rundir0=${rundir:-$PTMP/${LOGNAME}/vsdb_plot_$envirp.$envirv}    ;#temporary workplace
 vsdball=$rundir0/vsdb_data
 mkdir -p $vsdball; cd $vsdball || exit 8
@@ -162,7 +159,7 @@ for region in  $regions ; do
 
     # change all related variables in allcenters_rmsmap.sh
     genericlist="WEBSERVER WEBDIR doftp"
-    genericlist="$genericlist vsdbhome NWPROD PTMP GRADSBIN IMGCONVERT FC FFLAG PYTHON"
+    genericlist="$genericlist vsdbhome PTMP GRADSBIN IMGCONVERT FC FFLAG PYTHON"
     genericlist="$genericlist vsdb_data makemap mapdir scorecard scoredir"
     genericlist="$genericlist sdate edate vlength fcycle"
     specificlist="obsvlist mdlist reglist rundir vhrlist vtype vnamlist levlist"
