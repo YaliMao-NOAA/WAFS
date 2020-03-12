@@ -6,7 +6,7 @@ date
 PDY1=20190722
 PDY2=20190902
 
-COMOUT=/scratch4/NCEPDEV/stmp3/Yali.Mao/uk_icsev
+COMOUT=/scratch2/NCEPDEV/stmp3/Yali.Mao/uk_icsev
 
 HPSS=/NCEPDEV/emc-global/5year/Yali.Mao/gfip
 

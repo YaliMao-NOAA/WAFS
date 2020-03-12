@@ -9,42 +9,39 @@
 # module list
 
 #=====================================================#
-if [[ `hostname` =~ ^tfe ]] ; then
+if [[ `hostname` =~ ^h ]] ; then
 #=====================================================#
-  export MACHINE=theia
+  export MACHINE=hera
 
-  #========== Theia ====================#
+  #========== Hera ====================#
 
   # Loading Intel Compiler Suite
-  #module use /apps/modules/modulefamilies/intel
-  module load intel/15.1.133
-  module load impi/5.0.3.048
-  module load netcdf/3.6.3
-
-  #module use /contrib/modulefiles
-
+  # module use /apps/modules/modulefiles
+  module load intel/18.0.5.274
+  # module use /apps/modules/modulefamilies/intel
+  module load impi/2018.0.4
+  module load netcdf/4.6.1
 
   # Loding nceplibs modules
-  #module use /scratch3/NCEPDEV/nwprod/lib/modulefiles
-  module load sigio/v2.0.1
-  module load jasper/v1.900.1
-  module load png/v1.2.44
-  module load z/v1.2.6
-  module load sfcio/v1.0.0
-  module load nemsio/v2.2.2
-  module load bacio/v2.0.1
-  module load g2/v3.1.0
-  module load xmlparse/v2.0.0
-  module load gfsio/v1.1.0
-  module load ip/v3.0.0
-  module load sp/v2.0.2
-  module load w3emc/v2.2.0
-  module load w3nco/v2.0.6
+  module use /scratch2/NCEPDEV/nwprod/NCEPLIBS/modulefiles
+  module load sigio/2.1.1
+  module load jasper/1.900.1
+  module load png/1.2.44
+  module load z/1.2.11
+  module load sfcio/1.1.1
+  module load nemsio/2.2.4
+  module load bacio/2.0.3
+  module load g2/3.1.1
+  module load xmlparse/2.0.0
+  module load gfsio/1.1.0
+  module load ip/3.0.2
+  module load sp/2.0.3
+  module load w3emc/2.3.1
+  module load w3nco/2.0.7
   module load crtm/v2.2.3
-  module load g2tmpl/v1.5.0
+  module load g2tmpl/1.5.0
 
-  module use /scratch3/NCEPDEV/stmp1/gwv/wrf.post.lib/modulefiles
-  module load wrf-io-v1.1.1
+  module load wrfio/1.1.1
 
   export FC=ifort
 
@@ -54,61 +51,6 @@ if [[ `hostname` =~ ^tfe ]] ; then
   export OPENMP="-qopenmp"
 
   export myFFLAGS="${INC} -g -O2 -convert big_endian"
-
-# From Fanglin
-# module use /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/python/modulefiles
-# module load python/3.6.1-emc
-
-#=====================================================#
-elif [[ `hostname` =~ ^tfe ]] ; then
-#=====================================================#
-  export MACHINE=theia
-
-  #========== Theia ====================#
-
-  # Loading Intel Compiler Suite
-  #module use /apps/modules/modulefamilies/intel
-  module load intel/15.1.133
-  module load impi/5.0.3.048
-  module load netcdf/3.6.3
-
-  #module use /contrib/modulefiles
-
-
-  # Loding nceplibs modules
-  #module use /scratch3/NCEPDEV/nwprod/lib/modulefiles
-  module load sigio/v2.0.1
-  module load jasper/v1.900.1
-  module load png/v1.2.44
-  module load z/v1.2.6
-  module load sfcio/v1.0.0
-  module load nemsio/v2.2.2
-  module load bacio/v2.0.1
-  module load g2/v3.1.0
-  module load xmlparse/v2.0.0
-  module load gfsio/v1.1.0
-  module load ip/v3.0.0
-  module load sp/v2.0.2
-  module load w3emc/v2.2.0
-  module load w3nco/v2.0.6
-  module load crtm/v2.2.3
-  module load g2tmpl/v1.5.0
-
-  module use /scratch3/NCEPDEV/stmp1/gwv/wrf.post.lib/modulefiles
-  module load wrf-io-v1.1.1
-
-  export FC=ifort
-
-  export INC="-I ${IP_INC4} -I ${G2_INC4}"
-  export LIBS="${IP_LIB4} ${W3NCO_LIB4} ${W3EMC_LIB4} ${BACIO_LIB4}  ${SP_LIB4} ${G2_LIB4} ${JASPER_LIB} ${PNG_LIB} ${Z_LIB} ${BUFR_LIB4}"
-  export FREE="-FR"
-  export OPENMP="-qopenmp"
-
-  export myFFLAGS="${INC} -g -O2 -convert big_endian"
-
-# From Fanglin
-# module use /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/python/modulefiles
-# module load python/3.6.1-emc
 
 #=====================================================#
 elif [[ `hostname` =~ ^[g|t][0-9]{1} ]] ; then

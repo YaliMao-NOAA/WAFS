@@ -1,9 +1,10 @@
 #!/bin/sh
 
-. /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/modules_setting.sh
+. $HOMEsave/modules_setting.sh
 
 set -x
 
+echo $FC $FFLAGS
 
 FFLAGS='-O0 -FR -g -traceback'
 #  ${NEMSIO_LIB} needs to be ahead of ${BACIO_LIB4}

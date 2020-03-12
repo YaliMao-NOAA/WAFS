@@ -1,7 +1,9 @@
 #!/bin/sh
 # Clean temporary folder, stmp, on Theia, when files/folders are 7 days old
 
-TMP=/scratch4/NCEPDEV/stmp3/Yali.Mao
+set -xa
+
+TMP=/scratch2/NCEPDEV/stmp3/Yali.Mao
 
 # gfs_prod_rzdm_prod: WAFS grib2 to RZDM server
 # Subfolders sorted by dates
@@ -34,13 +36,21 @@ TMP=/scratch4/NCEPDEV/stmp3/Yali.Mao
 # (Automatically delete data to free disk storage when a new run begins)
 
 folders="gfs_prod_rzdm_prod \
-         wafs.vrfy.com.twindonly \
          wafs.vrfy.com \
          wafs.vrfy_prod.prod_grib2 \
-         wafs.vrfy_prod.prod_vsdb \
-         wafs.vrfy_prod.prod_working"
+         wafs.vrfy_prod.prod_vsdb/wafs \
+         wafs.vrfy_prod.prod_working \
+         working_post \
+         logs_post"
 
 for dir in $folders ; do
-  files=`find $TMP/$dir  -mtime  +7`
+  files=`find $TMP/$dir -mtime +7`
   rm -rf $files
 done
+
+files=`find $TMP/vsdb.prod.prod.* -mtime +3`
+rm $files
+
+files=`find $TMP/run_gfs_post.o* -mtime +3`
+rm $files
+

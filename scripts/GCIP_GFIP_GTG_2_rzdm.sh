@@ -2,6 +2,8 @@
 
 set -xa
 
+fh=$1
+
 # PDY, cyc and fh must be exported by the caller
 
 prod=${prod:-prod}

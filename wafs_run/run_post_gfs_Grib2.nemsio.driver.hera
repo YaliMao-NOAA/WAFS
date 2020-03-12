@@ -1,7 +1,7 @@
 #!/bin/sh
 
-#SBATCH -o /scratch4/NCEPDEV/stmp3/Yali.Mao/run_gfs_post.oe%j
-#SBATCH -e /scratch4/NCEPDEV/stmp3/Yali.Mao/run_gfs_post.oe%j
+#SBATCH -o /scratch2/NCEPDEV/stmp3/Yali.Mao/run_gfs_post.oe%j
+#SBATCH -e /scratch2/NCEPDEV/stmp3/Yali.Mao/run_gfs_post.oe%j
 #SBATCH -J gfs_post
 #SBATCH -t 00:30:00
 #SBATCH -N 8 --ntasks-per-node=12
@@ -17,7 +17,7 @@ export MP_LABELIO=yes
 export OMP_NUM_THREADS=$threads
 #export APRUN="mpirun -np $PBS_NP"
 export APRUN="srun"
-#comment machine for using MPMD to generate pgrb files on theia.
+#comment machine for using MPMD to generate pgrb files on Hera
 export APRUN_DWN="staskfarm"
 #export machine=THEIA
 
@@ -27,17 +27,14 @@ export APRUN_DWN="staskfarm"
 ############################################
 module purge
 . $MODULESHOME/init/sh
-module load intel/18.1.163
-module load impi/5.1.2.150
-module load wgrib2
-module use /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/soft/modulefiles
-module load prod_util
-module use /scratch3/NCEPDEV/nwprod/modulefiles
-module load grib_util/v1.1.0
+module load intel/18.0.5.274
+module load impi/2018.0.4
+module use /scratch2/NCEPDEV/nwprod/NCEPLIBS/modulefiles
+module load grib_util/1.1.1
+module load prod_util/1.1.0
 module load crtm/v2.2.3
 module load slurm/default
-module use /scratch3/NCEPDEV/nwprod/lib/modulefiles
-module load g2tmpl/v1.5.0
+module load g2tmpl/1.5.0
 module list
 
 
@@ -61,10 +58,10 @@ export RUN=gfs
 export job=${RUN}_post_${cyc}
 export pid=${pid:-$$}
 export jobid=${job}.${pid}
-mkdir -p /scratch4/NCEPDEV/stmp3/$LOGNAME/nceppost/logs
-export jlogfile=/scratch4/NCEPDEV/stmp3/$LOGNAME/nceppost/logs/jlogfile.${job}.${pid}
+mkdir -p /scratch2/NCEPDEV/stmp3/$LOGNAME/nceppost/logs
+export jlogfile=/scratch2/NCEPDEV/stmp3/$LOGNAME/nceppost/logs/jlogfile.${job}.${pid}
 
-export DATA=/scratch4/NCEPDEV/stmp3/$LOGNAME/test/$jobid
+export DATA=/scratch2/NCEPDEV/stmp3/$LOGNAME/test/$jobid
 mkdir -p $DATA
 cd $DATA
 rm -f ${DATA}/*
@@ -81,29 +78,29 @@ export SENDDBN=NO
 export RERUN=NO
 export VERBOSE=YES
 
-export HOMEgfs=/scratch4/NCEPDEV/global/noscrub/Yali.Mao/git/EMC_post
+export HOMEgfs=/scratch2/NCEPDEV/ovp/Yali.Mao/git/EMC_post
 
 ##############################################
 # Define COM directories
 ##############################################
-export COMIN=/scratch4/NCEPDEV/stmp3/$LOGNAME/nemsio127/${RUN}.${PDY}/${cyc}
+export COMIN=/scratch2/NCEPDEV/stmp3/$LOGNAME/nemsio127/${RUN}.${PDY}/${cyc}
 mkdir -p $COMIN
 # specify my own COMOUT dir to mimic operations
-export COMOUT=/scratch4/NCEPDEV/stmp3/$LOGNAME/com2/gfs/test/${RUN}.$PDY/${cyc}
+export COMOUT=/scratch2/NCEPDEV/stmp3/$LOGNAME/com2/gfs/test/${RUN}.$PDY/${cyc}
 mkdir -p $COMOUT
 
 # specify variables if testing post in non gfs structure environment
 #export FIXglobal=/gpfs/hps3/emc/global/noscrub/emc.glopara/git/fv3gfs/master/global_shared.v15.0.0/fix
 #export FIXgfs=/gpfs/hps3/emc/global/noscrub/emc.glopara/git/fv3gfs/master/global_shared.v15.0.0/fix
-export FIXgfs=/scratch4/NCEPDEV/global/save/glopara/git/fv3gfs/fix
-export nemsioget=/scratch4/NCEPDEV/global/save/glopara/git/fv3gfs/master/exec/nemsio_get
+export FIXgfs=/scratch1/NCEPDEV/global/glopara/fix
+#export nemsioget=/scratch4/NCEPDEV/global/save/glopara/git/fv3gfs/master/exec/nemsio_get
 export POSTGRB2TBL=${HOMEgfs}/parm/params_grib2_tbl_new
-#export POSTGRB2TBL=/scratch3/NCEPDEV/nwprod/lib/g2tmpl/v1.5.0/sorc/params_grib2_tbl_new
+#export POSTGRB2TBL=/scratch2/NCEPDEV/nwprod/NCEPLIBS/src/g2tmpl_v1.5.1/params_grib2_tbl_new
 #export POSTGRB2TBL=$G2TMPL_SRC/params_grib2_tbl_new  # by module load g2tmpl
 export POSTGPEXEC=${HOMEgfs}/exec/ncep_post
 export PARMpost=${HOMEgfs}/parm
 
-export PostFlatFile=/scratch4/NCEPDEV/global/noscrub/Yali.Mao/git/save/wafs_run/postxconfig-NT-GFS_hybrid_127.txt
+export PostFlatFile=/scratch2/NCEPDEV/ovp/Yali.Mao/git/save/wafs_run/postxconfig-NT-GFS_hybrid_127.txt
 
 export MSTF=YES
 
@@ -136,7 +133,7 @@ for post_times in $allfhr; do
     date
 
     # Theia doesn't have log.nemsio file, then prepare!
-    COMROOT=/scratch4/NCEPDEV/rstprod/com
+    COMROOT=/scratch2/NCEPDEV/rstprod/com
     COMROOT=$COMIN
     if [[  $COMROOT = $COMIN ]] ; then
        echo > $COMIN/gfs.t${cyc}z.logf${post_times}.nemsio

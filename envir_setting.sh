@@ -12,29 +12,32 @@
 # /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/scripts/nemsio2ncar_from_hpss.sh
 # /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/gcip_satellite/match.gcip.SAT.CFG.sh
 
+LS_COLORS="rs=0:di=38;5;27:ln=35:mh=44;38;5;15:pi=40;38;5;11:so=38;5;13:do=38;5;5:bd=48;5;232;38;5;11:cd=48;5;232;38;5;3:or=48;5;232;38;5;9:mi=05;48;5;232;38;5;15:su=48;5;196;38;5;15:sg=48;5;11;38;5;16:ca=48;5;196;38;5;226:tw=48;5;10;38;5;16:ow=48;5;10;38;5;21:st=48;5;21;38;5;15:ex=38;5;34:*.tar=38;5;9:*.tgz=38;5;9:*.arc=38;5;9:*.arj=38;5;9:*.taz=38;5;9:*.lha=38;5;9:*.lz4=38;5;9:*.lzh=38;5;9:*.lzma=38;5;9:*.tlz=38;5;9:*.txz=38;5;9:*.tzo=38;5;9:*.t7z=38;5;9:*.zip=38;5;9:*.z=38;5;9:*.Z=38;5;9:*.dz=38;5;9:*.gz=38;5;9:*.lrz=38;5;9:*.lz=38;5;9:*.lzo=38;5;9:*.xz=38;5;9:*.bz2=38;5;9:*.bz=38;5;9:*.tbz=38;5;9:*.tbz2=38;5;9:*.tz=38;5;9:*.deb=38;5;9:*.rpm=38;5;9:*.jar=38;5;9:*.war=38;5;9:*.ear=38;5;9:*.sar=38;5;9:*.rar=38;5;9:*.alz=38;5;9:*.ace=38;5;9:*.zoo=38;5;9:*.cpio=38;5;9:*.7z=38;5;9:*.rz=38;5;9:*.cab=38;5;9:*.jpg=38;5;13:*.jpeg=38;5;13:*.gif=38;5;13:*.bmp=38;5;13:*.pbm=38;5;13:*.pgm=38;5;13:*.ppm=38;5;13:*.tga=38;5;13:*.xbm=38;5;13:*.xpm=38;5;13:*.tif=38;5;13:*.tiff=38;5;13:*.png=38;5;13:*.svg=38;5;13:*.svgz=38;5;13:*.mng=38;5;13:*.pcx=38;5;13:*.mov=38;5;13:*.mpg=38;5;13:*.mpeg=38;5;13:*.m2v=38;5;13:*.mkv=38;5;13:*.webm=38;5;13:*.ogm=38;5;13:*.mp4=38;5;13:*.m4v=38;5;13:*.mp4v=38;5;13:*.vob=38;5;13:*.qt=38;5;13:*.nuv=38;5;13:*.wmv=38;5;13:*.asf=38;5;13:*.rm=38;5;13:*.rmvb=38;5;13:*.flc=38;5;13:*.avi=38;5;13:*.fli=38;5;13:*.flv=38;5;13:*.gl=38;5;13:*.dl=38;5;13:*.xcf=38;5;13:*.xwd=38;5;13:*.yuv=38;5;13:*.cgm=38;5;13:*.emf=38;5;13:*.axv=38;5;13:*.anx=38;5;13:*.ogv=38;5;13:*.ogx=38;5;13:*.aac=38;5;45:*.au=38;5;45:*.flac=38;5;45:*.mid=38;5;45:*.midi=38;5;45:*.mka=38;5;45:*.mp3=38;5;45:*.mpc=38;5;45:*.ogg=38;5;45:*.ra=38;5;45:*.wav=38;5;45:*.axa=38;5;45:*.oga=38;5;45:*.spx=38;5;45:*.xspf=38;5;45:"
+
 export VSDBsave=/gpfs/dell2/emc/modeling/noscrub/Yali.Mao/vsdb
 
 export HOMEnoscrub=/gpfs/dell2/emc/modeling/noscrub/Yali.Mao
 
 #=====================================================#
-if [[ `hostname` =~ ^tfe ]] ; then
+if [[ `hostname` =~ ^h ]] ; then
 #=====================================================#
-  export MACHINE=theia
-  alias quotas='cat /scratch4/BMC/public/quotas/stmp3'
+  export MACHINE=hera
+  alias quotas='cat /scratch2/BMC/public/quotas/stmp'
 
-  #========== Theia ====================#
-  export VSDBsave=/scratch4/NCEPDEV/global/noscrub/Yali.Mao/vsdb
-  export HOMEnoscrub=/scratch4/NCEPDEV/global/noscrub/Yali.Mao
+  #========== Hera ====================#
+  export VSDBsave=/scratch1/NCEPDEV/global/Yali.Mao/vsdb
+  export HOMEnoscrub=/scratch1/NCEPDEV/global/Yali.Mao
 
   export NOSCRUB=$HOMEnoscrub
   export HOMEnoscrub=$NOSCRUB
 
-  export TMP='/scratch4/NCEPDEV/stmp3/Yali.Mao'
+  export HOMEgit=/scratch2/NCEPDEV/ovp/Yali.Mao/git
+  export G2CTL=$HOMEgit/save/grads/g2ctl.hera
 
-  export G2CTL=$HOMEnoscrub/git/save/grads/g2ctl.theia
+  export TMP='/scratch2/NCEPDEV/stmp3/Yali.Mao'
 
   export NWPROD=/scratch4/NCEPDEV/rstprod/nwprod
-  export COMROOT=/scratch4/NCEPDEV/rstprod/com
+  export COMROOT=/scratch1/NCEPDEV/rstprod/com
 
   # run this bash before 'module load'
   if [ ! -z $MODULESHOME ]; then
@@ -46,102 +49,33 @@ if [[ `hostname` =~ ^tfe ]] ; then
   fi
 
   module use /apps/modules/modulefiles
-  module load intel/18.0.1.163
-  module load gcc/6.2.0
-  module load grads
+  module load intel/18.0.5.274
+#  module load gcc/6.2.0
+  module load grads/2.2.1
   module load ncl
   module load hpss
-  module load svn
+#  module load svn
 #  module load slurm
   module load rocoto
-  module load intelpython
 
   module use /apps/modules/modulefamilies/intel
-  module load impi/5.1.2.150
+  module load impi/2018.0.4
   module load netcdf
   module load R/3.5.0
 
-  module use /scratch3/NCEPDEV/nwprod/modulefiles/
-  module load grib_util
-#  module load wgrib2/2.0.8
+  module use /scratch2/NCEPDEV/nwprod/NCEPLIBS/modulefiles
+  module load grib_util/1.1.1
   alias wgrib2=$WGRIB2
-
-  module use /scratch3/NCEPDEV/nwprod/lib/modulefiles
-  module load prod_util
-  module load g2tmpl/v1.5.0
+  module load prod_util/1.1.0
+  module load g2tmpl/1.5.0
+# load python which needs contrib and anaconda/latest
+  module load contrib
+  module load anaconda/latest
 
   # Install LD_LIBRARY_PATH to solve runtime error:  
   #   error while loading shared libraries: libiomp5.so: cannot open shared object file
-  # It works for /scratch4/NCEPDEV/global/noscrub/Yali.Mao/git/verf_g2g.v3.0.12/exec/verf_g2g_grid2grid_grib2
+  # It works for /scratch2/NCEPDEV/ovp/Yali.Mao/git/verf_g2g.v3.0.12/exec/verf_g2g_grid2grid_grib2
   source /opt/intel/bin/compilervars.sh intel64
-
-# From Fanglin
-# module use /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/python/modulefiles
-# module load python/3.6.1-emc
-
-#=====================================================#
-elif [[ `hostname` =~ ^h ]] ; then
-#=====================================================#
-  export MACHINE=theia
-  alias quotas='cat /scratch4/BMC/public/quotas/stmp3'
-
-  #========== Theia ====================#
-  export VSDBsave=/scratch4/NCEPDEV/global/noscrub/Yali.Mao/vsdb
-  export HOMEnoscrub=/scratch4/NCEPDEV/global/noscrub/Yali.Mao
-
-  export NOSCRUB=$HOMEnoscrub
-  export HOMEnoscrub=$NOSCRUB
-
-  export TMP='/scratch4/NCEPDEV/stmp3/Yali.Mao'
-
-  export G2CTL=$HOMEnoscrub/git/save/grads/g2ctl.theia
-
-  export NWPROD=/scratch4/NCEPDEV/rstprod/nwprod
-  export COMROOT=/scratch4/NCEPDEV/rstprod/com
-
-  # run this bash before 'module load'
-  if [ ! -z $MODULESHOME ]; then
-      . $MODULESHOME/init/bash
-      . $MODULESHOME/init/profile
-  else
-      . /apps/lmod/7.7.18/init/bash
-      . /apps/lmod/7.7.18/init/profile
-  fi
-
-  module use /apps/modules/modulefiles
-  module load intel/18.0.1.163
-  module load gcc/6.2.0
-  module load grads
-  module load ncl
-  module load hpss
-  module load svn
-#  module load slurm
-  module load rocoto
-  module load intelpython
-
-  module use /apps/modules/modulefamilies/intel
-  module load impi/5.1.2.150
-  module load netcdf
-  module load R/3.5.0
-
-  module use /scratch3/NCEPDEV/nwprod/modulefiles/
-  module load grib_util
-#  module load wgrib2/2.0.8
-  alias wgrib2=$WGRIB2
-
-  module use /scratch3/NCEPDEV/nwprod/lib/modulefiles
-  module load prod_util
-  module load g2tmpl/v1.5.0
-
-  # Install LD_LIBRARY_PATH to solve runtime error:  
-  #   error while loading shared libraries: libiomp5.so: cannot open shared object file
-  # It works for /scratch4/NCEPDEV/global/noscrub/Yali.Mao/git/verf_g2g.v3.0.12/exec/verf_g2g_grid2grid_grib2
-  source /opt/intel/bin/compilervars.sh intel64
-
-# From Fanglin
-# module use /scratch4/NCEPDEV/nems/noscrub/emc.nemspara/python/modulefiles
-# module load python/3.6.1-emc
-
 
 #=====================================================#
 elif [[ `hostname` =~ ^[g|t][0-9]{1} ]] ; then
@@ -155,11 +89,12 @@ elif [[ `hostname` =~ ^[g|t][0-9]{1} ]] ; then
       export HOMEnoscrub=$NOSCRUB
   fi
 
+  export HOMEgit=$HOMEnoscrub/git
+  export G2CTL=$HOMEgit/save/grads/g2ctl
+
   export TMP='/ptmpp1/Yali.Mao'
   #export SSAVE='/sss/emc/global/shared/Yali.Mao/save'
   #alias ssave='cd $SSAVE'
-
-  export G2CTL=$HOMEnoscrub/git/save/grads/g2ctl
 
   export NWPROD=/nwprod2
   export GADDIR=/usrx/local/GrADS/2.0.2/lib
@@ -201,9 +136,10 @@ elif [[ `hostname` =~ ^[l|s]login ]] ; then
       export HOMEnoscrub=$NOSCRUB
   fi
 
-  export TMP='/gpfs/hps/ptmp/Yali.Mao'
+  export HOMEgit=$HOMEnoscrub/git
+  export G2CTL=$HOMEgit/save/grads/g2ctl.new
 
-  export G2CTL=$HOMEnoscrub/git/save/grads/g2ctl.new
+  export TMP='/gpfs/hps/ptmp/Yali.Mao'
 
   export NWPROD=/gpfs/hps/nco/ops/nwprod
   export GADDIR=/usrx/local/dev/GrADS/data
@@ -256,9 +192,10 @@ else
   export NOSCRUB=$HOMEnoscrub
   export HOMEnoscrub=$NOSCRUB
 
-  export TMP='/gpfs/dell3/ptmp/Yali.Mao'
+  export HOMEgit=$HOMEnoscrub/git
+  export G2CTL=$HOMEgit/save/grads/g2ctl.new
 
-  export G2CTL=$HOMEnoscrub/git/save/grads/g2ctl.new
+  export TMP='/gpfs/dell3/ptmp/Yali.Mao'
 
   export NWPROD=/gpfs/dell1/nco/ops/nwprod
   export GADDIR=/usrx/local/dev/GrADS/2.0.2/lib
@@ -308,12 +245,11 @@ else
 #=====================================================#
 fi
 #=====================================================#
-export HOMEgit=$HOMEnoscrub/git
 export HOMEsave=$HOMEgit/save
 export GRADS=$HOMEsave/grads
 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/$NWPROD/lib
 
 # Will not be used by 'alias'
-export GIT=$NOSCRUB/git
+export GIT=$HOMEgit
 export SAVE=$GIT/save

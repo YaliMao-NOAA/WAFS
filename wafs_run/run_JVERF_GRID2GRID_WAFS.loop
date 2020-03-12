@@ -1,0 +1,18 @@
+#!/bin/bash
+set -xa
+date
+
+PDY1=20190723
+PDY2=20190725
+
+export DATA=/scratch2/NCEPDEV/stmp3/Yali.Mao/wafs.vrfy.com.twindonly
+mkdir -p $DATA
+cd $DATA
+
+export vday=$PDY1
+while [[ $vday < $PDY2 ]] ; do
+  sh /scratch2/NCEPDEV/ovp/Yali.Mao/git/save/wafs_run/run_JVERF_GRID2GRID_WAFS.cron prod prod wind > ${vday}.log 2>&1
+  vday=`$NDATE 24 ${vday}00 | cut -c1-8`
+done
+
+date

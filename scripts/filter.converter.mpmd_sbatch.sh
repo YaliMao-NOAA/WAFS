@@ -17,9 +17,9 @@ export PDY=`echo $CDATE | cut -c1-8`
 export cyc=`echo $CDATE | cut -c9-10`
 export cycle=t${cyc}z
 
-export COMOUT=/scratch4/NCEPDEV/stmp3/$LOGNAME/com2/gfs/test/${RUN}.$PDY/${cyc}
+export COMOUT=/scratch2/NCEPDEV/stmp3/$LOGNAME/com2/gfs/test/${RUN}.$PDY/${cyc}
 set -xa
-export DATA=/scratch4/NCEPDEV/stmp3/$LOGNAME/tmp
+export DATA=/scratch2/NCEPDEV/stmp3/$LOGNAME/tmp
 rm -rf $DATA
 mkdir $DATA
 cd $DATA

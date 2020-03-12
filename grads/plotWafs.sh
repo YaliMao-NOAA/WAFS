@@ -4,12 +4,9 @@
 usage="Usage: $HOMEsave/grads/plotWafs.sh domain prod  a_WAFS_grib2_file"
 
 #*******************************************************
-# It is loaded by .bashrc as well
-if [[ `hostname` =~ ^tfe ]] ; then
-   . /scratch4/NCEPDEV/global/noscrub/Yali.Mao/git/save/envir_setting.sh
-else
-   . /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/envir_setting.sh
-fi
+# To load $HOMEsave/envir_setting.sh
+. ~/.bashrc
+
 set -x 
 
 ICSEVconvert=$HOMEgit/verf_g2g.v3.0.12/exec/verf_g2g_icing_convert.$MACHINE
@@ -37,7 +34,7 @@ elif [[ $prd =~ severity ]] ; then
    $WGRIB2 $dataFile | grep ":ICSEV:" | $WGRIB2 -i $dataFile -grib ${dataFile}.icsev
    ##########################################
    #### start: For new ICSEV grib2 table ####
-   $WGRIB2 $dataFile | grep "parmcat=19 parm=36:" | $WGRIB2 -i $dataFile -grib ${dataFile}.icsev1
+   $WGRIB2 $dataFile | grep "parmcat=19 parm=37:" | $WGRIB2 -i $dataFile -grib ${dataFile}.icsev1
    cat ${dataFile}.icsev1 >> ${dataFile}.icsev
    rm ${dataFile}.icsev1
    #### end: For new ICSEV grib2 table  #####
@@ -150,7 +147,7 @@ elif [ $prd = probability ] ; then
    prdname="Icing Probability=>Potential"
 elif [ $prd = severity ] ; then
    clevs="0 1 2 3"
-   field=var01936prs
+   field=var01937prs
    ccols="99 110 120 130 140 "
    prdname="Icing Severity"
 elif [ $prd = iseverity ] ; then

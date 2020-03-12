@@ -62,8 +62,8 @@ alias tempest='ssh -X wd20ym@tempest'
 alias linux='ssh -X wd20ym@emc-lw-ymao'
 # ssh to NOMAD
 alias nomad='ssh -X yali.mao@emc-ls-nomad7.ncep.noaa.gov'
-# file transfer to theia
-alias theia='scp -p Yali.Mao@dtn-theia.fairmont.rdhpcs.noaa.gov:/scratch4/NCEPDEV/stmp3/Yali.Mao/.'
+# file transfer to hera
+alias hera='scp -p Yali.Mao@dtn-hera.fairmont.rdhpcs.noaa.gov:/scratch2/NCEPDEV/stmp3/Yali.Mao/.'
 
 alias history='history 60'
 alias h='history'
@@ -109,9 +109,9 @@ alias proj='cd $PROJ'
 alias save='cd $HOMEsave'
 alias run='cd $HOMEsave/wafs_run'
 alias noscrub='cd $HOMEnoscrub'
-alias gitp='cd $HOMEnoscrub/git'
+alias gitp='cd $HOMEgit'
 alias vsdb='cd $HOMEnoscrub/vsdb/wafs'
-alias post='cd $HOMEnoscrub/git/EMC_gtg_ncar'
+alias post='cd $HOMEgit/EMC_post_fork'
 
 alias cronl='crontab -l'
 alias crone='emacs $HOMEsave/cronjobs.$MACHINE'
@@ -135,6 +135,9 @@ alias rgrep='grep -r '
 alias nosvn='grep -v svn'
 alias lsd='ls -ld */'
 alias lsda='echo "`ls -Cd .*/`" "`ls -Cd */`"'
+
+# For Hera
+alias sjobs='squeue -u Yali.Mao'
 
 alias mydegrib2='$HOMEsave/grib2/degrib2'
 
@@ -170,7 +173,7 @@ alias wcossnomad='sudo -u emc.nomad -i'
 alias gm='function _gm() {
               if [ $1 = "2" ] ; then 
                 $G2CTL -verf $2 > $2.ctl
-                gribmap -i  $2.ctl
+                gribmap -big -i  $2.ctl
                 sed "s/\*\* (.*)/\*\* /g" -i $2.ctl
               else
                 $HOMEsave/grads/grib2ctl.pl -verf $1 > $1.ctl

@@ -1,5 +1,8 @@
 #!/bin/sh
 
+set -xa
+date
+
 ########################################################
 # 1) Upload icing and turbulence grib2 data to rzdm ftp server
 # 2) Making plots and upload to rzdm www website
@@ -8,41 +11,24 @@
 #
 # para: run own job card
 # prod: operational products
-# 
-# later on to be modified:
-# 1. fhour/fh in GCIP_GFIP_GTG_2_rzdm.sh, change to 3 digits for para after termination of GFS parallel in Sep 2019
-# 2. cronjob stops para run after 'old' GFS retires in Sep 2019
 ########################################################
-
-# 1) /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.cron
-# 2) /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.sh
-# 3) bsub < $HOMEsave/wafs_run/run_post_gfs_Grib2.nemsio.driver.$MACHINE
+# 1) $HOMEsave/scripts/GCIP_GFIP_GTG_2_rzdm.cron.$MACHINE
+# 2) $HOMEsave/scripts/GCIP_GFIP_GTG_2_rzdm.cron
+# 3) $HOMEsave/scripts/GCIP_GFIP_GTG_2_rzdm.sh
+# 4) bsub < $HOMEsave/wafs_run/run_post_gfs_Grib2.nemsio.driver.$MACHINE
 #    !!! needs compiling!!! $HOMEgit/EMC_gtg_ncar
-# 4) /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/grads/plotWafs.sh
+# 5) /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/grads/plotWafs.sh
 #    !!! needs compiling!!! ICSEVconvert=$HOMEgit/verf_g2g.v3.0.12/exec/verf_g2g_icing_convert.$MACHINE
 
 #*******************************************************
-# It is loaded by .bashrc as well
-if [[ `hostname` =~ ^tfe ]] ; then
-   . /scratch4/NCEPDEV/global/noscrub/Yali.Mao/git/save/envir_setting.sh
+# .bashrc was loaded in the driver
+if [[ `hostname` =~ ^h ]] ; then
    export RSYNC=echo
    export SSH=echo
 else
-   . /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/envir_setting.sh
    export RSYNC=rsync
    export SSH=ssh
 fi
-
-set -xa
-date
-export PDY=${PDY:-`$NDATE -3 | cut -c1-8`}
-
-#export PDY=20190709
-#export COMROOT=/scratch4/NCEPDEV/stmp3/Yali.Mao/test
-
-# prod: para - experimental, run own job card
-#       prod - operational
-export prod=${prod:-para}
 
 if [ $prod = test ] ; then
 #   DATA is for running a job card
@@ -76,23 +62,29 @@ fi
 
 rm -r $DATAROOTplot
 
-# Split forecast hours to 2 lists to decrease thread creations,
+# Use MPMD to speed up the processing
+rm gfipgcipgtg2rzdm.cmdfile
+
 # otherwise there are error message on Theia: 
 # libgomp: Thread creation failed: Resource temporarily unavailable
-fhours1="003 006 009 012 015 018 021"
-fhours2="024 027 030 033 036 000"
+fhours="003 006 009 012 015 018 021 024 027 030 033 036 000"
 # 000 and 003 needs more time than others because of GCIP.
 # Put 000 at the last of the list to be 'waited'
-for fh in $fhours1 ; do
-  export fh
-  sh $HOMEsave/scripts/GCIP_GFIP_GTG_2_rzdm.sh &
+i=0
+for fh in $fhours ; do
+  echo $i $HOMEsave/scripts/GCIP_GFIP_GTG_2_rzdm.sh $fh >> gfipgcipgtg2rzdm.cmdfile
+  i=$(( i + 1 ))
 done
-wait
-for fh in $fhours2 ; do
-  export fh
-  sh $HOMEsave/scripts/GCIP_GFIP_GTG_2_rzdm.sh &
-done
-wait
+if [ ! `echo $MPIRUN | cut -d " " -f1` = 'srun' ] ; then
+    # If not 'srun' MPMD, do not need CPU number at the beginning of each line of gfipgcipgtg2rzdm.cmdfile
+    sed 's/[^ ]* //'  -i gfipgcipgtg2rzdm.cmdfile
+    export MP_PGMMODEL=mpmd
+    MPMDRUN=$MPIRUN
+else
+    MPMDRUN="$MPIRUN -l --multi-prog"
+fi
+$MPMDRUN gfipgcipgtg2rzdm.cmdfile
+
 sleep 30 # 000 and 003 might be finished in  seconds apart
 
 ########################################################
@@ -106,7 +98,7 @@ if [[ $cyc <  18 ]] ; then
     dates="$dates `$NDATE -25 ${PDY}00 | cut -c1-8`"
 fi
 
-if [[ `hostname` =~ ^tfe ]] ; then
+if [[ `hostname` =~ ^h ]] ; then
   echo $PDY $cyc $dates > $TMP/GCIP_GFIP_GTG_2_rzdm.list
 else
   if  [ $prod = prod ] ; then

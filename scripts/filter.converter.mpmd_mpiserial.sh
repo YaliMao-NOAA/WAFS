@@ -17,15 +17,15 @@ export PDY=`echo $CDATE | cut -c1-8`
 export cyc=`echo $CDATE | cut -c9-10`
 export cycle=t${cyc}z
 
-export COMOUT=/scratch4/NCEPDEV/stmp3/$LOGNAME/com2/gfs/test/${RUN}.$PDY/${cyc}
+export COMOUT=/scratch2/NCEPDEV/stmp3/$LOGNAME/com2/gfs/test/${RUN}.$PDY/${cyc}
 set -xa
-export DATA=/scratch4/NCEPDEV/stmp3/$LOGNAME/tmp
+export DATA=/scratch2/NCEPDEV/stmp3/$LOGNAME/tmp
 rm -rf $DATA
 mkdir $DATA
 cd $DATA
 
 post_times=030
-export rawfile=/scratch4/NCEPDEV/stmp3/Yali.Mao/com2/gfs/test/gfs.20190830/12/gfs.t${cyc}z.master.grb2f${post_times}
+export rawfile=/scratch2/NCEPDEV/stmp3/Yali.Mao/com2/gfs/test/gfs.20190830/12/gfs.t${cyc}z.master.grb2f${post_times}
 date
 
 
@@ -68,10 +68,10 @@ chmod 775 $DATA/poescript
 #sbatch -A ovp  -n $nproc --wrap "srun -l --multi-prog $DATA/poescript"
 export MP_PGMMODEL=mpmd
 export MP_CMDFILE=$DATA/poescript
-export SCR_CMDFILE=$MP_CMDFILE    # Used by mpiserial on theia
+export SCR_CMDFILE=$MP_CMDFILE    # Used by mpiserial on Hera
 
 
-mpiexec.hydra -np $nproc /scratch4/NCEPDEV/ensemble/save/Jiayi.Peng/ens_tracker.v1.1.8/mpiserial.cd/mpiserial
+mpiexec.hydra -np $nproc /scratch2/NCEPDEV/ovp/Yali.Mao/git/save/mpiserial.cd/mpiserial
 
 #Wait till all jobs are done
 sleepmax=600

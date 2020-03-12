@@ -39,19 +39,20 @@ program main
   integer :: numfields, numlocal, maxlocal ! output of gb_info 
   logical :: unpack=.true., expand=.true.           ! output of gf_getfld
   type(gribfield) :: gfld
-  integer :: iseek, n, k, level
+  integer :: iseek, k, n, level
 
   character(len=*), parameter :: myself = 'readGB2() '
 
   ! other variables
-  integer :: nxy, iret, i
+  integer :: nxy, iret, i,ncount
 
   ! ===========================================!
   ! take care of input arguments
 
   call GET_COMMAND_ARGUMENT(1, inputfile)
   icat = 19
-  iprm = 234
+  iprm = 36
+!  iprm = 234
 
   ! ===========================================!
   ! read, process and output data in Grib2
@@ -106,16 +107,18 @@ program main
            level = gfld%ipdtmpl(12) / (10 ** gfld%ipdtmpl(11))
            write(*,*) "data size=", size(gfld%fld)
            data(:) = gfld%fld
+           ncount = 0
            do i = 1, nxy
-              if(&
- (data(i) < 999.) .and. &
-                 (data(i)/= 0. .and. data(i) /= 1. .and. &
+              if((data(i) > 99999.)) then
+                 ncount = ncount + 1
+              elseif(data(i)/= 0. .and. data(i) /= 1. .and. &
                   data(i)/= 2. .and. data(i) /= 3. .and. &
-                  data(i)/= 4. .and. data(i) /= 5. )) then
+                  data(i)/= 4. .and. data(i) /= 5. ) then
                  write(*,*) "Not integer icing severity", i, level, data(i)
               end if
 !              if( data(i) /= 0.)  write(*,*) "sample value of icing severity", i, data(i), level, nxy
            end do
+           if(ncount>0) print *, "On level=",level, ncount, " gridpoints have missing value"
         end if if_ipdtmpl
 
         call gf_free(gfld)

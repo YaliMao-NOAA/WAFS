@@ -1,0 +1,6 @@
+#!/bin/sh
+
+module load grib_util
+masterfile=$1
+output=$2
+$WGRIB2 $masterfile | grep ":ICIP:\|:ICSEV:" | $WGRIB2 -i $masterfile -grib $output
