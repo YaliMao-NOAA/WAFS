@@ -1,0 +1,259 @@
+1:0:vt=2019111303:cumulonimbus base:21 hour fcst:ICAHT ICAO Standard Atmosphere Reference Height [m]:
+    ndata=41760:undef=0:mean=56.6781:min=-1:max=5586
+    grid_template=0:winds(N/S):
+	lat-lon grid:(288 x 145) units 1e-06 input WE:NS output WE:SN res 48
+	lat 90.000000 to -90.000000 by 1.250000
+	lon 0.000000 to 358.750000 by 1.250000 #points=41760
+
+2:68039:vt=2019111303:cumulonimbus top:21 hour fcst:ICAHT ICAO Standard Atmosphere Reference Height [m]:
+    ndata=41760:undef=0:mean=848.236:min=-1:max=18621
+    grid_template=0:winds(N/S):
+	lat-lon grid:(288 x 145) units 1e-06 input WE:NS output WE:SN res 48
+	lat 90.000000 to -90.000000 by 1.250000
+	lon 0.000000 to 358.750000 by 1.250000 #points=41760
+
+3:146518:vt=2019111303:entire atmosphere:21 hour fcst:CBHE Horizontal Extent of Cumulonimbus (CB) [%]:
+    ndata=41760:undef=0:mean=-0.0652155:min=-0.1:max=0.8
+    grid_template=0:winds(N/S):
+	lat-lon grid:(288 x 145) units 1e-06 input WE:NS output WE:SN res 48
+	lat 90.000000 to -90.000000 by 1.250000
+	lon 0.000000 to 358.750000 by 1.250000 #points=41760
+
+4:167577:vt=2019111303:700 mb:21 hour fcst:CTP In-Cloud Turbulence [%]:spatial ave:nearest neighbor interpolation
+    ndata=41760:undef=0:mean=0.000132208:min=-0.004:max=0.172
+    grid_template=0:winds(N/S):
+	lat-lon grid:(288 x 145) units 1e-06 input WE:NS output WE:SN res 48
+	lat 90.000000 to -90.000000 by 1.250000
+	lon 0.000000 to 358.750000 by 1.250000 #points=41760
+
+5:209519:vt=2019111303:700 mb:21 hour fcst:CTP In-Cloud Turbulence [%]:spatial max:nearest neighbor interpolation
+    ndata=41760:undef=0:mean=0.00229296:min=-0.004:max=0.424
+    grid_template=0:winds(N/S):
+	lat-lon grid:(288 x 145) units 1e-06 input WE:NS output WE:SN res 48
+	lat 90.000000 to -90.000000 by 1.250000
+	lon 0.000000 to 358.750000 by 1.250000 #points=41760
+
+6:256681:vt=2019111303:600 mb:21 hour fcst:CTP In-Cloud Turbulence [%]:spatial ave:nearest neighbor interpolation
+    ndata=41760:undef=0:mean=0.000244732:min=-0.004:max=0.207
+    grid_template=0:winds(N/S):
+	lat-lon grid:(288 x 145) units 1e-06 input WE:NS output WE:SN res 48
+	lat 90.000000 to -90.000000 by 1.250000
+	lon 0.000000 to 358.750000 by 1.250000 #points=41760
+
+7:298623:vt=2019111303:600 mb:21 hour fcst:CTP In-Cloud Turbulence [%]:spatial max:nearest neighbor interpolation
+    ndata=41760:undef=0:mean=0.00177498:min=-0.004:max=0.313
+    grid_template=0:winds(N/S):
+	lat-lon grid:(288 x 145) units 1e-06 input WE:NS output WE:SN res 48
+	lat 90.000000 to -90.000000 by 1.250000
+	lon 0.000000 to 358.750000 by 1.250000 #points=41760
+
+8:345785:vt=2019111303:500 mb:21 hour fcst:CTP In-Cloud Turbulence [%]:spatial ave:nearest neighbor interpolation
+    ndata=41760:undef=0:mean=0.000116523:min=0:max=0.016
+    grid_template=0:winds(N/S):
+	lat-lon grid:(288 x 145) units 1e-06 input WE:NS output WE:SN res 48
+	lat 90.000000 to -90.000000 by 1.250000
+	lon 0.000000 to 358.750000 by 1.250000 #points=41760
+
+9:372067:vt=2019111303:500 mb:21 hour fcst:CTP In-Cloud Turbulence [%]:spatial max:nearest neighbor interpolation
+    ndata=41760:undef=0:mean=0.00100704:min=0:max=0.094
+    grid_template=0:winds(N/S):
+	lat-lon grid:(288 x 145) units 1e-06 input WE:NS output WE:SN res 48
+	lat 90.000000 to -90.000000 by 1.250000
+	lon 0.000000 to 358.750000 by 1.250000 #points=41760
+
+10:408789:vt=2019111303:400 mb:21 hour fcst:CTP In-Cloud Turbulence [%]:spatial ave:nearest neighbor interpolation
+    ndata=41760:undef=0:mean=5.73515e-05:min=0:max=0.01
+    grid_template=0:winds(N/S):
+	lat-lon grid:(288 x 145) units 1e-06 input WE:NS output WE:SN res 48
+	lat 90.000000 to -90.000000 by 1.250000
+	lon 0.000000 to 358.750000 by 1.250000 #points=41760
+
+11:429851:vt=2019111303:400 mb:21 hour fcst:CTP In-Cloud Turbulence [%]:spatial max:nearest neighbor interpolation
+    ndata=41760:undef=0:mean=0.000504694:min=0:max=0.043
+    grid_template=0:winds(N/S):
+	lat-lon grid:(288 x 145) units 1e-06 input WE:NS output WE:SN res 48
+	lat 90.000000 to -90.000000 by 1.250000
+	lon 0.000000 to 358.750000 by 1.250000 #points=41760
+
+12:461353:vt=2019111303:300 mb:21 hour fcst:CTP In-Cloud Turbulence [%]:spatial ave:nearest neighbor interpolation
+    ndata=41760:undef=0:mean=6.72414e-05:min=0:max=0.017
+    grid_template=0:winds(N/S):
+	lat-lon grid:(288 x 145) units 1e-06 input WE:NS output WE:SN res 48
+	lat 90.000000 to -90.000000 by 1.250000
+	lon 0.000000 to 358.750000 by 1.250000 #points=41760
+
+13:487635:vt=2019111303:300 mb:21 hour fcst:CTP In-Cloud Turbulence [%]:spatial max:nearest neighbor interpolation
+    ndata=41760:undef=0:mean=0.000441403:min=0:max=0.051
+    grid_template=0:winds(N/S):
+	lat-lon grid:(288 x 145) units 1e-06 input WE:NS output WE:SN res 48
+	lat 90.000000 to -90.000000 by 1.250000
+	lon 0.000000 to 358.750000 by 1.250000 #points=41760
+
+14:519137:vt=2019111303:400 mb:21 hour fcst:CAT Clear Air Turbulence (CAT) [%]:spatial ave:nearest neighbor interpolation
+    ndata=41760:undef=0:mean=0.677402:min=0:max=23.1
+    grid_template=0:winds(N/S):
+	lat-lon grid:(288 x 145) units 1e-06 input WE:NS output WE:SN res 48
+	lat 90.000000 to -90.000000 by 1.250000
+	lon 0.000000 to 358.750000 by 1.250000 #points=41760
+
+15:561079:vt=2019111303:400 mb:21 hour fcst:CAT Clear Air Turbulence (CAT) [%]:spatial max:nearest neighbor interpolation
+    ndata=41760:undef=0:mean=3.2557:min=0:max=66.1
+    grid_template=0:winds(N/S):
+	lat-lon grid:(288 x 145) units 1e-06 input WE:NS output WE:SN res 48
+	lat 90.000000 to -90.000000 by 1.250000
+	lon 0.000000 to 358.750000 by 1.250000 #points=41760
+
+16:613461:vt=2019111303:350 mb:21 hour fcst:CAT Clear Air Turbulence (CAT) [%]:spatial ave:nearest neighbor interpolation
+    ndata=41760:undef=0:mean=0.703015:min=0:max=18.1
+    grid_template=0:winds(N/S):
+	lat-lon grid:(288 x 145) units 1e-06 input WE:NS output WE:SN res 48
+	lat 90.000000 to -90.000000 by 1.250000
+	lon 0.000000 to 358.750000 by 1.250000 #points=41760
+
+17:655403:vt=2019111303:350 mb:21 hour fcst:CAT Clear Air Turbulence (CAT) [%]:spatial max:nearest neighbor interpolation
+    ndata=41760:undef=0:mean=3.13951:min=0:max=86.9
+    grid_template=0:winds(N/S):
+	lat-lon grid:(288 x 145) units 1e-06 input WE:NS output WE:SN res 48
+	lat 90.000000 to -90.000000 by 1.250000
+	lon 0.000000 to 358.750000 by 1.250000 #points=41760
+
+18:707785:vt=2019111303:300 mb:21 hour fcst:CAT Clear Air Turbulence (CAT) [%]:spatial ave:nearest neighbor interpolation
+    ndata=41760:undef=0:mean=0.761068:min=0:max=13
+    grid_template=0:winds(N/S):
+	lat-lon grid:(288 x 145) units 1e-06 input WE:NS output WE:SN res 48
+	lat 90.000000 to -90.000000 by 1.250000
+	lon 0.000000 to 358.750000 by 1.250000 #points=41760
+
+19:749727:vt=2019111303:300 mb:21 hour fcst:CAT Clear Air Turbulence (CAT) [%]:spatial max:nearest neighbor interpolation
+    ndata=41760:undef=0:mean=3.13883:min=0:max=65
+    grid_template=0:winds(N/S):
+	lat-lon grid:(288 x 145) units 1e-06 input WE:NS output WE:SN res 48
+	lat 90.000000 to -90.000000 by 1.250000
+	lon 0.000000 to 358.750000 by 1.250000 #points=41760
+
+20:802109:vt=2019111303:250 mb:21 hour fcst:CAT Clear Air Turbulence (CAT) [%]:spatial ave:nearest neighbor interpolation
+    ndata=41760:undef=0:mean=0.786104:min=0:max=16.7
+    grid_template=0:winds(N/S):
+	lat-lon grid:(288 x 145) units 1e-06 input WE:NS output WE:SN res 48
+	lat 90.000000 to -90.000000 by 1.250000
+	lon 0.000000 to 358.750000 by 1.250000 #points=41760
+
+21:844051:vt=2019111303:250 mb:21 hour fcst:CAT Clear Air Turbulence (CAT) [%]:spatial max:nearest neighbor interpolation
+    ndata=41760:undef=0:mean=3.13534:min=0:max=67.1
+    grid_template=0:winds(N/S):
+	lat-lon grid:(288 x 145) units 1e-06 input WE:NS output WE:SN res 48
+	lat 90.000000 to -90.000000 by 1.250000
+	lon 0.000000 to 358.750000 by 1.250000 #points=41760
+
+22:896433:vt=2019111303:200 mb:21 hour fcst:CAT Clear Air Turbulence (CAT) [%]:spatial ave:nearest neighbor interpolation
+    ndata=41760:undef=0:mean=0.561145:min=0:max=11.3
+    grid_template=0:winds(N/S):
+	lat-lon grid:(288 x 145) units 1e-06 input WE:NS output WE:SN res 48
+	lat 90.000000 to -90.000000 by 1.250000
+	lon 0.000000 to 358.750000 by 1.250000 #points=41760
+
+23:933155:vt=2019111303:200 mb:21 hour fcst:CAT Clear Air Turbulence (CAT) [%]:spatial max:nearest neighbor interpolation
+    ndata=41760:undef=0:mean=2.31613:min=0:max=55.1
+    grid_template=0:winds(N/S):
+	lat-lon grid:(288 x 145) units 1e-06 input WE:NS output WE:SN res 48
+	lat 90.000000 to -90.000000 by 1.250000
+	lon 0.000000 to 358.750000 by 1.250000 #points=41760
+
+24:985537:vt=2019111303:150 mb:21 hour fcst:CAT Clear Air Turbulence (CAT) [%]:spatial ave:nearest neighbor interpolation
+    ndata=41760:undef=0:mean=0.442222:min=0:max=14.2
+    grid_template=0:winds(N/S):
+	lat-lon grid:(288 x 145) units 1e-06 input WE:NS output WE:SN res 48
+	lat 90.000000 to -90.000000 by 1.250000
+	lon 0.000000 to 358.750000 by 1.250000 #points=41760
+
+25:1027479:vt=2019111303:150 mb:21 hour fcst:CAT Clear Air Turbulence (CAT) [%]:spatial max:nearest neighbor interpolation
+    ndata=41760:undef=0:mean=1.98532:min=0:max=64.4
+    grid_template=0:winds(N/S):
+	lat-lon grid:(288 x 145) units 1e-06 input WE:NS output WE:SN res 48
+	lat 90.000000 to -90.000000 by 1.250000
+	lon 0.000000 to 358.750000 by 1.250000 #points=41760
+
+26:1079861:vt=2019111303:800 mb:21 hour fcst:ICIP Icing [%]:spatial ave:nearest neighbor interpolation
+    ndata=41760:undef=0:mean=0.133714:min=0:max=0.98
+    grid_template=0:winds(N/S):
+	lat-lon grid:(288 x 145) units 1e-06 input WE:NS output WE:SN res 48
+	lat 90.000000 to -90.000000 by 1.250000
+	lon 0.000000 to 358.750000 by 1.250000 #points=41760
+
+27:1116583:vt=2019111303:800 mb:21 hour fcst:ICIP Icing [%]:spatial max:nearest neighbor interpolation
+    ndata=41760:undef=0:mean=0.299295:min=0:max=1
+    grid_template=0:winds(N/S):
+	lat-lon grid:(288 x 145) units 1e-06 input WE:NS output WE:SN res 48
+	lat 90.000000 to -90.000000 by 1.250000
+	lon 0.000000 to 358.750000 by 1.250000 #points=41760
+
+28:1153305:vt=2019111303:700 mb:21 hour fcst:ICIP Icing [%]:spatial ave:nearest neighbor interpolation
+    ndata=41760:undef=0:mean=0.0973331:min=0:max=0.94
+    grid_template=0:winds(N/S):
+	lat-lon grid:(288 x 145) units 1e-06 input WE:NS output WE:SN res 48
+	lat 90.000000 to -90.000000 by 1.250000
+	lon 0.000000 to 358.750000 by 1.250000 #points=41760
+
+29:1190027:vt=2019111303:700 mb:21 hour fcst:ICIP Icing [%]:spatial max:nearest neighbor interpolation
+    ndata=41760:undef=0:mean=0.243433:min=0:max=1
+    grid_template=0:winds(N/S):
+	lat-lon grid:(288 x 145) units 1e-06 input WE:NS output WE:SN res 48
+	lat 90.000000 to -90.000000 by 1.250000
+	lon 0.000000 to 358.750000 by 1.250000 #points=41760
+
+30:1226749:vt=2019111303:600 mb:21 hour fcst:ICIP Icing [%]:spatial ave:nearest neighbor interpolation
+    ndata=41760:undef=0:mean=0.0672359:min=0:max=0.92
+    grid_template=0:winds(N/S):
+	lat-lon grid:(288 x 145) units 1e-06 input WE:NS output WE:SN res 48
+	lat 90.000000 to -90.000000 by 1.250000
+	lon 0.000000 to 358.750000 by 1.250000 #points=41760
+
+31:1263471:vt=2019111303:600 mb:21 hour fcst:ICIP Icing [%]:spatial max:nearest neighbor interpolation
+    ndata=41760:undef=0:mean=0.210584:min=0:max=1
+    grid_template=0:winds(N/S):
+	lat-lon grid:(288 x 145) units 1e-06 input WE:NS output WE:SN res 48
+	lat 90.000000 to -90.000000 by 1.250000
+	lon 0.000000 to 358.750000 by 1.250000 #points=41760
+
+32:1300193:vt=2019111303:500 mb:21 hour fcst:ICIP Icing [%]:spatial ave:nearest neighbor interpolation
+    ndata=41760:undef=0:mean=0.0680999:min=0:max=0.86
+    grid_template=0:winds(N/S):
+	lat-lon grid:(288 x 145) units 1e-06 input WE:NS output WE:SN res 48
+	lat 90.000000 to -90.000000 by 1.250000
+	lon 0.000000 to 358.750000 by 1.250000 #points=41760
+
+33:1336915:vt=2019111303:500 mb:21 hour fcst:ICIP Icing [%]:spatial max:nearest neighbor interpolation
+    ndata=41760:undef=0:mean=0.197378:min=0:max=1
+    grid_template=0:winds(N/S):
+	lat-lon grid:(288 x 145) units 1e-06 input WE:NS output WE:SN res 48
+	lat 90.000000 to -90.000000 by 1.250000
+	lon 0.000000 to 358.750000 by 1.250000 #points=41760
+
+34:1373637:vt=2019111303:400 mb:21 hour fcst:ICIP Icing [%]:spatial ave:nearest neighbor interpolation
+    ndata=41760:undef=0:mean=0.029859:min=0:max=0.61
+    grid_template=0:winds(N/S):
+	lat-lon grid:(288 x 145) units 1e-06 input WE:NS output WE:SN res 48
+	lat 90.000000 to -90.000000 by 1.250000
+	lon 0.000000 to 358.750000 by 1.250000 #points=41760
+
+35:1405139:vt=2019111303:400 mb:21 hour fcst:ICIP Icing [%]:spatial max:nearest neighbor interpolation
+    ndata=41760:undef=0:mean=0.10205:min=0:max=1
+    grid_template=0:winds(N/S):
+	lat-lon grid:(288 x 145) units 1e-06 input WE:NS output WE:SN res 48
+	lat 90.000000 to -90.000000 by 1.250000
+	lon 0.000000 to 358.750000 by 1.250000 #points=41760
+
+36:1441861:vt=2019111303:300 mb:21 hour fcst:ICIP Icing [%]:spatial ave:nearest neighbor interpolation
+    ndata=41760:undef=0:mean=0.000551964:min=0:max=0.05
+    grid_template=0:winds(N/S):
+	lat-lon grid:(288 x 145) units 1e-06 input WE:NS output WE:SN res 48
+	lat 90.000000 to -90.000000 by 1.250000
+	lon 0.000000 to 358.750000 by 1.250000 #points=41760
+
+37:1457703:vt=2019111303:300 mb:21 hour fcst:ICIP Icing [%]:spatial max:nearest neighbor interpolation
+    ndata=41760:undef=0:mean=0.0106046:min=0:max=0.31
+    grid_template=0:winds(N/S):
+	lat-lon grid:(288 x 145) units 1e-06 input WE:NS output WE:SN res 48
+	lat 90.000000 to -90.000000 by 1.250000
+	lon 0.000000 to 358.750000 by 1.250000 #points=41760
+

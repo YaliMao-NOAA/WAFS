@@ -1,0 +1,888 @@
+1:0:vt=2019110212:100 mb:6 hour fcst:EDPARM Eddy Dissipation Parameter [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.0812088:min=0.004:max=0.402
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+2:2269877:vt=2019110212:100 mb:6 hour fcst:CATEDR Clear Air Turbulence (CAT) (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.0793293:min=0.003:max=0.43
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+3:4699075:vt=2019110212:100 mb:6 hour fcst:MWTURB Mountain Wave Turbulence (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.0149544:min=0:max=0.297
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+4:5781117:vt=2019110212:125 mb:6 hour fcst:EDPARM Eddy Dissipation Parameter [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.0865772:min=0.005:max=0.449
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+5:8094599:vt=2019110212:125 mb:6 hour fcst:CATEDR Clear Air Turbulence (CAT) (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.08474:min=0.003:max=0.468
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+6:10577277:vt=2019110212:125 mb:6 hour fcst:MWTURB Mountain Wave Turbulence (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.0152905:min=0:max=0.315
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+7:11665158:vt=2019110212:150 mb:6 hour fcst:EDPARM Eddy Dissipation Parameter [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.0904196:min=0.003:max=0.474
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+8:14011373:vt=2019110212:150 mb:6 hour fcst:CATEDR Clear Air Turbulence (CAT) (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.0882167:min=0.002:max=0.506
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+9:16532296:vt=2019110212:150 mb:6 hour fcst:MWTURB Mountain Wave Turbulence (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.015629:min=0:max=0.303
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+10:17623386:vt=2019110212:175 mb:6 hour fcst:EDPARM Eddy Dissipation Parameter [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.0948601:min=0.003:max=0.457
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+11:20014652:vt=2019110212:175 mb:6 hour fcst:CATEDR Clear Air Turbulence (CAT) (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.0926062:min=0.002:max=0.48
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+12:22593414:vt=2019110212:175 mb:6 hour fcst:MWTURB Mountain Wave Turbulence (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.0160644:min=0:max=0.281
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+13:23690336:vt=2019110212:200 mb:6 hour fcst:EDPARM Eddy Dissipation Parameter [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.100429:min=0.004:max=0.442
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+14:26112294:vt=2019110212:200 mb:6 hour fcst:CATEDR Clear Air Turbulence (CAT) (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.0986673:min=0.002:max=0.477
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+15:28727328:vt=2019110212:200 mb:6 hour fcst:MWTURB Mountain Wave Turbulence (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.0166127:min=0:max=0.302
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+16:29826124:vt=2019110212:225 mb:6 hour fcst:EDPARM Eddy Dissipation Parameter [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.105796:min=0.005:max=0.481
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+17:32280527:vt=2019110212:225 mb:6 hour fcst:CATEDR Clear Air Turbulence (CAT) (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.10451:min=0.003:max=0.517
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+18:34934812:vt=2019110212:225 mb:6 hour fcst:MWTURB Mountain Wave Turbulence (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.0172368:min=0:max=0.314
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+19:36038011:vt=2019110212:250 mb:6 hour fcst:EDPARM Eddy Dissipation Parameter [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.110021:min=0.006:max=0.458
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+20:38520740:vt=2019110212:250 mb:6 hour fcst:CATEDR Clear Air Turbulence (CAT) (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.108964:min=0.005:max=0.482
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+21:41209542:vt=2019110212:250 mb:6 hour fcst:MWTURB Mountain Wave Turbulence (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.0178243:min=0:max=0.321
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+22:42317211:vt=2019110212:275 mb:6 hour fcst:EDPARM Eddy Dissipation Parameter [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.112854:min=0.01:max=0.435
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+23:44854462:vt=2019110212:275 mb:6 hour fcst:CATEDR Clear Air Turbulence (CAT) (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.111829:min=0.007:max=0.463
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+24:47571275:vt=2019110212:275 mb:6 hour fcst:MWTURB Mountain Wave Turbulence (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.0182686:min=0:max=0.36
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+25:48682133:vt=2019110212:300 mb:6 hour fcst:EDPARM Eddy Dissipation Parameter [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.114471:min=0.009:max=0.432
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+26:51299959:vt=2019110212:300 mb:6 hour fcst:CATEDR Clear Air Turbulence (CAT) (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.113449:min=0.007:max=0.466
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+27:54102854:vt=2019110212:300 mb:6 hour fcst:MWTURB Mountain Wave Turbulence (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.0185377:min=0:max=0.395
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+28:55227999:vt=2019110212:325 mb:6 hour fcst:EDPARM Eddy Dissipation Parameter [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.115048:min=0.009:max=0.481
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+29:57780382:vt=2019110212:325 mb:6 hour fcst:CATEDR Clear Air Turbulence (CAT) (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.114236:min=0.006:max=0.506
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+30:60515240:vt=2019110212:325 mb:6 hour fcst:MWTURB Mountain Wave Turbulence (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.0186527:min=0:max=0.403
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+31:61632948:vt=2019110212:350 mb:6 hour fcst:EDPARM Eddy Dissipation Parameter [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.114343:min=0.01:max=0.459
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+32:64180028:vt=2019110212:350 mb:6 hour fcst:CATEDR Clear Air Turbulence (CAT) (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.113884:min=0.007:max=0.485
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+33:66940652:vt=2019110212:350 mb:6 hour fcst:MWTURB Mountain Wave Turbulence (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.0186662:min=0:max=0.411
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+34:68060919:vt=2019110212:375 mb:6 hour fcst:EDPARM Eddy Dissipation Parameter [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.112406:min=0.009:max=0.433
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+35:70594424:vt=2019110212:375 mb:6 hour fcst:CATEDR Clear Air Turbulence (CAT) (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.112183:min=0.007:max=0.46
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+36:73375475:vt=2019110212:375 mb:6 hour fcst:MWTURB Mountain Wave Turbulence (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.0186148:min=0:max=0.39
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+37:74498089:vt=2019110212:400 mb:6 hour fcst:EDPARM Eddy Dissipation Parameter [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.109496:min=0.011:max=0.436
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+38:77033773:vt=2019110212:400 mb:6 hour fcst:CATEDR Clear Air Turbulence (CAT) (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.109257:min=0.01:max=0.47
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+39:79783484:vt=2019110212:400 mb:6 hour fcst:MWTURB Mountain Wave Turbulence (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.0185224:min=0:max=0.412
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+40:80914328:vt=2019110212:425 mb:6 hour fcst:EDPARM Eddy Dissipation Parameter [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.106084:min=0.013:max=0.449
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+41:83398021:vt=2019110212:425 mb:6 hour fcst:CATEDR Clear Air Turbulence (CAT) (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.105487:min=0.013:max=0.477
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+42:86086325:vt=2019110212:425 mb:6 hour fcst:MWTURB Mountain Wave Turbulence (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.0184215:min=0:max=0.412
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+43:87210244:vt=2019110212:450 mb:6 hour fcst:EDPARM Eddy Dissipation Parameter [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.102549:min=0.015:max=0.502
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+44:89622423:vt=2019110212:450 mb:6 hour fcst:CATEDR Clear Air Turbulence (CAT) (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.101168:min=0.015:max=0.547
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+45:92264665:vt=2019110212:450 mb:6 hour fcst:MWTURB Mountain Wave Turbulence (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.0183502:min=0:max=0.425
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+46:93383526:vt=2019110212:475 mb:6 hour fcst:EDPARM Eddy Dissipation Parameter [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.0990917:min=0.015:max=0.503
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+47:95840244:vt=2019110212:475 mb:6 hour fcst:CATEDR Clear Air Turbulence (CAT) (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.0968076:min=0.014:max=0.537
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+48:98457967:vt=2019110212:475 mb:6 hour fcst:MWTURB Mountain Wave Turbulence (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=9216:mean=0.0183235:min=0:max=0.492
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+49:99608872:vt=2019110212:500 mb:6 hour fcst:EDPARM Eddy Dissipation Parameter [m2/3s-1]:
+    ndata=4718592:undef=9238:mean=0.0959186:min=0.013:max=0.539
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+50:102097069:vt=2019110212:500 mb:6 hour fcst:CATEDR Clear Air Turbulence (CAT) (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=9238:mean=0.092795:min=0.012:max=0.499
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+51:104749750:vt=2019110212:500 mb:6 hour fcst:MWTURB Mountain Wave Turbulence (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=9238:mean=0.0183225:min=0:max=0.556
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+52:105908171:vt=2019110212:525 mb:6 hour fcst:EDPARM Eddy Dissipation Parameter [m2/3s-1]:
+    ndata=4718592:undef=9872:mean=0.0931029:min=0.012:max=0.538
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+53:108399217:vt=2019110212:525 mb:6 hour fcst:CATEDR Clear Air Turbulence (CAT) (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=9872:mean=0.0898431:min=0.01:max=0.512
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+54:111054937:vt=2019110212:525 mb:6 hour fcst:MWTURB Mountain Wave Turbulence (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=9872:mean=0.0183152:min=0:max=0.563
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+55:112233601:vt=2019110212:550 mb:6 hour fcst:EDPARM Eddy Dissipation Parameter [m2/3s-1]:
+    ndata=4718592:undef=13130:mean=0.0904509:min=0.011:max=0.525
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+56:114722805:vt=2019110212:550 mb:6 hour fcst:CATEDR Clear Air Turbulence (CAT) (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=13130:mean=0.0874336:min=0.01:max=0.478
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+57:117373332:vt=2019110212:550 mb:6 hour fcst:MWTURB Mountain Wave Turbulence (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=13130:mean=0.0182375:min=0:max=0.549
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+58:118550896:vt=2019110212:575 mb:6 hour fcst:EDPARM Eddy Dissipation Parameter [m2/3s-1]:
+    ndata=4718592:undef=18257:mean=0.0880158:min=0.013:max=0.421
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+59:121058810:vt=2019110212:575 mb:6 hour fcst:CATEDR Clear Air Turbulence (CAT) (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=18257:mean=0.0854912:min=0.011:max=0.439
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+60:123687215:vt=2019110212:575 mb:6 hour fcst:MWTURB Mountain Wave Turbulence (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=18257:mean=0.0181181:min=0:max=0.451
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+61:124889415:vt=2019110212:600 mb:6 hour fcst:EDPARM Eddy Dissipation Parameter [m2/3s-1]:
+    ndata=4718592:undef=25027:mean=0.0858507:min=0.015:max=0.437
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+62:127369419:vt=2019110212:600 mb:6 hour fcst:CATEDR Clear Air Turbulence (CAT) (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=25027:mean=0.0834497:min=0.013:max=0.421
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+63:129992957:vt=2019110212:600 mb:6 hour fcst:MWTURB Mountain Wave Turbulence (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=25027:mean=0.0179172:min=0:max=0.45
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+64:131215320:vt=2019110212:625 mb:6 hour fcst:EDPARM Eddy Dissipation Parameter [m2/3s-1]:
+    ndata=4718592:undef=49008:mean=0.0846204:min=0.016:max=0.462
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+65:133670241:vt=2019110212:625 mb:6 hour fcst:CATEDR Clear Air Turbulence (CAT) (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=49008:mean=0.0821229:min=0.015:max=0.417
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+66:136235351:vt=2019110212:625 mb:6 hour fcst:MWTURB Mountain Wave Turbulence (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=49008:mean=0.0173521:min=0:max=0.487
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+67:137480584:vt=2019110212:650 mb:6 hour fcst:EDPARM Eddy Dissipation Parameter [m2/3s-1]:
+    ndata=4718592:undef=85675:mean=0.0844083:min=0.018:max=0.504
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+68:139913698:vt=2019110212:650 mb:6 hour fcst:CATEDR Clear Air Turbulence (CAT) (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=85675:mean=0.0818415:min=0.017:max=0.449
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+69:142493438:vt=2019110212:650 mb:6 hour fcst:MWTURB Mountain Wave Turbulence (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=85675:mean=0.0162844:min=0:max=0.522
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+70:143753402:vt=2019110212:675 mb:6 hour fcst:EDPARM Eddy Dissipation Parameter [m2/3s-1]:
+    ndata=4718592:undef=153137:mean=0.0829683:min=0.02:max=0.561
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+71:146167261:vt=2019110212:675 mb:6 hour fcst:CATEDR Clear Air Turbulence (CAT) (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=153137:mean=0.0800663:min=0.018:max=0.565
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+72:148687755:vt=2019110212:675 mb:6 hour fcst:MWTURB Mountain Wave Turbulence (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=153137:mean=0.015263:min=0:max=0.465
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+73:149947629:vt=2019110212:700 mb:6 hour fcst:EDPARM Eddy Dissipation Parameter [m2/3s-1]:
+    ndata=4718592:undef=221721:mean=0.0803766:min=0.021:max=0.738
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+74:152345162:vt=2019110212:700 mb:6 hour fcst:CATEDR Clear Air Turbulence (CAT) (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=221721:mean=0.0771579:min=0.02:max=0.753
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+75:154869284:vt=2019110212:700 mb:6 hour fcst:MWTURB Mountain Wave Turbulence (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=221721:mean=0.0144245:min=0:max=0.487
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+76:156117102:vt=2019110212:725 mb:6 hour fcst:EDPARM Eddy Dissipation Parameter [m2/3s-1]:
+    ndata=4718592:undef=290436:mean=0.0784095:min=0.022:max=0.862
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+77:158501450:vt=2019110212:725 mb:6 hour fcst:CATEDR Clear Air Turbulence (CAT) (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=290436:mean=0.0750854:min=0.02:max=0.851
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+78:161001274:vt=2019110212:725 mb:6 hour fcst:MWTURB Mountain Wave Turbulence (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=290436:mean=0.0138879:min=0:max=0.503
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+79:162223464:vt=2019110212:750 mb:6 hour fcst:EDPARM Eddy Dissipation Parameter [m2/3s-1]:
+    ndata=4718592:undef=336207:mean=0.0778445:min=0.021:max=0.894
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+80:164609313:vt=2019110212:750 mb:6 hour fcst:CATEDR Clear Air Turbulence (CAT) (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=336207:mean=0.0746768:min=0.02:max=0.904
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+81:167108225:vt=2019110212:750 mb:6 hour fcst:MWTURB Mountain Wave Turbulence (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=336207:mean=0.0136731:min=0:max=0.512
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+82:168299523:vt=2019110212:775 mb:6 hour fcst:EDPARM Eddy Dissipation Parameter [m2/3s-1]:
+    ndata=4718592:undef=374629:mean=0.0779596:min=0.021:max=0.778
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+83:170695889:vt=2019110212:775 mb:6 hour fcst:CATEDR Clear Air Turbulence (CAT) (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=374629:mean=0.0750164:min=0.02:max=0.785
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+84:173210144:vt=2019110212:775 mb:6 hour fcst:MWTURB Mountain Wave Turbulence (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=374629:mean=0.0135829:min=0:max=0.51
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+85:174386191:vt=2019110212:800 mb:6 hour fcst:EDPARM Eddy Dissipation Parameter [m2/3s-1]:
+    ndata=4718592:undef=413280:mean=0.0784405:min=0.021:max=0.924
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+86:176802770:vt=2019110212:800 mb:6 hour fcst:CATEDR Clear Air Turbulence (CAT) (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=413280:mean=0.0757299:min=0.02:max=0.948
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+87:179371007:vt=2019110212:800 mb:6 hour fcst:MWTURB Mountain Wave Turbulence (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=413280:mean=0.0134357:min=0:max=0.469
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+88:180537041:vt=2019110212:825 mb:6 hour fcst:EDPARM Eddy Dissipation Parameter [m2/3s-1]:
+    ndata=4718592:undef=450825:mean=0.0794952:min=0.018:max=0.963
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+89:182982378:vt=2019110212:825 mb:6 hour fcst:CATEDR Clear Air Turbulence (CAT) (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=450825:mean=0.0770606:min=0.017:max=0.986
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+90:185555170:vt=2019110212:825 mb:6 hour fcst:MWTURB Mountain Wave Turbulence (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=450825:mean=0.0131697:min=0:max=0.505
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+91:186710551:vt=2019110212:850 mb:6 hour fcst:EDPARM Eddy Dissipation Parameter [m2/3s-1]:
+    ndata=4718592:undef=494666:mean=0.0810873:min=0.017:max=0.836
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+92:189190966:vt=2019110212:850 mb:6 hour fcst:CATEDR Clear Air Turbulence (CAT) (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=494666:mean=0.0789957:min=0.016:max=0.859
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+93:191806620:vt=2019110212:850 mb:6 hour fcst:MWTURB Mountain Wave Turbulence (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=494666:mean=0.0127004:min=0:max=0.507
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+94:192948177:vt=2019110212:875 mb:6 hour fcst:EDPARM Eddy Dissipation Parameter [m2/3s-1]:
+    ndata=4718592:undef=551569:mean=0.083174:min=0.017:max=0.712
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+95:195461292:vt=2019110212:875 mb:6 hour fcst:CATEDR Clear Air Turbulence (CAT) (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=551569:mean=0.0815114:min=0.016:max=0.73
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+96:198118156:vt=2019110212:875 mb:6 hour fcst:MWTURB Mountain Wave Turbulence (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=551569:mean=0.0118808:min=0:max=0.488
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+97:199237171:vt=2019110212:900 mb:6 hour fcst:EDPARM Eddy Dissipation Parameter [m2/3s-1]:
+    ndata=4718592:undef=629336:mean=0.0855342:min=0.02:max=0.698
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+98:201802999:vt=2019110212:900 mb:6 hour fcst:CATEDR Clear Air Turbulence (CAT) (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=629336:mean=0.0842281:min=0.019:max=0.699
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+99:204487051:vt=2019110212:900 mb:6 hour fcst:MWTURB Mountain Wave Turbulence (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=629336:mean=0.0106898:min=0:max=0.445
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+100:205571946:vt=2019110212:925 mb:6 hour fcst:EDPARM Eddy Dissipation Parameter [m2/3s-1]:
+    ndata=4718592:undef=716786:mean=0.0891282:min=0.015:max=0.792
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+101:208145256:vt=2019110212:925 mb:6 hour fcst:CATEDR Clear Air Turbulence (CAT) (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=716786:mean=0.0879158:min=0.015:max=0.792
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+102:210870116:vt=2019110212:925 mb:6 hour fcst:MWTURB Mountain Wave Turbulence (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=716786:mean=0.00928039:min=0:max=0.414
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+103:211912568:vt=2019110212:950 mb:6 hour fcst:EDPARM Eddy Dissipation Parameter [m2/3s-1]:
+    ndata=4718592:undef=842885:mean=0.09721:min=0.012:max=0.834
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+104:214605196:vt=2019110212:950 mb:6 hour fcst:CATEDR Clear Air Turbulence (CAT) (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=842885:mean=0.0960265:min=0.012:max=0.837
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+105:217464288:vt=2019110212:950 mb:6 hour fcst:MWTURB Mountain Wave Turbulence (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=842885:mean=0.00766098:min=0:max=0.447
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+106:218452395:vt=2019110212:975 mb:6 hour fcst:EDPARM Eddy Dissipation Parameter [m2/3s-1]:
+    ndata=4718592:undef=1114968:mean=0.114307:min=0.015:max=0.597
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+107:221193968:vt=2019110212:975 mb:6 hour fcst:CATEDR Clear Air Turbulence (CAT) (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=1114968:mean=0.113749:min=0.014:max=0.615
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+108:224126205:vt=2019110212:975 mb:6 hour fcst:MWTURB Mountain Wave Turbulence (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=1114968:mean=0.00595007:min=0:max=0.411
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+109:225035850:vt=2019110212:1000 mb:6 hour fcst:EDPARM Eddy Dissipation Parameter [m2/3s-1]:
+    ndata=4718592:undef=2066266:mean=0.125325:min=0.016:max=0.556
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+110:227369487:vt=2019110212:1000 mb:6 hour fcst:CATEDR Clear Air Turbulence (CAT) (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=2066266:mean=0.125392:min=0.016:max=0.576
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
+111:229865556:vt=2019110212:1000 mb:6 hour fcst:MWTURB Mountain Wave Turbulence (Eddy Dissipation Rate) [m2/3s-1]:
+    ndata=4718592:undef=2066266:mean=0.00469805:min=0:max=0.331
+    grid_template=40:winds(N/S):
+	Gaussian grid: (3072 x 1536) units 1e-06 input WE:NS output WE:SN
+	number of latitudes between pole-equator=768 #points=4718592
+	lat 89.910324 to -89.910324
+	lon 0.000000 to 359.882813 by 0.117188
+
