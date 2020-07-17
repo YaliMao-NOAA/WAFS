@@ -51,7 +51,7 @@ program main
 
   call GET_COMMAND_ARGUMENT(1, inputfile)
   icat = 19
-  iprm = 36
+  iprm = 37
 !  iprm = 234
 
   ! ===========================================!

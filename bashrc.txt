@@ -136,9 +136,6 @@ alias nosvn='grep -v svn'
 alias lsd='ls -ld */'
 alias lsda='echo "`ls -Cd .*/`" "`ls -Cd */`"'
 
-# For Hera
-alias sjobs='squeue -u Yali.Mao'
-
 alias mydegrib2='$HOMEsave/grib2/degrib2'
 
 #alias g130='function _g130() {

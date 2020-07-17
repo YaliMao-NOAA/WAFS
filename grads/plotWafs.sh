@@ -5,10 +5,9 @@ usage="Usage: $HOMEsave/grads/plotWafs.sh domain prod  a_WAFS_grib2_file"
 
 #*******************************************************
 # To load $HOMEsave/envir_setting.sh
-. ~/.bashrc
+source $HOMEsave/envir_setting.sh
 
-set -x 
-
+set -x
 ICSEVconvert=$HOMEgit/verf_g2g.v3.0.12/exec/verf_g2g_icing_convert.$MACHINE
 
 domain=`echo $1 | tr 'A-Z' 'a-z'`	# original | conus | hawaii | alaska

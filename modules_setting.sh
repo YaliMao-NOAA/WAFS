@@ -53,6 +53,48 @@ if [[ `hostname` =~ ^h ]] ; then
   export myFFLAGS="${INC} -g -O2 -convert big_endian"
 
 #=====================================================#
+elif [[ `hostname` =~ ^O ]] ; then
+#=====================================================#
+  export MACHINE=orion
+
+  #========== Orion ====================#
+
+  module load contrib noaatools
+
+  module load intel/2018.4
+  module load impi/2018.4
+
+  module use -a /apps/contrib/NCEPLIBS/orion/modulefiles
+
+  module load sigio/2.2.0
+  module load jasper/1.900.2
+  module load png/1.2.44
+  module load z/1.2.6
+  module load sfcio/1.2.0
+  module load nemsio/2.2.4
+  module load bacio/2.0.3
+  module load g2/3.1.1
+  module load gfsio/1.2.0
+  module load ip/3.0.2
+  module load sp/2.0.3
+  module load w3nco/2.0.7
+  module load crtm/2.3.0
+  module load g2tmpl/1.6.0
+  module load wrfio/1.1.1
+  module load w3emc/2.4.0
+  module load netcdf_parallel/4.7.4
+  module load hdf5_parallel/1.10.6
+
+  export FC=ifort
+
+  export INC="-I ${IP_INC4} -I ${G2_INC4}"
+  export LIBS="${IP_LIB4} ${W3NCO_LIB4} ${W3EMC_LIB4} ${BACIO_LIB4}  ${SP_LIB4} ${G2_LIB4} ${JASPER_LIB} ${PNG_LIB} ${Z_LIB} ${BUFR_LIB4}"
+  export FREE="-FR"
+  export OPENMP="-qopenmp"
+
+  export myFFLAGS="${INC} -g -O2 -convert big_endian"
+
+#=====================================================#
 elif [[ `hostname` =~ ^[g|t][0-9]{1} ]] ; then
 #     `cat /etc/dev` # gyre/tide/luna/surg
 #=====================================================#

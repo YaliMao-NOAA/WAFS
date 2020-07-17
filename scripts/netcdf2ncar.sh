@@ -19,10 +19,38 @@
 #       If lastbackup is "" (first time run), or lastbackup is too old,
 #       PDY1=PDY2-2 and lastbackup=$PDY2$cyc2
 
-if [[ `hostname` =~ ^[l|s]login ]] ; then
+if [[ `hostname` =~ ^h ]] ; then
+#=====================================================#
+
+  export MACHINE=hera
+  export TMP='/scratch2/NCEPDEV/stmp3/Yali.Mao'
+
+  # run this bash before 'module load'
+
+  if [ ! -z $MODULESHOME ]; then
+      . $MODULESHOME/init/bash
+      . $MODULESHOME/init/profile
+  else
+      . /apps/lmod/7.7.18/init/bash
+      . /apps/lmod/7.7.18/init/profile
+  fi
+
+  module use /apps/modules/modulefiles
+  module load intel/18.0.5.274
+
+  module load hpss
+
+  module use /apps/modules/modulefamilies/intel
+  module load impi/2018.0.4
+
+  module use /scratch2/NCEPDEV/nwprod/NCEPLIBS/modulefiles
+  module load grib_util/1.1.1
+  module load prod_util/1.1.0
+
+elif [[ `hostname` =~ ^[l|s]login ]] ; then
 #=====================================================#                                                                                                                                     
   export MACHINE=cray
-  export TMP='/gpfs/hps/ptmp/Huiya.Chuang'
+  export TMP='/gpfs/hps/ptmp/Hui-Ya.Chuang'
 
   # run this bash before 'module load'                                                                                                                                                      
   if [ ! -z $MODULESHOME ]; then
@@ -47,7 +75,7 @@ if [[ `hostname` =~ ^[l|s]login ]] ; then
 else
 #=====================================================#                                                                                                                                     
   export MACHINE=dell
-  export TMP='/gpfs/dell3/ptmp/Huiya.Chuang'
+  export TMP='/gpfs/dell3/ptmp/Hui-Ya.Chuang'
 
   # run this bash before 'module load'                                                                                                                                                      
   if [ ! -z $MODULESHOME ]; then
@@ -96,12 +124,14 @@ mkdir -p $DATA
 cycles=${cycles:-"00 12"}
 fhours=${fhours:-"012 024"}
 
-if [[ $when == "realtime" ]] ; then # 03/09/2020 ~ implementation
+if [[ $when == "realtime" ]] ; then # 05/19/2020 ~ implementation
     COMROOT=/gpfs/dell3/ptmp/emc.glopara/ROTDIRS/v16rt2
-elif [[ $when == "stream2" ]] ; then #06/24/2019 ~ 11/01/2019
-    COMROOT=/gpfs/dell6/ptmp/emc.glopara/ROTDIRS/v16retro2
-elif [[ $when == "stream3" ]] ; then #11/01/2019 ~ 03/08/2020
-    COMROOT=/gpfs/dell6/ptmp/emc.glopara/ROTDIRS/v16retro3
+elif [[ $when == "stream1" ]] ; then # 06/01/2019 ~ 08/31/2019
+    COMROOT=/gpfs/dell6/ptmp/emc.glopara/ROTDIRS/v16retro1e
+elif [[ $when == "stream2" ]] ; then # 09/01/2019 ~ 11/30/2019
+    COMROOT= /gpfs/dell6/ptmp/emc.glopara/ROTDIRS/v16retro2e
+elif [[ $when == "stream3" ]] ; then # 12/01/2019 ~ 03/31/2020 (On Hera)
+    COMROOT=/scratch1/NCEPDEV/global/glopara/ptmp/v16retro3e
 fi
 
 
