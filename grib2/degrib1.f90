@@ -42,7 +42,30 @@ write(*,*) "GDS, nx=", nx, " ny=", ny
 do k=1, 25
   write(*,*) "k=", k, kgds(k)
 end do
-write(*,*) "GDS"
+write(*,*) "PDS"
+do k=1, 22
+  write(*,*) "k=", k, kpds(k)
+end do
+
+
+call getgbh(unit, 0, -4, jpds, jgds, kg, kf, kk, kpds, kgds, iret)
+
+nx = kgds(2)
+ny = kgds(3)
+nxy = nx * ny
+
+if(kgds(1) == igrid) then
+  allocate(slat(ny))
+  allocate(mesh(ny))
+  call splat(4, 880, slat, mesh)
+  write(*,*) slat
+endif
+
+write(*,*) "GDS, nx=", nx, " ny=", ny
+do k=1, 25
+  write(*,*) "k=", k, kgds(k)
+end do
+write(*,*) "PDS"
 do k=1, 22
   write(*,*) "k=", k, kpds(k)
 end do

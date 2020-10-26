@@ -2,7 +2,7 @@
 
       use grib_mod
       use params
-      integer, parameter :: msk1=32000, maxfld=800
+      integer, parameter :: msk1=32000, maxfld=1100
       CHARACTER(len=1),allocatable,dimension(:) :: cgrib
       integer :: listsec0(3)
       integer :: listsec1(13)
