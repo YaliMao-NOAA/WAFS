@@ -14,7 +14,7 @@
 set -xa
 
 LOGNAME=`whoami`
-WEBSERVER="ymao@emcrzdm"
+WEBSERVER="ymao@emcrzdm.ncep.noaa.gov"
 WEBDIR="/home/www/emc/htdocs/gmb/icao"
 if [[ `hostname` =~ ^tfe ]] ; then
    export doftp="NO"
