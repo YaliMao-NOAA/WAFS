@@ -257,15 +257,14 @@ fi
 #### Step 2: ftp grib2 data to RZDM FTP server      ####
 ########################################################
 remote=$remoteData
-remoteServer=ymao@emcrzdm
-$SSH $remoteServer "mkdir -p $remote"
+remoteServer=ymao@emcrzdm.ncep.noaa.gov
 
 if [[ $fh = "000" ]] || [[ $fh = "003" || $fh = "00" ]] || [[ $fh = "03" ]] ; then
   # For GCIP
-  $RSYNC -avP $COMOUT/*t${cyc2}z.gcip* ${remoteServer}:${remote}/.
+  $RSYNC -avP $COMOUT/*t${cyc2}z.gcip* ${remoteServer}:${remote}/. >> $TMP/GCIP_GFIP_GTG_2_rzdm.working/GCIP_GFIP_GTG_2_rzdm.transfer.$cyc
 else
   # For forecast of icing and GTG
-  $RSYNC -avP $COMOUT/*f$fh ${remoteServer}:${remote}/.
+  $RSYNC -avP $COMOUT/*f$fh ${remoteServer}:${remote}/. >> $TMP/GCIP_GFIP_GTG_2_rzdm.working/GCIP_GFIP_GTG_2_rzdm.transfer.$cyc
 fi
 
 # Skip plotting if forecast hour is greater than 36
@@ -277,7 +276,7 @@ fi
 ###  plot: Step 3: plots. ftp to RZDM WEB server     ###
 ########################################################
 remote=$remotePlot
-remoteServer=ymao@emcrzdm
+remoteServer=ymao@emcrzdm.ncep.noaa.gov
 
 DATAplot=$DATAROOTplot/fv3plot.f$fh
 mkdir -p $DATAplot
@@ -321,6 +320,6 @@ done
 rm *cat.png
 rm *mwt.png
 
-$RSYNC -avP $DATAplot/*png ${remoteServer}:${remote}/.
+$RSYNC -avP $DATAplot/*png ${remoteServer}:${remote}/. >> $TMP/GCIP_GFIP_GTG_2_rzdm.working/GCIP_GFIP_GTG_2_rzdm.transfer.$cyc
 
 exit 0

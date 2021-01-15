@@ -1,3 +1,4 @@
+export LANG=en_US.UTF-8
 
 if [ $HOMEnoscrub != $NOSCRUB ] ; then
    alias syncgit='rsync -avP $HOMEgit/. $NOSCRUB/git/. --delete'
@@ -56,7 +57,7 @@ alias mxterms="xterm -geometry 155x55+30+5 &
 
 # RZDM
 alias zdm='scp ymao@emcrzdm:/home/ftp/emc/unaff/ymao/'
-alias rzdm='ssh -X ymao@emcrzdm'
+alias rzdm='ssh -X ymao@emcrzdm.ncep.noaa.gov'
 # TEMPEST
 alias tempest='ssh -X wd20ym@tempest'
 alias linux='ssh -X wd20ym@emc-lw-ymao'
@@ -135,6 +136,9 @@ alias rgrep='grep -r '
 alias nosvn='grep -v svn'
 alias lsd='ls -ld */'
 alias lsda='echo "`ls -Cd .*/`" "`ls -Cd */`"'
+
+# For Hera
+alias sjobs='squeue -u Yali.Mao'
 
 alias mydegrib2='$HOMEsave/grib2/degrib2'
 

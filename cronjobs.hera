@@ -1,3 +1,7 @@
+# Extract GFS netcdf files from HPSS then upload to RZDM server for NCAR downloading
+#==================================================
+#26 19 9 * * sh /scratch2/NCEPDEV/ovp/Yali.Mao/git/save/scripts/netcdf2hera_from_hpss.makeup.sh > /scratch2/NCEPDEV/stmp3/Yali.Mao/toncar.backup 2>&1
+
 # Clean up temporary folders to free disk storage on Hera when files are 7 days older.
 #==================================================
 # Don't run in cronjob. When running a history case, the extracted data from HPSS will be deleted
@@ -9,10 +13,10 @@
 # https://www.emc.ncep.noaa.gov/gmb/icao/prod_plot/plot.html
 # for each cycle, takes about 16 mintues to finish all forecasts
 #==================================================
-55 05 * * * export cyc=00; export prod=prod; sh -l /scratch2/NCEPDEV/ovp/Yali.Mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.cron.hera > /scratch2/NCEPDEV/stmp3/Yali.Mao/gfipgcipgtg2rzdm.hera 2>&1
-55 11 * * * export cyc=06; export prod=prod; sh -l /scratch2/NCEPDEV/ovp/Yali.Mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.cron.hera > /scratch2/NCEPDEV/stmp3/Yali.Mao/gfipgcipgtg2rzdm.hera 2>&1
-55 17 * * * export cyc=12; export prod=prod; sh -l /scratch2/NCEPDEV/ovp/Yali.Mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.cron.hera > /scratch2/NCEPDEV/stmp3/Yali.Mao/gfipgcipgtg2rzdm.hera 2>&1
-55 23 * * * export cyc=18; export prod=prod; sh -l /scratch2/NCEPDEV/ovp/Yali.Mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.cron.hera > /scratch2/NCEPDEV/stmp3/Yali.Mao/gfipgcipgtg2rzdm.hera 2>&1
+55 05 * * * export cyc=00; export prod=prod; sh -l /scratch2/NCEPDEV/ovp/Yali.Mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.cron.hera > /scratch2/NCEPDEV/stmp3/Yali.Mao/GCIP_GFIP_GTG_2_rzdm.working/gfipgcipgtg2rzdm.hera 2>&1
+55 11 * * * export cyc=06; export prod=prod; sh -l /scratch2/NCEPDEV/ovp/Yali.Mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.cron.hera > /scratch2/NCEPDEV/stmp3/Yali.Mao/GCIP_GFIP_GTG_2_rzdm.working/gfipgcipgtg2rzdm.hera 2>&1
+55 17 * * * export cyc=12; export prod=prod; sh -l /scratch2/NCEPDEV/ovp/Yali.Mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.cron.hera > /scratch2/NCEPDEV/stmp3/Yali.Mao/GCIP_GFIP_GTG_2_rzdm.working/gfipgcipgtg2rzdm.hera 2>&1
+55 23 * * * export cyc=18; export prod=prod; sh -l /scratch2/NCEPDEV/ovp/Yali.Mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.cron.hera > /scratch2/NCEPDEV/stmp3/Yali.Mao/GCIP_GFIP_GTG_2_rzdm.working/gfipgcipgtg2rzdm.hera 2>&1
 
 # Run vsdb verification
 # Save results at $VSDBsave/wafs=/gpfs/dell2/emc/modeling/noscrub/Yali.Mao/vsdb/wafs
@@ -27,9 +31,11 @@
 #00 20 * * *  export vday=20191126; sh -l /scratch2/NCEPDEV/ovp/Yali.Mao/git/save/wafs_run/run_JVERF_GRID2GRID_WAFS.cron prod prod wind>  /scratch2/NCEPDEV/stmp3/Yali.Mao/vsdb.prod.prod.makeup.twind.$vday 2>&1
 
 
-# Plot verification from vsdb
+# Plot verification from vsdb (monthly)
 #==================================================
-# sh /scratch2/NCEPDEV/ovp/Yali.Mao/git/save/scripts/verify_wafs.cron.hera
+# observation choices: gfs gcip gcipconus cip
+01 00 2 * *  export observation=gcip;sh /scratch2/NCEPDEV/ovp/Yali.Mao/git/save/scripts/verify_wafs.cron.hera>/scratch2/NCEPDEV/stmp3/Yali.Mao/verify.plot.$observation 2>&1
+08 01 2 * *  export observation=gfs;sh /scratch2/NCEPDEV/ovp/Yali.Mao/git/save/scripts/verify_wafs.cron.hera>/scratch2/NCEPDEV/stmp3/Yali.Mao/verify.plot.$observation 2>&1
 
 # run post icing/gtg/both from archived NEMSIO data
 #==================================================

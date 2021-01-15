@@ -23,11 +23,11 @@ date
 #*******************************************************
 # .bashrc was loaded in the driver
 if [[ `hostname` =~ ^h ]] ; then
-   export RSYNC=echo
-   export SSH=echo
+   export RSYNC=${RSYNC:-echo rsync}
+   export SSH=${SSH:-echo ssh}
 else
-   export RSYNC=rsync
-   export SSH=ssh
+   export RSYNC=${RSYNC:-rsync}
+   export SSH=${SSH:-ssh}
 fi
 
 if [ $prod = test ] ; then
@@ -60,10 +60,16 @@ else
 
 fi
 
+if [[ `hostname` =~ ^h ]] ; then
+  $SSH ymao@emcrzdm.ncep.noaa.gov \"mkdir -p $remoteData\" > $TMP/GCIP_GFIP_GTG_2_rzdm.working/GCIP_GFIP_GTG_2_rzdm.transfer.$cyc
+else
+  ssh ymao@emcrzdm.ncep.noaa.gov "mkdir -p $remoteData"
+fi
+
 rm -r $DATAROOTplot
 
 # Use MPMD to speed up the processing
-rm gfipgcipgtg2rzdm.cmdfile
+rm $TMP/GCIP_GFIP_GTG_2_rzdm.working/gfipgcipgtg2rzdm.cmdfile
 
 # otherwise there are error message on Theia: 
 # libgomp: Thread creation failed: Resource temporarily unavailable
@@ -72,18 +78,18 @@ fhours="003 006 009 012 015 018 021 024 027 030 033 036 000"
 # Put 000 at the last of the list to be 'waited'
 i=0
 for fh in $fhours ; do
-  echo $i $HOMEsave/scripts/GCIP_GFIP_GTG_2_rzdm.sh $fh >> gfipgcipgtg2rzdm.cmdfile
+  echo $i $HOMEsave/scripts/GCIP_GFIP_GTG_2_rzdm.sh $fh >> $TMP/GCIP_GFIP_GTG_2_rzdm.working/gfipgcipgtg2rzdm.cmdfile
   i=$(( i + 1 ))
 done
 if [ ! `echo $MPIRUN | cut -d " " -f1` = 'srun' ] ; then
     # If not 'srun' MPMD, do not need CPU number at the beginning of each line of gfipgcipgtg2rzdm.cmdfile
-    sed 's/[^ ]* //'  -i gfipgcipgtg2rzdm.cmdfile
+    sed 's/[^ ]* //'  -i $TMP/GCIP_GFIP_GTG_2_rzdm.working/gfipgcipgtg2rzdm.cmdfile
     export MP_PGMMODEL=mpmd
     MPMDRUN=$MPIRUN
 else
     MPMDRUN="$MPIRUN -l --multi-prog"
 fi
-$MPMDRUN gfipgcipgtg2rzdm.cmdfile
+$MPMDRUN $TMP/GCIP_GFIP_GTG_2_rzdm.working/gfipgcipgtg2rzdm.cmdfile
 
 sleep 30 # 000 and 003 might be finished in  seconds apart
 
@@ -99,12 +105,9 @@ if [[ $cyc <  18 ]] ; then
 fi
 
 if [[ `hostname` =~ ^h ]] ; then
-  echo $PDY $cyc $dates > $TMP/GCIP_GFIP_GTG_2_rzdm.list
+  echo $PDY $cyc $dates > $TMP/GCIP_GFIP_GTG_2_rzdm.working/GCIP_GFIP_GTG_2_rzdm.list
+  $SSH ymao@emcrzdm.ncep.noaa.gov \"ksh \~/scripts/wafs_web.ftp_maintenance.sh $prod $cyc $dates\" >> $TMP/GCIP_GFIP_GTG_2_rzdm.working/GCIP_GFIP_GTG_2_rzdm.transfer.$cyc
 else
-  if  [ $prod = prod ] ; then
-    ssh ymao@emcrzdm "ksh ~/scripts/wafs_web.ftp_maintenance.sh $prod $cyc $dates"
-  elif  [ $prod = para ] ; then
-    ssh ymao@emcrzdm "ksh ~/scripts/wafs_web.ftp_maintenance.sh $prod $cyc $dates"
-  fi
+  ssh ymao@emcrzdm.ncep.noaa.gov "ksh ~/scripts/wafs_web.ftp_maintenance.sh $prod $cyc $dates"
 fi
 date
