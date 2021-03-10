@@ -4,12 +4,18 @@ SHELL=/bin/sh
 
 #. ~/.bashrc
 module purge
+if [ $MACHINE = "dell" ] ; then
+ . $MODULESHOME/init/bash
+ moduledir=`dirname $(readlink -f ../modulefiles/verf)`
+ module use ${moduledir}
+ module load verf/v3.0.12-$MACHINE
+else
  . /etc/profile
  . /etc/profile.d/modules.sh
-moduledir=`dirname $(readlink -f ../modulefiles/verf)`
-module use ${moduledir}
-module load verf/v3.0.12
-
+ moduledir=`dirname $(readlink -f ../modulefiles/verf)`
+ module use ${moduledir}
+ module load verf/v3.0.12
+fi
 
 set -x
 

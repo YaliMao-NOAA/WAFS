@@ -1,0 +1,61 @@
+#%Module#########################################################
+##                                           Binbin.Zhou@noaa.gov
+##                                             NOAA/NWS/NCEP/EMC
+##  Change Log
+##  01/21/2016: Binbin Zhou, initial setting
+##                                           
+## VERF g2g v7.0.0
+## Check available modules: module avail
+## Check path names: module load xxx
+##                   env > output
+##___________________________________________________
+proc ModulesHelp { } {
+puts stderr "Set environment veriables for VERF"
+puts stderr "This module initializes the environment "
+puts stderr "for the Intel Compiler Suite $version\n"
+}
+module-whatis " VERF whatis description"
+
+set ver v3.0.12
+
+set sys [uname sysname]
+set VERF /nwpara2/modulefiles/VERF
+set lname VERF
+
+setenv COMP ifort
+setenv COMP_MP mpfort
+setenv COMP_MPI mpiifort
+
+setenv C_COMP icc
+setenv C_COMP_MP mpcc
+
+
+# Loading Intel Compiler Suite
+module load ips/18.0.1.163
+module load impi/18.0.1
+
+module load prod_util/1.1.0
+module load prod_envir/1.1.0
+
+module load NetCDF-parallel/4.7.4
+module load HDF5-parallel/1.10.6
+
+module load jasper/1.900.1
+module load libpng/1.2.59
+module load zlib/1.2.11
+
+module load w3emc/2.4.0
+module load w3nco/2.0.6
+module load bacio/2.0.2
+module load g2/3.1.0
+module load g2tmpl/1.6.0
+module load sfcio/1.0.0
+module load nemsio/2.2.3
+module load ip/3.0.1
+module load sp/2.0.2
+
+module load sigio/2.1.0
+module load sfcio/1.0.0
+module load gfsio/1.1.0
+module load crtm/2.3.0
+module load wrfio/1.1.1
