@@ -41,6 +41,7 @@ folders="gfs_prod_rzdm_prod \
          wafs.vrfy_prod.prod_vsdb/wafs \
          wafs.vrfy_prod.prod_working \
          working_post \
+         met_working \
          logs_post"
 
 for dir in $folders ; do
