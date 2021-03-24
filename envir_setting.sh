@@ -226,15 +226,15 @@ else
   module load NetCDF/4.5.0
   module load lsf/10.1
 
-  module load EnvVars/1.0.2
+  module load EnvVars/1.0.3
   module load pm5/1.0
   module load subversion/1.7.16
   module load HPSS/5.0.2.5
   module load mktgs/1.0
   module load rsync/3.1.2
-  module load prod_envir/1.0.2
-  module load grib_util/1.0.6
-  module load prod_util/1.1.0
+  module load prod_envir/1.1.0
+  module load grib_util/1.1.1
+  module load prod_util/1.1.6
 
   module use /gpfs/dell3/usrx/local/dev/emc_rocoto/modulefiles/
   module load ruby/2.5.1 rocoto/1.2.4

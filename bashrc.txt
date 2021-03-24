@@ -81,7 +81,7 @@ com2=/gpfs/*2/nco/ops/com
 comh=/gpfs/hps/nco/ops/com
 comd=$COMROOT
 com0=/gpfs/hps/nco/ops/com
-dcom=/gpfs/*1/nco/ops/dcom
+dcom=$DCOMROOT
 
 NWPROD1=/gpfs/*1/nco/ops/nwprod
 NWPROD2=/gpfs/*2/nco/ops/nwprod
@@ -150,24 +150,25 @@ alias adds="echo ksh $HOMEgit/g2g_verif.v3.0.0/ush/verf_g2g_icing_convertadds.sh
 alias plot="echo ksh $HOMEsave/grads/plotWafs.sh conus potential grb2file"
 
 alias output="echo /gpfs/dell1/nco/ops/com/output/prod ; ls -l /gpfs/dell1/nco/ops/com/output/prod | grep -v tar.xz"
-alias outputh="echo /gpfs/hps/nco/ops/com/output/para ; ls -l /gpfs/hps/nco/ops/com/output/para | grep -v tar.xz"
+alias outputp="echo /gpfs/hps/nco/ops/com/output/para ; ls -l /gpfs/hps/nco/ops/com/output/para | grep -v tar.xz"
 
 alias para="ll /gpfs/hps/nco/ops/com/gfs/para ; echo /gpfs/hps/nco/ops/com/gfs/para/gfs.`$NDATE|cut -c1-8`/"
 
-alias master="ls -l $comd/gfs/prod/gfs.`$NDATE|cut -c1-8`/00/gfs.t00z.master.grb2f006"
-alias   wafs="ls -l $comd/gfs/prod/gfs.`$NDATE|cut -c1-8`/00/gfs.t00z.wafs_grb45f06*"
-alias   gcip="ls -l $comd/gfs/prod/gfs.`$NDATE|cut -c1-8`/00/gfs*gcip*"
-alias     us="ls -l $comd/gfs/prod/gfs.`$NDATE|cut -c1-8`/00/gfs.t00z.wafs_grb45f06.grib2"
-alias  blend="ls -l $comd/gfs/prod/gfs.`$NDATE|cut -c1-8`/00/WAFS_blended_`$NDATE|cut -c1-8`00f06.grib2"
-alias   flux="ls -l $comd/gfs/prod/gfs.`$NDATE|cut -c1-8`/00/gfs.t00z.sf06 /com2/gfs/prod/gfs.`$NDATE|cut -c1-8`/gfs.t00z.sfluxgrbf06"
-alias uk="ls -l $dcom/us007003/`$NDATE|cut -c1-8`/wgrbbul/ukmet_wafs/EGRR_WAFS_unblended_`$NDATE|cut -c1-8`_00z_t06.grib2"
-alias cip="ls -l $dcom/us007003/`$NDATE|cut -c1-8`/wgrbbul/adds_cip/*"
-alias fip="ls -l $dcom/us007003/`$NDATE|cut -c1-8`/wgrbbul/adds_fip/*"
+alias master="ls -l $comd/gfs/prod/gfs.`$NDATE|cut -c1-8`/00/atmos/gfs.t00z.master.grb2f006"
+alias   wafs="ls -l $comd/gfs/prod/gfs.`$NDATE|cut -c1-8`/00/atmos/gfs.t00z.wafs_grb45f06*"
+alias   gcip="ls -l $comd/gfs/prod/gfs.`$NDATE|cut -c1-8`/00/atmos/gfs*gcip*"
+alias     us="ls -l $comd/gfs/prod/gfs.`$NDATE|cut -c1-8`/00/atmos/gfs.t00z.wafs_grb45f06.grib2"
+alias  blend="ls -l $comd/gfs/prod/gfs.`$NDATE|cut -c1-8`/00/atmos/WAFS_blended_`$NDATE|cut -c1-8`00f06.grib2"
+alias   flux="ls -l $comd/gfs/prod/gfs.`$NDATE|cut -c1-8`/00/atmos/gfs.t00z.sf06 /com2/gfs/prod/gfs.`$NDATE|cut -c1-8`/gfs.t00z.sfluxgrbf06"
+alias uk="ls -l $dcom/prod/`$NDATE|cut -c1-8`/wgrbbul/ukmet_wafs/EGRR_WAFS_unblended_`$NDATE|cut -c1-8`_00z_t06.grib2"
+alias cip="ls -l $dcom/prod/`$NDATE|cut -c1-8`/wgrbbul/adds_cip/*"
+alias fip="ls -l $dcom/prod/`$NDATE|cut -c1-8`/wgrbbul/adds_fip/*"
+alias nam="ls -l $comd/nam/prod/nam.`$NDATE|cut -c1-8`/nam.t00z.awip1230.tm00"
+alias radar="ls -l $comd/hourly/prod/radar.`$NDATE|cut -c1-8`/refd3d.t01z*"
+alias metar="ls -l $dcom/prod/ldmdata/obs/surface/metar/*"
+
 alias gtg="ls -l $com2/gtg/prod/gtg.`$NDATE|cut -c1-8`/gtg.t00z.edr.f*.grb2"
 alias rap="ls -l $comh/rap/prod/rap.`$NDATE|cut -c1-8`/rap.t00z.awp130bgrbf03.grib2"
-alias nam="ls -l $com1/nam/prod/nam.`$NDATE|cut -c1-8`/nam.t00z.awip3203.tm00"
-alias radar="ls -l $com1/hourly/prod/radar.`$NDATE|cut -c1-8`/refd3d.t01z*"
-alias metar="ls -l $dcom/us007003/ldmdata/obs/surface/metar/*"
 
 alias wcossnomad='sudo -u emc.nomad -i'
 
