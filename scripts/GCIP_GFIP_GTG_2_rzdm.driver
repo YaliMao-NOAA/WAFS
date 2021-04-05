@@ -1,0 +1,82 @@
+#!/bin/sh
+
+source ~/.bashrc
+
+set -xa
+
+date
+
+export prod=${prod:-prod}
+export cyc=${cyc:-00}
+export PDY=${PDY:-`$NDATE | cut -c1-8`}
+
+mkdir -p $TMP/GCIP_GFIP_GTG_2_rzdm.working
+rm $TMP/GCIP_GFIP_GTG_2_rzdm.working/GCIP_GFIP_GTG_2_rzdm.list
+
+export DATAgrib2=$TMP/gfs_${prod}_rzdm_prod/gfs.$PDY/$cyc
+export DATAROOTplot=$TMP/gfs_${prod}_rzdm_plotting_$cyc
+
+############################
+# Create files
+############################
+
+jobname=wafs2rzdm
+logfile=$TMP/GCIP_GFIP_GTG_2_rzdm.working/gfipgcipgtg2rzdm.$cyc
+rm $logfile
+script=$HOMEsave/scripts/GCIP_GFIP_GTG_2_rzdm.job
+
+if [ $MACHINE = "dell" ] ; then
+    module load CFP/2.0.1
+    export MPIRUN="mpirun -n 13 cfp"
+    SUB=bsub
+    $SUB < $script
+elif [ $MACHINE = "hera" ] ; then
+    export MPIRUN="srun"
+    SUB=sbatch
+    ACCOUNT=ovp
+    ${SUB} -A ${ACCOUNT} -t 00:15:00 -N 13 -q batch -J ${jobname} -o ${logfile} ${script}
+fi
+
+############################
+# Transfer data to RZDM
+############################
+
+remoteServer=ymao@emcrzdm.ncep.noaa.gov
+
+export remoteData=/home/ftp/emc/unaff/ymao/wafs.$prod/gfs.$PDY
+export remotePlot=/home/www/emc/htdocs/gmb/icao/${prod}_plot
+
+ic=1
+while [ $ic -le 180 ] ; do
+    lines=`cat $TMP/GCIP_GFIP_GTG_2_rzdm.working/GCIP_GFIP_GTG_2_rzdm.list | wc -l`
+
+    if [ $lines -eq 13 ] ; then
+	ssh ymao@emcrzdm.ncep.noaa.gov "mkdir -p $remoteData"
+	rsync -avP $DATAgrib2/* ${remoteServer}:${remoteData}/.
+
+	ssh ymao@emcrzdm.ncep.noaa.gov "mkdir -p $remotePlot"
+	rsync -avP $DATAROOTplot/*/*png ${remoteServer}:${remotePlot}/.
+
+	########################################################
+	####        cleanup grib data and plottings if      ####
+	####        older than 'endDate', keep up to 3 days ####
+	########################################################                                                                                                             
+	dates=$PDY
+	dates="$dates `$NDATE -1 ${PDY}00 | cut -c1-8`"
+	echo "cyc=$cyc"
+	if [[ $cyc <  18 ]] ; then
+	    dates="$dates `$NDATE -25 ${PDY}00 | cut -c1-8`"
+	fi
+	ssh ymao@emcrzdm.ncep.noaa.gov "ksh ~/scripts/wafs_web.ftp_maintenance.sh $prod $cyc $dates"
+
+        break
+    else
+        ic=`expr $ic + 1`
+        sleep 60
+    fi
+
+    if [ $ic -eq  180 ] ; then
+        echo " Time out: No data transferred to RZDM after 3-hour waiting"
+    fi
+done
+date

@@ -202,7 +202,9 @@ for field in $fields ; do
 
 echo $field
 fieldshort=`echo $field | rev | cut -c 4- | rev | tr 'A-Z' 'a-z'`
-if [[ $field =~ var01930 ]] ; then
+if [[ $field =~ var01937 ]] ; then
+    fieldshort='icesev'
+elif [[ $field =~ var01930 ]] ; then
     fieldshort='gtg'
 elif [[ $field =~ var01928 ]] ; then
     fieldshort='mwt'

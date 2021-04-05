@@ -202,69 +202,45 @@ fi
 
 
 ########################################################
-#### plot: Step 0: prepare COMIN COMOUT fh severity ####
+#### plot: Step 0: prepare COMIN DATAgrib2 fh       ####
 ########################################################
+#DATAgrib2 is for rzdm server
 
 if [ $prod = test ] ; then
-  # COMIN is COMOUT of UPP, COMOUT is for rzdm server
+  # COMIN is COMOUT of UPP
   COMIN=$COMOUT
-  COMOUT=$TMP/fv3_test_rzdm_prod/gfs.$PDY/$cyc
-elif [ $prod = prod ] ; then
-  # COMIN is COMOUT of UPP, COMOUT is for rzdm server
-  COMIN=$COMROOT/gfs/$prod/gfs.$PDY/$cyc
-  COMOUT=$TMP/gfs_${prod}_rzdm_prod/gfs.$PDY/$cyc
-else  # if [ $prod = para ] ; then
-  COMIN=/gpfs/hps/nco/ops/com/gfs/$prod/gfs.$PDY
-  COMOUT=$TMP/gfs_${prod}_rzdm_prod/gfs.$PDY/$cyc
+else
+  # COMROOT is pre-defined in job for para
+  COMIN=$COMROOT/gfs/$prod/gfs.$PDY/$cyc/atmos
 fi
 
 ########################################################
 ####  plot: Step 1: collect data from $COMIN         ###
 ########################################################
-mkdir -p $COMOUT
+mkdir -p $DATAgrib2
+cd $DATA
 
 if [[ $fhour = "000" ]] || [[ $fhour = "003" ]] ; then
   # GCIP
   modelfile=$COMIN/gfs.t${cyc2}z.gcip.f00.grib2
-  cp $modelfile  $COMOUT/.
+  cp $modelfile  $DATAgrib2/.
 else
-  # GFIP/GFIS needs to be extracted from master file
-  modelfile=$COMIN/gfs.t${cyc}z.master.grb2f$fh
-  $WGRIB2 $modelfile | grep ":ICIP:\|:ICSEV:" | $WGRIB2 -i $modelfile -grib $COMOUT/gfs.t${cyc}z.master.grb2f$fh
+  # GFIP needs to be extracted from wafs file
+  modelfile=$COMIN/gfs.t${cyc}z.wafs.grb2f$fh
+  $WGRIB2 $modelfile | grep ":ICIP:" | grep -v ":70 mb:" | $WGRIB2 -i $modelfile -grib gfs.t${cyc}z.master.grb2f$fh
 
   #Convert to 0.25 degree for blending purpose
-  option1=' -set_grib_type same -new_grid_winds earth '
-  option21=' -new_grid_interpolation bilinear  -if '
-  option22="(parm=36|:ICSEV):"
-  option23=' -new_grid_interpolation neighbor -fi '
-  option4=' -set_bitmap 1 -set_grib_max_bits 16'
-  grid0p25="latlon 0:1440:0.25 90:721:-0.25"
-  $WGRIB2 $COMOUT/gfs.t${cyc}z.master.grb2f$fh \
-          $option1 $option21 $option22 $option23 $option4 \
-          -new_grid $grid0p25 $COMOUT/gfs.t${cyc}z.icing.0p25.grb2f$fh
+  opt1=' -set_grib_type same -new_grid_winds earth '
+  opt2=' -new_grid_interpolation bilinear '
+  opt3=' -set_bitmap 1 -set_grib_max_bits 16 '
+  newgrid="latlon 0:1440:0.25 90:721:-0.25"
 
-  # GTG
-  modelfile=$COMIN/gfs.t${cyc}z.gtg.grb2f$fh
-  cp $modelfile  $COMOUT/.
+  $WGRIB2 gfs.t${cyc}z.master.grb2f$fh \
+          $opt1 $opt2 $opt3 \
+          -new_grid $newgrid $DATAgrib2/gfs.t${cyc}z.wafs_0p25.grb2f$fh
 
-  #Convert to 0.25 degree for blending purpose
-  $WGRIB2 $modelfile \
-          $option1 $option2 $option4 \
-          -new_grid $grid0p25 $COMOUT/gfs.t${cyc}z.gtg.0p25.grb2f$fh
-fi
+  cat $COMIN/gfs.t${cyc}z.wafs_0p25.f${fh}.grib2 >> $DATAgrib2/gfs.t${cyc}z.wafs_0p25.grb2f$fh
 
-########################################################
-#### Step 2: ftp grib2 data to RZDM FTP server      ####
-########################################################
-remote=$remoteData
-remoteServer=ymao@emcrzdm.ncep.noaa.gov
-
-if [[ $fh = "000" ]] || [[ $fh = "003" || $fh = "00" ]] || [[ $fh = "03" ]] ; then
-  # For GCIP
-  $RSYNC -avP $COMOUT/*t${cyc2}z.gcip* ${remoteServer}:${remote}/. >> $TMP/GCIP_GFIP_GTG_2_rzdm.working/GCIP_GFIP_GTG_2_rzdm.transfer.$cyc
-else
-  # For forecast of icing and GTG
-  $RSYNC -avP $COMOUT/*f$fh ${remoteServer}:${remote}/. >> $TMP/GCIP_GFIP_GTG_2_rzdm.working/GCIP_GFIP_GTG_2_rzdm.transfer.$cyc
 fi
 
 # Skip plotting if forecast hour is greater than 36
@@ -273,26 +249,24 @@ if [[ $fhour > 036 ]] ; then
 fi
 
 ########################################################
-###  plot: Step 3: plots. ftp to RZDM WEB server     ###
+###  plot: Step 2: plots.                            ###
 ########################################################
-remote=$remotePlot
 remoteServer=ymao@emcrzdm.ncep.noaa.gov
 
-DATAplot=$DATAROOTplot/fv3plot.f$fh
+DATAplot=$DATAROOTplot/plot.f$fh
 mkdir -p $DATAplot
 cd $DATAplot
 rm $DATAplot/*
 
-#===================== ICING =====================
 if [[ $fhour == "000" ]] || [[ $fhour == "003" ]] ; then
   # copy GCIP data
-  cp $COMOUT/*t${cyc2}z.gcip.f00.grib2 .
+  cp $DATAgrib2/*t${cyc2}z.gcip.f00.grib2 .
 else
   # copy GFIP data
-  cp $COMOUT/gfs.t${cyc}z.master.grb2f$fh .
+  cp $DATAgrib2/gfs.t${cyc}z.wafs_0p25.grb2f$fh .
 fi
 for grb2file in `ls` ; do
-   severity=iseverity
+   severity=severity
 
    sh $HOMEsave/grads/plotWafs.sh original potential $grb2file
    sh $HOMEsave/grads/plotWafs.sh original $severity  $grb2file
@@ -302,24 +276,20 @@ for grb2file in `ls` ; do
    sh $HOMEsave/grads/plotWafs.sh hawaii  $severity  $grb2file
    sh $HOMEsave/grads/plotWafs.sh alaska  potential $grb2file
    sh $HOMEsave/grads/plotWafs.sh alaska  $severity  $grb2file
-done
 
-#================== TURBULENCE ===================
-if [[ $fhour > "003" ]] ; then
-  # copy GTG data
-  cp $COMOUT/*t${cyc}z.gtg.grb2f$fh .
-fi
-for grb2file in `ls *gtg*` ; do
-  sh $HOMEsave/grads/plotWafs.sh original turbulence $grb2file
-  sh $HOMEsave/grads/plotWafs.sh conus turbulence $grb2file
-  sh $HOMEsave/grads/plotWafs.sh hawaii turbulence $grb2file
-  sh $HOMEsave/grads/plotWafs.sh alaska turbulence $grb2file
+   if [[ $grb2file =~ "wafs" ]] ; then
+       sh $HOMEsave/grads/plotWafs.sh original turbulence $grb2file
+       sh $HOMEsave/grads/plotWafs.sh conus turbulence $grb2file
+       sh $HOMEsave/grads/plotWafs.sh hawaii turbulence $grb2file
+       sh $HOMEsave/grads/plotWafs.sh alaska turbulence $grb2file
+   fi
 done
 
 # Don't upload CAT MWT to rzdm web site
 rm *cat.png
 rm *mwt.png
 
-$RSYNC -avP $DATAplot/*png ${remoteServer}:${remote}/. >> $TMP/GCIP_GFIP_GTG_2_rzdm.working/GCIP_GFIP_GTG_2_rzdm.transfer.$cyc
+# Mark this job for $fh is finished 
+echo $PDY $cyc $fh >> $TMP/GCIP_GFIP_GTG_2_rzdm.working/GCIP_GFIP_GTG_2_rzdm.list
 
 exit 0
