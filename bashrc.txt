@@ -154,7 +154,7 @@ alias outputp="echo /gpfs/hps/nco/ops/com/output/para ; ls -l /gpfs/hps/nco/ops/
 
 alias para="ll /gpfs/hps/nco/ops/com/gfs/para ; echo /gpfs/hps/nco/ops/com/gfs/para/gfs.`$NDATE|cut -c1-8`/"
 
-alias master="ls -l $comd/gfs/prod/gfs.`$NDATE|cut -c1-8`/00/atmos/gfs.t00z.master.grb2f006"
+alias master="ls -l $comd/gfs/prod/gfs.*/00/atmos/gfs.t00z.master.grb2f006"
 alias   wafs="ls -l $comd/gfs/prod/gfs.`$NDATE|cut -c1-8`/00/atmos/gfs.t00z.wafs_grb45f06*"
 alias   gcip="ls -l $comd/gfs/prod/gfs.`$NDATE|cut -c1-8`/00/atmos/gfs*gcip*"
 alias     us="ls -l $comd/gfs/prod/gfs.`$NDATE|cut -c1-8`/00/atmos/gfs.t00z.wafs_grb45f06.grib2"

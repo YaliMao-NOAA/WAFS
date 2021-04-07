@@ -3,8 +3,8 @@
 source ~/.bashrc
 set -xa
 
-vday=$1
-COMIN=$2
+vday=${1:-`$NDATE -24 | cut -c 1-8`}
+COMIN=$2 # For Hera only
 
 PDY=$vday
 
@@ -19,18 +19,33 @@ if [ $MACHINE = "dell" ] ; then
     thismachine=`hostname | cut -c 1`
     runmachine=`cat /etc/dev | cut -c 1`
     if [ $thismachine = $runmachine ] ; then
-	COMROOT=$TMP/gfip
-	for cyc in $cycles ; do
-	    COMOUT=$COMROOT/gfs.$PDY/$cyc/atmos
-	    mkdir -p $COMOUT
-	    for fh in $fhours ; do
-		modelfile=$COMROOT/gfs/prod/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.wafs.grb2f0$fh
-		$WGRIB2 $modelfile | grep ":ICIP:" | grep -v ":70 mb:" | $WGRIB2 -i $modelfile -grib $COMOUT/gfs.t${cyc}z.gfip.grb2f$fh
-	    done
-	done
+	# Check data which still available at COMROOT but not archived because of computer unavailability
+	for past_day in 7 6 5 4 3 2 1 0 ; do
+            hour=$((past_day*24))
+            past=`$NDATE -$hour ${vday}00`
 
-	cd $COMROOT
-	htar -Pcvf /NCEPDEV/emc-global/5year/Yali.Mao/gfip/$PDY.tar ./gfs.$PDY/*/atmos/*gfip*
+            PDY=`echo ${past} | cut -c 1-8`
+	    nfiles=`htar -tvf /NCEPDEV/emc-global/5year/Yali.Mao/gfip/$PDY.tar | grep gfip | wc -l`
+	    if [ $nfiles -eq 0 ] ; then
+		COMROOTgfip=$TMP/gfip
+		if [ -d $COMROOT/gfs/prod/gfs.$PDY ] ; then
+		    for cyc in $cycles ; do
+			COMOUTgfip=$COMROOTgfip/gfs.$PDY/$cyc/atmos
+			mkdir -p $COMOUTgfip
+			for fh in $fhours ; do
+			    modelfile=$COMROOT/gfs/prod/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.wafs.grb2f0$fh
+			    $WGRIB2 $modelfile | grep ":ICIP:" | grep -v ":70 mb:" | $WGRIB2 -i $modelfile -grib $COMOUTgfip/gfs.t${cyc}z.gfip.grb2f$fh
+			done
+		    done
+
+		    cd $COMROOTgfip
+		    #filesize=`du -c ./gfs.$PDY/*/atmos/*gfip* | tail -n 1 | cut -f 1`
+		    htar -Pcvf /NCEPDEV/emc-global/5year/Yali.Mao/gfip/$PDY.tar ./gfs.$PDY/*/atmos/*gfip*
+		else
+		    echo "Warning: no GFIP data available to be archived on $PDY"
+		fi
+	    fi
+	done
     fi
 
 elif [ $MACHINE = "hera" ] ; then
@@ -40,6 +55,7 @@ elif [ $MACHINE = "hera" ] ; then
     #########################
     # Extract analysis data
     #########################
+    PDY=$vday
     year=`echo $PDY | cut -c1-4`
     yearmonth=`echo $PDY | cut -c1-6`
     for cyc in 00 06 12 18 ; do
@@ -99,19 +115,4 @@ elif [ $MACHINE = "hera" ] ; then
 	fi
     done
 fi
-
-
-for past_day in 1 2 ; do
-   hour=$((past_day*24))
-   past=`$NDATE -$hour ${vday}00`
-   day=`echo ${past} | cut -c 1-8`
-
-   echo "Get forecast data in the past on : $day"
-   if [ -d $FCSTDIR.$day ] ; then
-       $USHverf_g2g/wafs_verf_g2g_get.sh $model $day
-   else
-       $USHverf_g2g/wafs_verf_g2g_get_HPSS.sh $model $day
-   fi
-done
-
 
