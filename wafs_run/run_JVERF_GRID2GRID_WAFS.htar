@@ -81,9 +81,13 @@ elif [ $MACHINE = "hera" ] ; then
 	year=`echo $PDY | cut -c1-4`
 	yearmonth=`echo $PDY | cut -c1-6`
 
-	# Extract forecast data if only gcip was previously extracted
-	nfiles=`ls $COMIN/gfs.$PDY/$cyc/atmos | wc -l`
-	if [ $nfiles -eq 2 ] ; then
+	# Extract forecast data if only gcip & u/v/t was previously extracted
+	# Check only one run cycle, 18z
+	nfiles=`ls $COMIN/gfs.$PDY/18/atmos | wc -l`
+	if [ $nfiles -le 3 ] ; then
+
+	    mkdir -p $COMIN/$PDY # For extracting DCOM data
+
 	    ### extract GFIP (high resolution) (archived from Dell)
 	    cd $COMIN
 	    htar -xvf  /NCEPDEV/emc-global/5year/Yali.Mao/gfip/$PDY.tar
