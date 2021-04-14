@@ -29,7 +29,8 @@ if [ $MACHINE = "dell" ] ; then
     module load CFP/2.0.1
     export MPIRUN="mpirun -n 13 cfp"
     SUB=bsub
-    $SUB < $script
+    $SUB -q debug -P GFS-DEV -o $logfile -e $logfile -n 13 -cwd $TMP -W 00:15  -J $jobname -R span[ptile=1] -R affinity[core] < $script
+#    $SUB < $script
 elif [ $MACHINE = "hera" ] ; then
     export MPIRUN="srun"
     SUB=sbatch
