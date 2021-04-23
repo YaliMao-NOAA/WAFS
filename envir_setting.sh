@@ -24,6 +24,7 @@ if [[ `hostname` =~ ^h ]] ; then
   export MACHINE=hera
   alias quotas='cat /scratch2/BMC/public/quotas/stmp'
   alias ncdump='/apps/netcdf/4.6.1/intel/16.1.150/bin/ncdump'
+  alias sjobs='squeue -u Yali.Mao'
 
   #========== Hera ====================#
   export VSDBsave=/scratch1/NCEPDEV/global/Yali.Mao/vsdb
@@ -81,11 +82,67 @@ if [[ `hostname` =~ ^h ]] ; then
   module use -a /contrib/met/modulefiles/
   module load met/9.1
 
-
   # Install LD_LIBRARY_PATH to solve runtime error:  
   #   error while loading shared libraries: libiomp5.so: cannot open shared object file
   # It works for /scratch2/NCEPDEV/ovp/Yali.Mao/git/verf_g2g.v3.0.12/exec/verf_g2g_grid2grid_grib2
   source /opt/intel/bin/compilervars.sh intel64
+
+
+# Install LD_LIBRARY_PATH to solve runtime error:  
+  #   error while loading shared libraries: libiomp5.so: cannot open shared object file
+  # It works for /scratch2/NCEPDEV/ovp/Yali.Mao/git/verf_g2g.v3.0.12/exec/verf_g2g_grid2grid_grib2
+  source /opt/intel/bin/compilervars.sh intel64
+
+#=====================================================#
+elif [[ `hostname` =~ ^O ]] ; then
+#=====================================================#
+  export MACHINE=orion
+  alias quotas='cat /scratch2/BMC/public/quotas/stmp'
+
+  alias sjobs='squeue -u ymao'
+
+  #========== Orion ====================#
+#  export VSDBsave=/scratch1/NCEPDEV/global/Yali.Mao/vsdb
+  export HOMEnoscrub=/work/noaa/stmp/ymao
+
+  export NOSCRUB=$HOMEnoscrub
+  export HOMEnoscrub=$NOSCRUB
+
+  export HOMEgit=/work/noaa/stmp/ymao/git
+  export G2CTL=$HOMEgit/save/grads/g2ctl.orion
+
+  export TMP='/work/noaa/stmp/ymao/stmp'
+
+#  export NWPROD=/scratch4/NCEPDEV/rstprod/nwprod
+#  export COMROOT=/scratch1/NCEPDEV/rstprod/com
+
+  # run this bash before 'module load'
+  if [ ! -z $MODULESHOME ]; then
+      . $MODULESHOME/init/bash
+      . $MODULESHOME/init/profile
+  else
+      . /apps/lmod-8.1/lmod-8.1/init/bash
+      . /apps/lmod-8.1/lmod-8.1/Init/profile
+  fi
+
+  module load contrib noaatools
+
+  module load intel/2018.4
+  module load impi/2018.4
+
+  module load grads/2.2.1
+  module load ncl
+#  module load hpss
+##  module load slurm
+  module load rocoto/1.3.1
+  module load netcdf/4.7.2-parallel
+  module load r/3.5.2
+
+  module use -a /apps/contrib/NCEPLIBS/orion/modulefiles
+  module load grib_util/1.2.0
+  alias wgrib2=$WGRIB2
+  module load prod_util/1.2.0
+  module load g2tmpl/1.7.0
 
 #=====================================================#
 elif [[ `hostname` =~ ^[g|t][0-9]{1} ]] ; then

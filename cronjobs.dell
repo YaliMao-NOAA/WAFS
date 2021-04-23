@@ -3,14 +3,14 @@
 # https://www.emc.ncep.noaa.gov/gmb/icao/prod_plot/plot.html
 # for each cycle, takes about 5 mintues to finish all forecasts
 #==================================================
-45 04 * * * export cyc=00; export prod=prod; sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.driver > /gpfs/dell3/ptmp/Yali.Mao/GCIP_GFIP_GTG_2_rzdm.log 2>&1
-45 10 * * * export cyc=06; export prod=prod; sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.driver > /gpfs/dell3/ptmp/Yali.Mao/GCIP_GFIP_GTG_2_rzdm.log 2>&1
-45 16 * * * export cyc=12; export prod=prod; sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.driver > /gpfs/dell3/ptmp/Yali.Mao/GCIP_GFIP_GTG_2_rzdm.log 2>&1
-45 22 * * * export cyc=18; export prod=prod; sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.driver > /gpfs/dell3/ptmp/Yali.Mao/GCIP_GFIP_GTG_2_rzdm.log 2>&1
+45 04 * * * export cyc=00; export prod=prod; sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.driver > /gpfs/dell3/ptmp/Yali.Mao/GCIP_GFIP_GTG_2_rzdm.$cyc 2>&1
+45 10 * * * export cyc=06; export prod=prod; sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.driver > /gpfs/dell3/ptmp/Yali.Mao/GCIP_GFIP_GTG_2_rzdm.$cyc 2>&1
+45 16 * * * export cyc=12; export prod=prod; sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.driver > /gpfs/dell3/ptmp/Yali.Mao/GCIP_GFIP_GTG_2_rzdm.$cyc 2>&1
+45 22 * * * export cyc=18; export prod=prod; sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.driver > /gpfs/dell3/ptmp/Yali.Mao/GCIP_GFIP_GTG_2_rzdm.$cyc 2>&1
 
 # Archive GFIP to HPSS from Dell for verification on Hera
 #==================================================
-00 06  * * *  sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/wafs_run/run_JVERF_GRID2GRID_WAFS.htar > /gpfs/dell3/ptmp/Yali.Mao/JVERF_GRID2GRID_WAFS.htar.dell.log 2>&1
+00 06  * * * source ~/.bashrc ; sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/wafs_run/run_JVERF_GRID2GRID_WAFS.htar > /gpfs/dell3/ptmp/Yali.Mao/JVERF_GRID2GRID_WAFS.htar.dell.log 2>&1
 
 # Run GCIP operational in case a satellite is changed
 # between 2 GFS implementations.
