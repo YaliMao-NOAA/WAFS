@@ -7,10 +7,15 @@
 #
 ########################################################
 
-# 1) (On Dell) $HOMEsave/wafs_run/run_JVERF_GRID2GRID_WAFS.htar to archive GFIP
-# 2) (On Hera) $HOMEsave/wafs_run/run_JVERF_GRID2GRID_WAFS.htar to extract all data
-# 3) $HOMEsave/wafs_run/run_JVERF_GRID2GRID_WAFS.sh
-# 4) HOMEverf_g2g=$HOMEgit/verf_g2g.v3.0.12
+#1 run_JVERF_GRID2GRID_WAFS.cron (it can be run independently from run_JVERF_GRID2GRID_WAFS.loop)
+#2 run_JVERF_GRID2GRID_WAFS.htar
+#3 run_JVERF_GRID2GRID_WAFS.sh
+
+# 1.0) (On Dell) $HOMEsave/wafs_run/run_JVERF_GRID2GRID_WAFS.htar to archive GFIP
+# 1.1) (On Hera) $HOMEsave/wafs_run/run_JVERF_GRID2GRID_WAFS.htar to extract all data
+#      (On Dell) $HOMEsave/wafs_run/run_JVERF_GRID2GRID_WAFS.htar to prepare(extract or copy) all data
+# 2) $HOMEsave/wafs_run/run_JVERF_GRID2GRID_WAFS.sh
+# 3) HOMEverf_g2g=$HOMEgit/verf_g2g.v3.0.12
 #      jobs/JVERF_GRID2GRID_WAFS
 #      scripts/exverf_g2g_wafs.sh.ecf
 #      / ush/verf_g2g_get_wafs2.sh
@@ -23,14 +28,27 @@
 
 #*******************************************************
 # To load $HOMEsave/envir_setting.sh
+if [ -z $MACHINE ] ; then
 . ~/.bashrc
+fi
 
 set -x
 
 date
 
+# If run on Dell, then only on Dev machine
+if [ $MACHINE = "dell" ] ; then
+    # Only run on dev machine
+    thismachine=`hostname | cut -c 1`
+    runmachine=`cat /etc/dev | cut -c 1`
+    if [ ! $thismachine = $runmachine ] ; then
+	echo "Only run run_JVERF_GRID2GRID_WAFS.cron on Dev machine"
+	exit
+    fi
+fi
+
 ########################################################
-#### arguments, cyc, vday                           ####
+#### arguments, (export)vday                        ####
 ########################################################
 
 export envirp=$1   # prod or para, forecast product
@@ -40,87 +58,94 @@ if [[ $windonly = "wind" ]] ; then
     export VMODELS="|gfs|"
 fi
 
-# verfication is 2 days ago unless it's predefined.
-export vday=${vday:-`$NDATE -48 | cut -c1-8`}
-# cyc doesn't matter for verification.
-# export cyc=${cyc:-12}
-
-export DATA=$TMP/wafs.vrfy_${envirp}.${envirv}_working
+export DATA=$TMP/wafs.vrfy.${envirp}_${envirv}.working
 mkdir -p $DATA
 
 export COMIN=$TMP/wafs.vrfy.com
 mkdir -p $COMIN # For extracting data from HPSS
 
 ########################################################
-#### inputs for US forecast and GCIP                #### 
+#### 1. Prepare observation and forecast data       ####
+#### 2. Verification of U/V/T forecast and ICIP     #### 
 ########################################################
 
-if [[ `hostname` =~ ^h ]] ; then
+htarscript=$HOMEsave/wafs_run/run_JVERF_GRID2GRID_WAFS.htar
+script=$HOMEsave/wafs_run/run_JVERF_GRID2GRID_WAFS.sh
 
-  # On Hera, data are from HPSS, input data need to be extracted and have the same COMROOT
-  # On Hera, only do prod.prod verification
+logfile=$DATA/wafs_verif.grid2grid.vsdb.log
+rm $logfile
+jobname=wafs_verif
 
-  SUB=sbatch
+if [[ $MACHINE = "hera" ]] ; then
+
+  # verfication is 2 days ago unless it's predefined.
+  # On Hera, data are from HPSS and available 2 days after
+  export vday=${vday:-`$NDATE -48 | cut -c1-8`}
+
   ACCOUNT=ovp
-  htarscript=$HOMEsave/wafs_run/run_JVERF_GRID2GRID_WAFS.htar
 
-  # Extract data from HPSS to Hera
-  echo 0 $htarscript $vday $COMIN > $TMP/wafs.vrfy_${envirp}.${envirv}_working/htar.cmdfile
-  srun -l --multi-prog -A ovp --ntasks=1 -p service -t 01:00:00 $TMP/wafs.vrfy_${envirp}.${envirv}_working/htar.cmdfile
+  # Prepare (extract) data from HPSS
+  echo 0 $htarscript $vday $COMIN > $TMP/wafs.vrfy.${envirp}_${envirv}.working/htar.cmdfile
+  srun -l --multi-prog -A ${ACCOUNT} --ntasks=1 -p service -t 01:00:00 $TMP/wafs.vrfy.${envirp}_${envirv}.working/htar.cmdfile
 
-  jobname=wafs_verif
-  logfile=$DATA/wafs_verif.grid2grid.hera
-  rm $logfile
-  script=$HOMEsave/wafs_run/run_JVERF_GRID2GRID_WAFS.sh
-
+  # Run verficiation
+  SUB=sbatch
   ${SUB} -A ${ACCOUNT} -t 04:30:00 -N 1 -q batch -J ${jobname} -o ${logfile} ${script}
 
-else
+elif [[ $MACHINE = "dell" ]] ; then
+
   # verfication is 1 day before today unless it's predefined.
   export vday=${vday:-`$NDATE -24 | cut -c1-8`}
 
-  SUB="bsub <"
-  # # For WCOSS
-  # $SUB -q $JOB_QUEUE -P $PROJECT -o ${logfile} -M 100 -R affinity[core] -W 0:20 -J ${jobname} -cwd ${PWD} ${plot_hist}
+  # Prepare data (copy from COM or extract from HPSS)
+  sh $htarscript $vday $COMIN
+
+  # Run verficiation
+  SUB=bsub
+#  $SUB -q debug -P GFS-DEV -o $logfile -e $logfile -n 1 -cwd $TMP -W 4:30  -J $jobname -R span[ptile=1] -R affinity[core] < $script
+  sh $script
+  
 fi
 
 ########################################################
 ### Archive vsdb results to HPSS                    ####
 ########################################################
 
-if [[ $windonly = "wind" ]] ; then
-    sleep 720
-    sleepmax=1800
-    sleepint=60
-else
-    # WAFS verification takes at least 1 hour
-    sleep 3600
-    sleepmax=16200 # wait at most 4.5 hours
-    sleepint=180   # check every 3 minutes
-fi
-sleeptime=0
-while [ $sleeptime -le $sleepmax ] ; do
-    if test -f $DATA/$vday/$vday ; then
-	break
+if [ $MACHINE = "hera" ] ; then # On Hera, verification is done by submitting a job, so needs to wait
+    if [[ $windonly = "wind" ]] ; then
+	sleep 720
+	sleepmax=1800
+	sleepint=60
     else
-	sleeptime=`expr $sleeptime + $sleepint`
-	sleep $sleepint
+	# WAFS verification takes at least 1 hour
+	sleep 3600
+	sleepmax=16200 # wait at most 4.5 hours
+	sleepint=180   # check every 3 minutes
     fi
-    if [ $sleeptime -eq $sleepmax ] ; then
-	echo " *** FATA ERROR: No verification data is generated for $vday"
-	exit
-    fi
-done
+    sleeptime=0
+    while [ $sleeptime -le $sleepmax ] ; do
+	if test -f $DATA/$vday/$vday ; then
+	    break
+	else
+	    sleeptime=`expr $sleeptime + $sleepint`
+	    sleep $sleepint
+	fi
+	if [ $sleeptime -eq $sleepmax ] ; then
+	    echo " *** FATA ERROR: No verification data is generated for $vday"
+	    exit
+	fi
+    done
+fi
 
 cd $TMP
 day=`echo $vday | cut -c1-6`
-htar -Pcvf /NCEPDEV/emc-global/5year/Yali.Mao/wafs_vsdb/${envirp}.${envirv}/$day/$vday.vsdb.tar `find wafs.vrfy_${envirp}.${envirv}_vsdb/wafs -name "*$vday*" -size +1c -type f`
+htar -Pcvf /NCEPDEV/emc-global/5year/Yali.Mao/wafs_vsdb/${envirp}.${envirv}/$day/$vday.vsdb.tar `find wafs.vrfy.${envirp}_${envirv}.vsdb/wafs -name "*$vday*" -size +1c -type f`
 
 ########################################################
 ### transfer vsdb to tempest and save to            ####
 ### /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/vsdb  #### 
 ########################################################
-dataDir=wafs.vrfy_${envirp}.${envirv}_vsdb/wafs
+dataDir=wafs.vrfy.${envirp}_${envirv}.vsdb/wafs
 
 cd $TMP
 allfilesize=`du -c $dataDir/*$vday* | tail -1| cut -f 1`
@@ -128,12 +153,14 @@ allfilesize=`du -c $dataDir/*$vday* | tail -1| cut -f 1`
 if [[ $allfilesize  -eq 0 ]] ; then
   echo "No ${envirp}.${envirv} vsdb result is generated. Please check."
   echo "No ${envirp}.${envirv} vsdb result is generated on $vday." | mailx -s "VSDB verification is not generated." yali.mao@noaa.gov
+  date
+  exit 1
 else
-  # to tempest
+  # to rzdm server (linux computer will download data from rzdm server then delete 
   if [[ ! `hostname` =~ ^h ]] ; then
-    remote=/gmb/wd20ym/vsdb
-    remoteServer=wd20ym@tempest
-    # rsync -ravP --min-size=1 $TMP/$dataDir/. ${remoteServer}:${remote}/.
+    remote=/home/people/emc/ymao/wafs.vrfy/vsdb
+    remoteServer=ymao@emcrzdm.ncep.noaa.gov
+    rsync -ravP --min-size=1 $TMP/$dataDir/. ${remoteServer}:${remote}/.
   fi
 
   # to wcoss/save folder

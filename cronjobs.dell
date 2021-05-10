@@ -12,6 +12,26 @@
 #==================================================
 00 06  * * * source ~/.bashrc ; sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/wafs_run/run_JVERF_GRID2GRID_WAFS.htar > /gpfs/dell3/ptmp/Yali.Mao/JVERF_GRID2GRID_WAFS.htar.dell.log 2>&1
 
+# Run vsdb verification
+# Save results at $VSDBsave/wafs=/gpfs/dell2/emc/modeling/noscrub/Yali.Mao/vsdb/wafs
+#==================================================
+# Suggestion: 1:30 hours for each run if data available on $COMROOT
+#             10 minutes for wind only
+#             4:30 hours for make up because data needs to extracted from HPSS
+01 00 * * *  sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/wafs_run/run_JVERF_GRID2GRID_WAFS.loop > /gpfs/dell3/ptmp/Yali.Mao/wafs.vrfy.log 2>&1
+
+# Make up some day
+#40 14  8 * *  export vday=20210420; sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/wafs_run/run_JVERF_GRID2GRID_WAFS.cron prod prod > /gpfs/dell3/ptmp/Yali.Mao/wafs.vrfy.log.$vday 2>&1
+# Make up some day for twind only (data from HPSS)
+#35 13  * * *  export vday=20210423; sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/wafs_run/run_JVERF_GRID2GRID_WAFS.cron prod prod wind > /gpfs/dell3/ptmp/Yali.Mao/wafs.vrfy.log.twind.$vday 2>&1
+
+
+# Plot verification from vsdb (monthly)
+#==================================================
+# observation choices: gfs gcip gcipconus cip
+01 00 2 * *  export observation=gfs;sh /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/scripts/verify.plot.wafs.cron >/gpfs/dell3/ptmp/Yali.Mao/verify.plot.$observation 2>&1
+00 01 2 * *  export observation=gcip;sh /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/scripts/verify.plot.wafs.cron >/gpfs/dell3/ptmp/Yali.Mao/verify.plot.$observation 2>&1
+
 # Run GCIP operational in case a satellite is changed
 # between 2 GFS implementations.
 #==================================================

@@ -7,7 +7,8 @@
 #
 # Modification needed later on:
 # COMROOT after each implementation
-# add cyc to $COMROOT related locations in jobs/JVERF_GRID2GRID_WAFS after 2019 GFS implementation
+# add cyc to $COMROOT related locations in jobs/JVERF_GRID2GRID_WAFS (actually ush/verf_g2g_get_wafs.sh)  after 2019 GFS implementation
+# add atmos to $COMROOT related locations in jobs/JVERF_GRID2GRID_WAFS (actually ush/verf_g2g_get_wafs.sh) after 2021 GFS implementation
 ########################################################
 
 # 1) /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/wafs_run/run_JVERF_GRID2GRID_WAFS.sh
@@ -32,64 +33,31 @@ date
 #### inputs for US forecast and GCIP                #### 
 ########################################################
 
-if [[ `hostname` =~ ^h ]] ; then
+export GCIPDIR=$COMIN/gfs
+export COMINGFIP=$COMIN/gfs
 
-  export GCIPDIR=$COMIN/gfs
-  export COMINGFIP=$COMIN/gfs
+export COMINGFSV=$COMIN/gfs # U/V/T analysis
+export COMINGFSP=$COMIN/gfs # U/V/T forecast
 
-  export COMINGFSV=$COMIN/gfs
-  export COMINGFSP=$COMIN/gfs
+export COMINUS=$COMIN/gfs
+export COMINBLND=$COMIN/gfs
 
-  export COMINUS=$COMIN/gfs
-  export COMINBLND=$COMIN/gfs
+export COMINUK=$COMIN
 
-  export COMINUK=$COMIN
-
-  export CIPDIR=$COMIN
-  export COMINFIP=$COMIN
-
-else
-
-  # GFS forecast
-  if [ $envirp = prod ] ; then
-      export COMROOT=$COMROOT
-  elif [ $envirp = para ] ; then
-      export COMROOT=/gpfs/hps/nco/ops/com
-  fi
-  export envir=$envirp
-
-  # GFS observation data
-  if [ $envirv = prod ] ; then
-      # global icing
-      export GCIPDIR=$COMROOT/gfs/$envirv/gfs
-
-      # u/v/t
-      export COMINGFSV=$COMROOT/gfs/$envirv/gfs
-
-  elif [ $envirv = para ] ; then
-      # global icing
-      # my own parallel, rerun GCIP in case satellite changes between GFS implemetations
-      # export GCIPDIR=$TMP/fv3_para_prod/gfs
-      # NCO parallel
-      export GCIPDIR=/gpfs/hps/nco/ops/com/gfs/$envirv/gfs
-
-      # u/v/t
-      export COMINGFSV=/gpfs/hps/nco/ops/com/gfs/$envirv/gfs
-
-  fi
-fi
+export CIPDIR=$COMIN
+export COMINFIP=$COMIN
 
 ########################################################
 #### outputs for verification                       #### 
 ########################################################
-
+DATA=${DATA:-$TMP/wafs.vrfy.${envirp}_${envirv}.working}
 export DATA=$DATA/$vday
 rm -f $DATA/*
 
 # Re-organize data as inputs for verification
-export COM_OUT=$TMP/wafs.vrfy_${envirp}.${envirv}_grib2
+export COM_OUT=$TMP/wafs.vrfy.${envirp}_${envirv}.grib2
 
-export COMVSDB=$TMP/wafs.vrfy_${envirp}.${envirv}_vsdb
+export COMVSDB=$TMP/wafs.vrfy.${envirp}_${envirv}.vsdb
 
 export jlogfile=/$DATA/jlogfile
 

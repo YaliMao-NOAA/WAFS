@@ -1,18 +1,41 @@
 #!/bin/bash
+. ~/.bashrc
+
+# RZDM is a temporary storage, the target place is local Linux machine
+
+#1 run_JVERF_GRID2GRID_WAFS.loop
+#2 run_JVERF_GRID2GRID_WAFS.cron (it can be run independently)
+#3 run_JVERF_GRID2GRID_WAFS.htar
+#4 run_JVERF_GRID2GRID_WAFS.sh
+
 set -xa
 date
 
-PDY1=20190723
-PDY2=20190725
+cd $TMP
+scp ymao@emcrzdm.ncep.noaa.gov:~/wafs.vrfy/wafs.vrfy.vsdb.date .
 
-export DATA=/scratch2/NCEPDEV/stmp3/Yali.Mao/wafs.vrfy.com.twindonly
-mkdir -p $DATA
-cd $DATA
+# Make up the missing dates in case of computer switching
+PDY1=`cat wafs.vrfy.vsdb.date`
+if [[ $MACHINE = "hera" ]] ; then
+    PDY2=`$NDATE -48 | cut -c1-8`
+elif [[ $MACHINE = "dell" ]] ; then
+    PDY2=`$NDATE -24 | cut -c1-8`
+fi
+if [ -z $PDY1 ] ; then
+    PDY1=$PDY2
+else
+    PDY1=`$NDATE 24 ${PDY1}00 | cut -c1-8`
+fi
 
 export vday=$PDY1
-while [[ $vday < $PDY2 ]] ; do
-  sh /scratch2/NCEPDEV/ovp/Yali.Mao/git/save/wafs_run/run_JVERF_GRID2GRID_WAFS.cron prod prod wind > ${vday}.log 2>&1
-  vday=`$NDATE 24 ${vday}00 | cut -c1-8`
+while [[ $vday < $PDY2 || $vday = $PDY2 ]] ; do
+  sh $HOMEsave/wafs_run/run_JVERF_GRID2GRID_WAFS.cron prod prod > $TMP/wafs.vrfy.log.${vday} 2>&1
+  err=$?
+  if [ $err -eq 0 ] ; then
+      echo $vday > wafs.vrfy.vsdb.date
+      scp wafs.vrfy.vsdb.date ymao@emcrzdm.ncep.noaa.gov:~/wafs.vrfy/.
+  fi
+  export vday=`$NDATE 24 ${vday}00 | cut -c1-8`
 done
 
 date

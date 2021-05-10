@@ -265,7 +265,9 @@ else
   export TMP='/gpfs/dell3/ptmp/Yali.Mao'
 
   export NWPROD=/gpfs/dell1/nco/ops/nwprod
-  export GADDIR=/usrx/local/dev/GrADS/2.0.2/lib
+
+  # "Sometimes" python plotting doesn't work well
+  export MPLBACKEND='Agg'
 
   # run this bash before 'module load'
   if [ ! -z $MODULESHOME ]; then

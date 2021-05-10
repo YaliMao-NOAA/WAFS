@@ -1,12 +1,15 @@
 #!/bin/sh
 
-source /scratch2/NCEPDEV/ovp/Yali.Mao/git/save/envir_setting.sh
+#################################################
+# Before running, synchronize data from Linux   #
+#================================================
+# rsync -ravP --min-size=1. wd20ym@emc-lw-ymao:/export/emc-lw-ymao/wd20ym/vsdb/wafs/prod.prod/. $VSDBsave/wafs/prod.prod/.
+#################################################
+
+source ~/.bashrc
+# Defined $VSDBsave
 
 set -xa
-
-# slurm module is not found. Add the path for 'srun'
-#export PATH="$PATH:/apps/slurm/default/bin"
-export MPIRUN="srun"
 
 # export observation=gfs
 # export observation=gcip
