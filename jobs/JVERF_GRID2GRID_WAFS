@@ -116,7 +116,8 @@ env
 
 #######################################################################
 # Execute the script.
-export VMODELS=${VMODELS:-"|cip|gcipconus|gcip|gfs|"}
+#export VMODELS=${VMODELS:-"|cip|gcipconus|gcip|gfs|"}
+export VMODELS=${VMODELS:-"|gcipconus|gcip|gfs|"}
 sh $HOMEverf_g2g/scripts/exverf_g2g_wafs.sh.ecf $vday $VMODELS
 
 msg="JOB $job HAS COMPLETED NORMALLY."

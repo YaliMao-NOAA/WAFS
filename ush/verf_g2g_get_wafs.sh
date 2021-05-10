@@ -73,7 +73,7 @@ if [[ $valid =~ cip ]] ; then
     for hh in $HHOBS3 ; do       # 00 03 06 09 12 15 18 21
       cyc=$(( 10#$hh / 6 * 6 ))
       cyc="$(printf "%02d" $(( 10#$cyc )) )"
-      imfile=$GCIPDIR.$vday/$cyc/gfs.t${hh}z.gcip.f00.grib2
+      imfile=$GCIPDIR.$vday/$cyc/atmos/gfs.t${hh}z.gcip.f00.grib2
       for lvl in $PLEVELSicing ; do
         $WGRIB2 $imfile -match ":ICIP:$lvl mb:" $matchgrid x.$lvl
 	cat x.$lvl >>  $COMOUT/${model_name}.t${hh}z.grd$vgrid.f00.grib2
@@ -92,17 +92,17 @@ if [[ $valid =~ cip ]] ; then
       fi
 
       if [[ $model_name =~ 'blnd' ]] ; then
-	 imfile=$COMINBLND.$vday/$hh/WAFS_blended_$vday${hh}f$fh.grib2
+	 imfile=$COMINBLND.$vday/$hh/atmos/WAFS_blended_$vday${hh}f$fh.grib2
       fi
       if [[ $model_name =~ 'us' ]] ; then # us mean/max
-	 imfile=$COMINUS.$vday/$hh/gfs.t${hh}z.wafs_grb45f${fh}.grib2
+	 imfile=$COMINUS.$vday/$hh/atmos/gfs.t${hh}z.wafs_grb45f${fh}.grib2
       fi
       if [[ $model_name =~ 'uk' ]] ; then
 	 imfile=$COMINUK/$vday/wgrbbul/ukmet_wafs/EGRR_WAFS_unblended_${vday}_${hh}z_t$fh.grib2
       fi
       if [[ $model_name =~ 'gfip' ]] ; then # high resolution
-	 ff="$(printf "%03d" $(( 10#$fh )) )"
-	 imfile=$COMINGFIP.$vday/$hh/gfs.t${hh}z.master.grb2f$ff
+	 #ff="$(printf "%03d" $(( 10#$fh )) )"
+	 imfile=$COMINGFIP.$vday/$hh/atmos/gfs.t${hh}z.gfip.grb2f$fh
       fi
 
       for lvl in $PLEVELSicing ; do
@@ -149,7 +149,7 @@ elif [ $valid = gfs ] ; then
 
   if [ $model_name = gfs ] ; then	# analysis GFS data, every 6 hours
     for hh in $HHOBS6 ; do        # 00 06 12 18
-      imfile=$COMINGFSV.$vday/$hh/gfs.t${hh}z.pgrb2.0p25.anl
+      imfile=$COMINGFSV.$vday/$hh/atmos/gfs.t${hh}z.pgrb2.0p25.anl
       for lvl in $PLEVELStwind ; do
         $WGRIB2 $imfile -match ":TMP:$lvl mb:" $matchgrid  t.$lvl
         $WGRIB2 $imfile -match  "GRD:$lvl mb:" $matchgrid uv.$lvl
@@ -167,7 +167,7 @@ elif [ $valid = gfs ] ; then
       if [[ -s $outfile ]] ; then
 	  continue
       fi
-      imfile=$COMINGFSP.$vday/$hh/gfs.t${hh}z.pgrb2.0p25.f$ff
+      imfile=$COMINGFSP.$vday/$hh/atmos/gfs.t${hh}z.pgrb2.0p25.f$ff
       for lvl in $PLEVELStwind ; do
         $WGRIB2 $imfile -match ":TMP:$lvl mb:" $matchgrid  t.$lvl
         $WGRIB2 $imfile -match  "GRD:$lvl mb:" $matchgrid uv.$lvl
