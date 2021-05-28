@@ -8,20 +8,20 @@
 #BSUB -q debug
 #BSUB -W 00:20
 #BSUB -P GFS-DEV
-#BSUB -n 11
-#BSUB -R span[ptile=1]
+#BSUB -n 18
+#BSUB -R span[ptile=18]
 #BSUB -R affinity[core(1):distribute=balance]
 
 set -xa
 
 # specify computation resource
-export NODES=11
-export ntasks=11
-export ptile=1
+export NODES=1
+export ntasks=18
+export ptile=18
 export threads=1
 export MP_LABELIO=yes
 export OMP_NUM_THREADS=$threads
-export MPIRUN="mpirun -n 11 cfp"
+export MPIRUN="mpirun -n 18 cfp"
 
 ############################################
 # Loading module
@@ -72,7 +72,7 @@ export jobid=${job}.${pid}
 
 #export PDY=`$NDATE -24 | cut -c 1-8`
 export PDY=`cut -c 7-14 $COMROOT/date/t00z`
-export PDY=20210510
+export PDY=20210527
 
 USER=`whoami`
 
