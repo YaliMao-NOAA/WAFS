@@ -1,3 +1,7 @@
+# Collect icing severity data to local machine for verification
+#==================================================
+10 14 * * * sh /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/scripts/cp_icesev.sh > /gpfs/dell3/ptmp/Yali.Mao/cp_icesev.log 2>&1
+
 # For operational
 # collect GFIP, GCIP and GTG to rzdm FTP server, plus plotting and maintenance
 # https://www.emc.ncep.noaa.gov/gmb/icao/prod_plot/plot.html
@@ -29,6 +33,10 @@
 # Plot verification from vsdb (monthly)
 #==================================================
 # observation choices: gfs gcip gcipconus cip
+#--------------------------------------------------
+# Before running, synchronize data from Linux   #
+# rsync -ravP --min-size=1. wd20ym@emc-lw-ymao:/export/emc-lw-ymao/wd20ym/vsdb/wafs/prod.prod/. $VSDBsave/wafs/prod.prod/.
+#--------------------------------------------------
 01 00 2 * *  export observation=gfs;sh /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/scripts/verify.plot.wafs.cron >/gpfs/dell3/ptmp/Yali.Mao/verify.plot.$observation 2>&1
 00 01 2 * *  export observation=gcip;sh /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/scripts/verify.plot.wafs.cron >/gpfs/dell3/ptmp/Yali.Mao/verify.plot.$observation 2>&1
 
