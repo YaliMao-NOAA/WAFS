@@ -93,10 +93,6 @@ HOMEsave0=/gpfs/hps3/emc/global/noscrub/Yali.Mao
 HOMEnoscrub1=/gpfs/*1/emc/global/noscrub/Yali.Mao
 HOMEnoscrub0=/gpfs/hps3/emc/global/noscrub/Yali.Mao
 
-TMP1=/gpfs/*1/ptmp/Yali.Mao
-TMP2=/gpfs/*2/ptmp/Yali.Mao
-TMP0=/gpfs/hps/ptmp/Yali.Mao
-
 # User specific aliases and functions (machine related)
 
 export PROJ="$HOMEsave/project"
@@ -120,6 +116,7 @@ alias crons='crontab $HOMEsave/cronjobs.$MACHINE'
 
 #
 alias tmp='cd $TMP'
+alias tmp2='cd $TMP2'
 # Goto NWS source code folder
 alias sorc='cd $NWPROD'
 
