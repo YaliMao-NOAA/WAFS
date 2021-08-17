@@ -263,6 +263,7 @@ else
   export G2CTL=$HOMEgit/save/grads/g2ctl.new
 
   export TMP='/gpfs/dell3/ptmp/Yali.Mao'
+  export TMP2='/gpfs/dell2/ptmp/Yali.Mao'
 
   export NWPROD=/gpfs/dell1/nco/ops/nwprod
 
