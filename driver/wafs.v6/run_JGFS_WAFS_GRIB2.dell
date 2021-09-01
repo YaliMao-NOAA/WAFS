@@ -72,7 +72,7 @@ export jobid=${job}.${pid}
 
 #export PDY=`$NDATE -24 | cut -c 1-8`
 export PDY=`cut -c 7-14 $COMROOT/date/t00z`
-export PDY=20210527
+export PDY=20210830
 
 USER=`whoami`
 
@@ -112,9 +112,6 @@ export HOMEgfs=${HOMEgfs:-${NWROOT}/EMC_wafs.work.v6}
 ############################################
 # run the job
 #############################################
-export SHOUR=06
-export EHOUR=36
-export FHINC=03
 
 sh $HOMEgfs/jobs/JGFS_ATMOS_WAFS_GRIB2
 
