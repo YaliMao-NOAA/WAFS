@@ -1,6 +1,6 @@
 # Collect icing severity data to local machine for verification
 #==================================================
-10 14 * * * sh /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/scripts/cp_icesev.sh > /gpfs/dell3/ptmp/Yali.Mao/cp_icesev.log 2>&1
+10 14 * * * sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/scripts/cp_icesev.sh > /gpfs/dell3/ptmp/Yali.Mao/cp_icesev.log 2>&1
 
 # For operational
 # collect GFIP, GCIP and GTG to rzdm FTP server, plus plotting and maintenance
