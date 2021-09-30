@@ -7,6 +7,14 @@
 # Part 1: data_in
 # Part 2: data_out
 #
+# After the data are prepared, save the data to HPSS
+# htar -cvf /NCEPDEV/emc-global/2year/Yali.Mao/regression_data data_in data_out
+# htar -xvf /NCEPDEV/emc-global/2year/Yali.Mao/regression_data
+# When the data set needs to be changed, delete the old from HPSS and archive new data
+#   hsi - login in HPSS
+#   rm /NCEPDEV/emc-global/2year/Yali.Mao/regression_data*
+#   exit
+
 
 basedir=`pwd`
 
