@@ -1,1 +1,0 @@
-../../../nogit/fv3_tiles/C768_grid.tile6.txt
