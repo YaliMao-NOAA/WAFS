@@ -251,6 +251,58 @@ elif [[ `hostname` =~ ^[l|s]login ]] ; then
   export PATH
 
 #=====================================================#
+elif [[ `hostname` =~ ^[d|c]login ]] ; then
+#=====================================================#
+  export MACHINE=wcoss2
+  alias qjobs='qstat | grep Yali.Mao'
+  alias git="git --no-pager"
+
+  #========== dogwood/cactus ====================#
+  # run this bash before 'module load'
+  if [ ! -z $MODULESHOME ]; then
+      . $MODULESHOME/init/bash
+  else
+      . /usr/share/lmod/lmod/init/bash
+  fi
+
+  module load envvar/${envvar_ver:-1.0}
+  module load intel/${intel_ver:-19.1.3.304}
+  module load PrgEnv-intel/${PrgEnv_intel_ver:-8.1.0}
+  module load craype/${craype:-2.7.8}
+  module load cray-mpich/${cray_mpich_ver:-8.1.9}
+
+  module load libjpeg/9c
+##  module load gcc
+  
+  module load prod_util
+  module load prod_envir
+  module load grib_util
+  module load wgrib2/2.0.8
+
+  module use /apps/test/modules
+  module load GrADS/2.2.1-cce-11.0.4
+
+  module load python/3.8.6
+
+  PATH=$PATH:/apps/prod/hpss
+  export PATH
+
+  export NOSCRUB=/lfs/h2/emc/vpppg/noscrub/Yali.Mao
+  if [ ! -e $HOMEnoscrub ] ; then
+      export HOMEnoscrub=$NOSCRUB
+  fi
+
+  export HOMEgit=$HOMEnoscrub/git
+  export G2CTL=$HOMEgit/save/grads/g2ctl.new
+
+  export TMP='/lfs/h2/emc/ptmp/Yali.Mao'
+
+  # From prod_envir
+  export NWPROD=$PACKAGEROOT
+  export OUTPUT=$OPSROOT/output
+  export OUTPUTP=/lfs/h1/ops/para/output
+
+#=====================================================#
 else
 #=====================================================#
   export MACHINE=dell
@@ -266,7 +318,9 @@ else
   export TMP2='/gpfs/dell2/ptmp/Yali.Mao'
 
   export NWPROD=/gpfs/dell1/nco/ops/nwprod
-
+  export OUTPUT=/gpfs/dell1/nco/ops/com/output/prod
+  export OUTPUTP=/gpfs/dell1/nco/ops/com/output/para
+  
   # "Sometimes" python plotting doesn't work well
   export MPLBACKEND='Agg'
 

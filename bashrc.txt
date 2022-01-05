@@ -76,39 +76,23 @@ alias moda='module avail'
 alias modd='module display'
 
 
-com1=/gpfs/*1/nco/ops/com
-com2=/gpfs/*2/nco/ops/com
 comh=/gpfs/hps/nco/ops/com
 comd=$COMROOT
-com0=/gpfs/hps/nco/ops/com
 dcom=$DCOMROOT
 
-NWPROD1=/gpfs/*1/nco/ops/nwprod
-NWPROD2=/gpfs/*2/nco/ops/nwprod
-NWPROD0=/gpfs/hps/nco/ops/nwprod
-
-HOMEsave1=/gpfs/*1/emc/global/save/Yali.Mao
-HOMEsave0=/gpfs/hps3/emc/global/noscrub/Yali.Mao
-
-HOMEnoscrub1=/gpfs/*1/emc/global/noscrub/Yali.Mao
-HOMEnoscrub0=/gpfs/hps3/emc/global/noscrub/Yali.Mao
 
 # User specific aliases and functions (machine related)
-
-export PROJ="$HOMEsave/project"
 
 # git/gerrit configuration:
 export GIT_SSH=$HOMEsave/git/config.ssh
 
 #
 ####
-alias proj='cd $PROJ'
 alias save='cd $HOMEsave'
 alias run='cd $HOMEsave/wafs_run'
 alias noscrub='cd $HOMEnoscrub'
 alias gitp='cd $HOMEgit'
 alias vsdb='cd $HOMEnoscrub/vsdb/wafs'
-alias post='cd $HOMEgit/EMC_post_fork'
 
 alias cronl='crontab -l'
 alias crone='emacs $HOMEsave/cronjobs.$MACHINE'
@@ -116,7 +100,6 @@ alias crons='crontab $HOMEsave/cronjobs.$MACHINE'
 
 #
 alias tmp='cd $TMP'
-alias tmp2='cd $TMP2'
 # Goto NWS source code folder
 alias sorc='cd $NWPROD'
 
@@ -130,7 +113,6 @@ alias mydiff='ksh $HOMEsave/scripts/diff.sh'
 alias diffr='diff -ry --suppress-common-lines '
 alias igrep='grep -i '
 alias rgrep='grep -r '
-alias nosvn='grep -v svn'
 alias lsd='ls -ld */'
 alias lsda='echo "`ls -Cd .*/`" "`ls -Cd */`"'
 
@@ -143,10 +125,10 @@ alias mydegrib2='$HOMEsave/grib2/degrib2'
 alias adds="echo ksh $HOMEgit/g2g_verif.v3.0.0/ush/verf_g2g_icing_convertadds.sh CIP\|FIP PRB\|SEV YYYYMMDDHH [levels]"
 alias plot="echo ksh $HOMEsave/grads/plotWafs.sh conus potential grb2file"
 
-alias output="echo /gpfs/dell1/nco/ops/com/output/prod ; ls -l /gpfs/dell1/nco/ops/com/output/prod | grep -v tar.xz"
-alias outputp="echo /gpfs/hps/nco/ops/com/output/para ; ls -l /gpfs/hps/nco/ops/com/output/para | grep -v tar.xz"
+alias output="ls -l $OUTPUT | grep -v tar.xz ; echo $OUTPUT"
+alias outputp="ls -l $OUTPUTP | grep -v tar.xz ; echo $OUTPUTP"
 
-alias para="ll /gpfs/hps/nco/ops/com/gfs/para ; echo /gpfs/hps/nco/ops/com/gfs/para/gfs.`$NDATE|cut -c1-8`/"
+alias prod="ll $COMROOT/gfs/*/gfs.`$NDATE|cut -c1-8`"
 
 alias master="ls -l $comd/gfs/prod/gfs.*/00/atmos/gfs.t00z.master.grb2f006"
 alias   wafs="ls -l $comd/gfs/prod/gfs.`$NDATE|cut -c1-8`/00/atmos/gfs.t00z.wafs_grb45f06*"
