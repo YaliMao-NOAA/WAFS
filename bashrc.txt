@@ -84,7 +84,7 @@ dcom=$DCOMROOT
 # User specific aliases and functions (machine related)
 
 # git/gerrit configuration:
-export GIT_SSH=$HOMEsave/git/config.ssh
+#export GIT_SSH=$HOMEsave/git/config.ssh
 
 #
 ####
