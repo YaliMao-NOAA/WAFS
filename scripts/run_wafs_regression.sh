@@ -60,12 +60,12 @@
 #
 # joblist=
 # Specify packages to test, a full list:
-# joblist="grib2_1p25 blend_1p25 grib2_0p25 blend_0p25 gcip"
-# grib2_1p25 : grib2 at 1.25 degree
-# blend_1p25 : blending at 1.25 degree
-# grib2_0p25 : grib2 at 0.25 degree
-# blend_0p25 : blending at 0.25 degree
-# gcip : gcip
+# joblist="GRIB2_1P25 BLEND_1P25 GRIB2_0P25 BLEND_0P25 GCIP"
+# GRIB2_1P25 : grib2 at 1.25 degree
+# BLEND_1P25 : blending at 1.25 degree
+# GRIB2_0P25 : grib2 at 0.25 degree
+# BLEND_0P25 : blending at 0.25 degree
+# GCIP : gcip
 #
 # workdir=
 # logfile=
@@ -73,6 +73,13 @@
 ######################################################################
 
 set -x
+
+# Transfer the date values of canned data to drivers
+export PDY=20220118
+export cyc=00
+export FHOURS=36
+export SHOUR=36
+export EHOUR=36
 
 # WAFS inventory copy to be regression-tested
 export test_v=/gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/EMC_wafs.work.v6
@@ -83,20 +90,29 @@ build_exe=no
 cmake=no
 
 # Specify packages to test:
-joblist="grib2_1p25 blend_1p25 grib2_0p25 blend_0p25"
-#joblist="grib2_0p25 blend_0p25"
-#joblist="grib2_1p25 blend_1p25"
+joblist="GRIB2_1P25 BLEND_1P25 GRIB2_0P25 BLEND_0P25 GCIP"
+#joblist="GRIB2_0P25 BLEND_0P25 GCIP"
+#joblist="GRIB2_1P25 BLEND_1P25"
+joblist="GCIP"
 
 #load module
-module load prod_util/1.1.0
+module load prod_util
 
 # find machine
-mac=$(hostname | cut -c1-1)
-if [ $mac = v -o $mac = m  ] ; then   # WCOSS_D (venus and mars)
+if [[ `hostname` =~ ^[v|m] ]] ; then # Dell (venus and mars) 
   export machine=dell
   export basedir=/gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/regression_wafs
   export workdir=/gpfs/dell3/ptmp/$USER/regression_wafs
-  export cmp_grib2_grib2=/u/Yali.Mao/bin/cmp_grib2_grib2_new # 0: different 1: same
+  export cmp_grib2_grib2=$basedir/ush/cmp_grib2_grib2 # 0: different 1: same
+  # To use wgrib2 by cmp_grib2_grib2_new
+  module load grib_util/1.1.1
+elif [[ `hostname` =~ ^[d|c]login ]] ; then # WCOSS2 (dogwood and cactus)
+  export machine=wcoss2
+  export basedir=/lfs/h2/emc/vpppg/noscrub/Yali.Mao/git/regression_wafs
+  export workdir=/lfs/h2/emc/ptmp/$USER/regression_wafs
+  export cmp_grib2_grib2=$basedir/ush/cmp_grib2_grib2 # 0: different 1: same
+  # To use wgrib2 by cmp_grib2_grib2_new
+  module load wgrib2/2.0.8
 fi
 
 mkdir -p $workdir/log
@@ -131,49 +147,55 @@ fi
 jobid_list=""
 
 cd $workdir
+
 for ajob in $joblist ; do
   # grib2 G45 data at 1.25 degree
-  if [ $ajob = "grib2_1p25" ]; then
+  if [ $ajob = "GRIB2_1P25" ]; then
      driver=run_JGFS_WAFS_GRIB2.${machine}
-     outputfile=out.grib2_1p25.wafs
+     outputfile=out.GRIB2_1P25.wafs
   # blending at 1.25 degree
-  elif [ $ajob = "blend_1p25" ]; then
+  elif [ $ajob = "BLEND_1P25" ]; then
      driver=run_JGFS_WAFS_BLENDING.${machine}
-     outputfile=out.blend_1p25.wafs
+     outputfile=out.BLEND_1P25.wafs
   # grib2 data at 0.25 degree
-  elif [ $ajob = "grib2_0p25" ]; then
+  elif [ $ajob = "GRIB2_0P25" ]; then
      driver=run_JGFS_WAFS_GRIB2_0P25.${machine}
-     outputfile=out.grib2_0p25.wafs
+     outputfile=out.GRIB2_0P25.wafs
   # blending at 0.25 degree
-  elif [ $ajob = "blend_0p25" ]; then
+  elif [ $ajob = "BLEND_0P25" ]; then
      driver=run_JGFS_WAFS_BLENDING_0P25.${machine}
-     outputfile=out.blend_0p25.wafs
+     outputfile=out.BLEND_0P25.wafs
   # GCIP
-  elif [ $ajob = "gcip" ]; then
+  elif [ $ajob = "GCIP" ]; then
      driver=run_JGFS_WAFS_GCIP.${machine}
-     outputfile=out.gcip.wafs
+     outputfile=out.GCIP.wafs
   fi
+
+  export testname="WAFS $ajob"
 
   if [ $cmake = "yes" ] ; then
       cp $basedir/driver/$driver .
   else
       cp $basedir/driver.v6/$driver .
   fi
+
   sed -e "s|^#BSUB -oo.*|#BSUB -oo $workdir/log/$outputfile|" \
       -e "s|^#BSUB -eo.*|#BSUB -eo $workdir/log/$outputfile|" \
       -e "s|^#BSUB -J.*|#BSUB -J $ajob|" -i $driver
 
-  if   [[ $ajob = "blend_1p25" ]] && [[ $joblist =~ "grib2_1p25" ]] ; then
-      # blend_1p25 is a downstream of grib2_1p25 
-      status=`bsub -w "done(grib2_1p25)" < $driver`
-  elif [[ $ajob = "blend_0p25" ]] && [[ $joblist =~ "grib2_0p25" ]]; then
-      # blend_0p25 is a downstream of grib2_0p25 
-      status=`bsub -w "done(grib2_0p25)" < $driver`
+  if   [[ $ajob = "BLEND_1P25" ]] && [[ $joblist =~ "GRIB2_1P25" ]] ; then
+      # BLEND_1P25 is a downstream of GRIB2_1P25 
+      status=`bsub -w "done(GRIB2_1P25)" < $driver`
+  elif [[ $ajob = "BLEND_0P25" ]] && [[ $joblist =~ "GRIB2_0P25" ]]; then
+      # BLEND_0P25 is a downstream of GRIB2_0P25 
+      status=`bsub -w "done(GRIB2_0P25)" < $driver`
   else
       status=`bsub < $driver`
   fi
   job_id=`echo $status | cut -d'<' -f2|cut -d'>' -f1`
   jobid_list="$jobid_list $job_id"
+
+
 done
 
 #get run time for each test

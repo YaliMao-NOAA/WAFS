@@ -61,7 +61,7 @@ export gfs_ver=v16.0.0
 ############################################
 # user defined
 ############################################
-export PDY=20210917
+export PDY=${PDY:-20210917}
 export cyc=${cyc:-00}
 
 # gfs_atmos_wafs_grib2 for generating global WAFS on grid 45
@@ -109,8 +109,8 @@ export HOMEgfs=$test_v
 ############################################
 # run the job
 #############################################
-export SHOUR=36
-export EHOUR=36
+export SHOUR=${SHOUR:-36}
+export EHOUR=${EHOUR:-36}
 export FHOUT_GFS=3
 
 sh $HOMEgfs/jobs/JGFS_ATMOS_WAFS_GRIB2_0P25
@@ -121,7 +121,5 @@ sh $HOMEgfs/jobs/JGFS_ATMOS_WAFS_GRIB2_0P25
 fh=$SHOUR
 
 export filelist="gfs.t${cyc}z.wafs_0p25_unblended.f${fh}.grib2"
-
-export testname="WAFS GRIB2.0P25"
 
 sh $basedir/ush/compare_data.sh

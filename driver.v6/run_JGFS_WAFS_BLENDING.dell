@@ -62,7 +62,7 @@ export gfs_ver=v16.0.0
 ############################################
 # user defined
 ############################################
-export PDY=20210917
+export PDY=${PDY:-20210917}
 export cyc=${cyc:-00}
 
 # gfs_atmos_wafs_blending for blending icing turbulence of US and UK
@@ -116,8 +116,8 @@ export HOMEgfs=$test_v
 ############################################
 # run the job
 #############################################
-export SHOUR=36
-export EHOUR=36
+export SHOUR=${SHOUR:-36}
+export EHOUR=${EHOUR:-36}
 export FHINC=03
 
 sh $HOMEgfs/jobs/JGFS_ATMOS_WAFS_BLENDING
@@ -130,7 +130,5 @@ fh=$SHOUR
 export filelist="WAFS_blended_${PDY}${cyc}f${fh}.grib2 \
                  wmo/grib2.t${cyc}z.WAFS_blended_f${fh}"
 export fileUK="new.EGRR_WAFS_unblended_20210917_00z_t36.grib2"
-
-export testname="WAFS BLENDING.1P25"
 
 sh $basedir/ush/compare_data.sh
