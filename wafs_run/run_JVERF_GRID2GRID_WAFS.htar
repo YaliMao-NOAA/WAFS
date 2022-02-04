@@ -5,6 +5,12 @@
 # In case 1, done in cronjob
 # In case 2/3, done in run_JVERF_GRID2GRID_WAFS.cron
 
+# For verification of aviation products at 1.25 degree
+# Case 1: if COMINROOT is empty, archive GFIP(ICIP) from dev machine
+#         (Run by a cronjob, archive the last recent 7 days of $vday)
+# Case 2: if COMINROOT is not empty, prepare analysis and forecast u/v/t/ICIP data
+#         (Called by run_JVERF_GRID2GRID_WAFS.cron, analysis on $vday, forecast on $vday-2 to $vday. May need GFIP archived in case 1) 
+
 set -xa
 
 vday=${1:-`$NDATE -24 | cut -c 1-8`}

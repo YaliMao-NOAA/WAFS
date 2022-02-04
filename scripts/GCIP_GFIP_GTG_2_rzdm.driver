@@ -25,17 +25,19 @@ logfile=$TMP/GCIP_GFIP_GTG_2_rzdm.working/gfipgcipgtg2rzdm.$cyc
 rm $logfile
 script=$HOMEsave/scripts/GCIP_GFIP_GTG_2_rzdm.job
 
+nfhours=13
+
 if [ $MACHINE = "dell" ] ; then
     module load CFP/2.0.1
-    export MPIRUN="mpirun -n 13 cfp"
+    export MPIRUN="mpirun -n $nfhours cfp"
     SUB=bsub
-    $SUB -q debug -P GFS-DEV -o $logfile -e $logfile -n 13 -cwd $TMP -W 00:15  -J $jobname -R span[ptile=1] -R affinity[core] < $script
+    $SUB -q debug -P GFS-DEV -o $logfile -e $logfile -n $nfhours -cwd $TMP -W 00:15  -J $jobname -R span[ptile=1] -R affinity[core] < $script
 #    $SUB < $script
 elif [ $MACHINE = "hera" ] ; then
     export MPIRUN="srun"
     SUB=sbatch
     ACCOUNT=ovp
-    ${SUB} -A ${ACCOUNT} -t 00:15:00 -N 13 -q batch -J ${jobname} -o ${logfile} ${script}
+    ${SUB} -A ${ACCOUNT} -t 00:15:00 -N $nfhours -q batch -J ${jobname} -o ${logfile} ${script}
 fi
 
 ############################
@@ -51,7 +53,7 @@ ic=1
 while [ $ic -le 180 ] ; do
     lines=`cat $TMP/GCIP_GFIP_GTG_2_rzdm.working/GCIP_GFIP_GTG_2_rzdm.list | wc -l`
 
-    if [ $lines -eq 13 ] ; then
+    if [ $lines -eq $nfhours ] ; then
 	ssh ymao@emcrzdm.ncep.noaa.gov "mkdir -p $remoteData"
 	rsync -avP $DATAgrib2/* ${remoteServer}:${remoteData}/.
 

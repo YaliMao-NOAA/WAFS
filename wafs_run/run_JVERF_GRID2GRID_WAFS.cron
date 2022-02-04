@@ -7,7 +7,7 @@
 #
 ########################################################
 
-#1 run_JVERF_GRID2GRID_WAFS.cron (it can be run independently from run_JVERF_GRID2GRID_WAFS.loop)
+#1 run_JVERF_GRID2GRID_WAFS.cron (it can be run independently, or from run_JVERF_GRID2GRID_WAFS.loop)
 #2 run_JVERF_GRID2GRID_WAFS.htar
 #3 run_JVERF_GRID2GRID_WAFS.sh
 
@@ -142,7 +142,7 @@ day=`echo $vday | cut -c1-6`
 htar -Pcvf /NCEPDEV/emc-global/5year/Yali.Mao/wafs_vsdb/${envirp}.${envirv}/$day/$vday.vsdb.tar `find wafs.vrfy.${envirp}_${envirv}.vsdb/wafs -name "*$vday*" -size +1c -type f`
 
 ########################################################
-### transfer vsdb to tempest and save to            ####
+### transfer vsdb to RZDM and save to               ####
 ### /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/vsdb  #### 
 ########################################################
 dataDir=wafs.vrfy.${envirp}_${envirv}.vsdb/wafs
