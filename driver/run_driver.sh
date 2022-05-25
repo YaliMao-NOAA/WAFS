@@ -16,11 +16,15 @@ driver="run_JGFS_WAFS_${job}.$MACHINE"
 PDY=20220503
 HOMEgfs=/lfs/h2/emc/vpppg/noscrub/Yali.Mao/git/fork.implement2023
 #FHOURS=18
-EHOUR=18
+EHOUR=
 cyc=06
 ICAO2023=yes
 COMPATH=/lfs/h2/emc/vpppg/noscrub/Yali.Mao/wafs2023input/com/gfs
-#COMPATH=/lfs/h1/ops/prod/com/gfs
+#For blending
+if [[ $job =~ 'BLENDING' ]] ; then
+    COMPATH=/lfs/h2/emc/vpppg/noscrub/Yali.Mao/wafs_dwn2023/com/gfs
+    DCOMROOT=/lfs/h2/emc/vpppg/noscrub/Yali.Mao/dcom
+fi
 FHOUT_GFS=1
 
 sed -e "s|PDY=.*|PDY=$PDY|" -e "s|HOMEgfs=.*|HOMEgfs=$HOMEgfs|" \
@@ -42,6 +46,9 @@ if [[ ! -z $FHOUT_GFS ]] ; then
 fi
 if [[ ! -z $COMPATH ]] ; then
     sed -e "s|COMPATH=.*|COMPATH=$COMPATH|" -i $TMP/$driver
+fi
+if [[ ! -z $DCOMROOT ]] ; then
+    sed -e "s|DCOMROOT=.*|DCOMROOT=$DCOMROOT|" -i $TMP/$driver
 fi
 
 qsub < $TMP/$driver
