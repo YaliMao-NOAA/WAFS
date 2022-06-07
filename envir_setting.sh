@@ -254,7 +254,7 @@ elif [[ `hostname` =~ ^[l|s]login ]] ; then
 elif [[ `hostname` =~ ^[d|c]login ]] ; then
 #=====================================================#
   export MACHINE=wcoss2
-  alias qjobs='qstat | grep Yali.Mao'
+  alias qjobs='qstat | grep yali.mao'
   alias git="git --no-pager"
 
   #========== dogwood/cactus ====================#
@@ -287,7 +287,7 @@ elif [[ `hostname` =~ ^[d|c]login ]] ; then
   PATH=$PATH:/apps/prod/hpss
   export PATH
 
-  export NOSCRUB=/lfs/h2/emc/vpppg/noscrub/Yali.Mao
+  export NOSCRUB=/lfs/h2/emc/vpppg/noscrub/yali.mao
   if [ ! -e $HOMEnoscrub ] ; then
       export HOMEnoscrub=$NOSCRUB
   fi
@@ -295,7 +295,7 @@ elif [[ `hostname` =~ ^[d|c]login ]] ; then
   export HOMEgit=$HOMEnoscrub/git
   export G2CTL=$HOMEgit/save/grads/g2ctl.new
 
-  export TMP='/lfs/h2/emc/ptmp/Yali.Mao'
+  export TMP='/lfs/h2/emc/ptmp/yali.mao'
 
   # From prod_envir
   export NWPROD=$PACKAGEROOT

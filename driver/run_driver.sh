@@ -13,24 +13,28 @@ set -x
 
 driver="run_JGFS_WAFS_${job}.$MACHINE"
 
-PDY=20220503
-HOMEgfs=/lfs/h2/emc/vpppg/noscrub/Yali.Mao/git/fork.implement2023
-#FHOURS=18
+PDY=20220526
+HOMEgfs=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/fork.implement2023
+#FHOURS=48
+SHOUR=
 EHOUR=
 cyc=06
 ICAO2023=yes
-COMPATH=/lfs/h2/emc/vpppg/noscrub/Yali.Mao/wafs2023input/com/gfs
+FHOUT_GFS=
+COMPATH=/lfs/h2/emc/vpppg/noscrub/yali.mao/wafs2023input/com/gfs
 #For blending
 if [[ $job =~ 'BLENDING' ]] ; then
-    COMPATH=/lfs/h2/emc/vpppg/noscrub/Yali.Mao/wafs_dwn2023/com/gfs
-    DCOMROOT=/lfs/h2/emc/vpppg/noscrub/Yali.Mao/dcom
+    COMPATH=/lfs/h2/emc/vpppg/noscrub/yali.mao/wafs_dwn2023/com/gfs
+    DCOMROOT=/lfs/h2/emc/vpppg/noscrub/yali.mao/dcom
 fi
-FHOUT_GFS=1
 
 sed -e "s|PDY=.*|PDY=$PDY|" -e "s|HOMEgfs=.*|HOMEgfs=$HOMEgfs|" \
     $HOMEgfs/driver/$driver > $TMP/$driver
 if [[ ! -z $FHOURS ]] ; then
     sed -e "s|FHOURS=.*|FHOURS=$FHOURS|" -i $TMP/$driver
+fi
+if [[ ! -z $SHOUR ]] ; then
+    sed -e "s|SHOUR=.*|SHOUR=$SHOUR|" -i $TMP/$driver
 fi
 if [[ ! -z $EHOUR ]] ; then
     sed -e "s|EHOUR=.*|EHOUR=$EHOUR|" -i $TMP/$driver
