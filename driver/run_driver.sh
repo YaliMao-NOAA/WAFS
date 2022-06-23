@@ -17,7 +17,7 @@ if [ $job = GRIB ] ; then
     driver="run_JGFS_WAFS.$MACHINE"
 fi
 
-PDY=20220609
+PDY=20220623
 HOMEgfs=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/fork.implement2023
 #FHOURS=48
 SHOUR=
@@ -26,6 +26,8 @@ cyc=06
 ICAO2023=yes
 FHOUT_GFS=
 COMPATH=/lfs/h2/emc/vpppg/noscrub/yali.mao/wafs2023input/com/gfs
+#for GCIP
+#COMPATH=/lfs/h1/ops/prod/com/gfs
 #For blending
 if [[ $job =~ 'BLENDING' ]] ; then
     if [ $job = 'BLENDING' ] ; then
@@ -44,6 +46,7 @@ if [[ $job =~ 'BLENDING' ]] ; then
 	    DCOMROOT=/lfs/h2/emc/vpppg/noscrub/yali.mao/dcom_2022
 	fi
     fi
+    COMPATH=/lfs/h2/emc/ptmp/yali.mao/wafs_dwn/com/gfs
 fi
 
 sed -e "s|PDY=.*|PDY=$PDY|" -e "s|HOMEgfs=.*|HOMEgfs=$HOMEgfs|" \
