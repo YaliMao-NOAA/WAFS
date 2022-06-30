@@ -1,0 +1,52 @@
+# Collect icing severity data to local machine for verification
+#==================================================
+#wait 10 14 * * * sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/scripts/cp_icesev.sh > /gpfs/dell3/ptmp/Yali.Mao/cp_icesev.log 2>&1
+
+# For operational
+# collect GFIP, GCIP and GTG to rzdm FTP server, plus plotting and maintenance
+# https://www.emc.ncep.noaa.gov/gmb/icao/prod_plot/plot.html
+# for each cycle, takes about 5 mintues to finish all forecasts
+#==================================================
+15 05 * * * export cyc=00; export prod=prod; /bin/bash -l /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.driver > /lfs/h2/emc/ptmp/yali.mao/GCIP_GFIP_GTG_2_rzdm.$cyc 2>&1
+15 11 * * * export cyc=06; export prod=prod; /bin/bash -l /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.driver > /lfs/h2/emc/ptmp/yali.mao/GCIP_GFIP_GTG_2_rzdm.$cyc 2>&1
+15 17 * * * export cyc=12; export prod=prod; /bin/bash -l /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.driver > /lfs/h2/emc/ptmp/yali.mao/GCIP_GFIP_GTG_2_rzdm.$cyc 2>&1
+15 23 * * * export cyc=18; export prod=prod; /bin/bash -l /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.driver > /lfs/h2/emc/ptmp/yali.mao/GCIP_GFIP_GTG_2_rzdm.$cyc 2>&1
+
+
+# Archive GFIP to HPSS from Dell for verification on Hera
+#==================================================
+#wait 00 06  * * * source ~/.bashrc ; sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/wafs_run/run_JVERF_GRID2GRID_WAFS.htar > /gpfs/dell3/ptmp/Yali.Mao/JVERF_GRID2GRID_WAFS.htar.dell.log 2>&1
+
+# Run vsdb verification
+# Save results at $VSDBsave/wafs=/gpfs/dell2/emc/modeling/noscrub/Yali.Mao/vsdb/wafs
+#==================================================
+# Suggestion: 1:30 hours for each run if data available on $COMROOT
+#             10 minutes for wind only
+#             4:30 hours for make up because data needs to extracted from HPSS
+#wait 01 00 * * *  sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/wafs_run/run_JVERF_GRID2GRID_WAFS.loop > /gpfs/dell3/ptmp/Yali.Mao/wafs.vrfy.log 2>&1
+
+# Make up some day
+#40 14  8 * *  export vday=20210420; sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/wafs_run/run_JVERF_GRID2GRID_WAFS.cron prod prod > /gpfs/dell3/ptmp/Yali.Mao/wafs.vrfy.log.$vday 2>&1
+# Make up some day for twind only (data from HPSS)
+#35 13  * * *  export vday=20210423; sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/wafs_run/run_JVERF_GRID2GRID_WAFS.cron prod prod wind > /gpfs/dell3/ptmp/Yali.Mao/wafs.vrfy.log.twind.$vday 2>&1
+
+
+# Plot verification from vsdb (monthly)
+#==================================================
+# observation choices: gfs gcip gcipconus cip
+#--------------------------------------------------
+# Before running, synchronize data from Linux   #
+# rsync -ravP --min-size=1. wd20ym@emc-lw-ymao:/export/emc-lw-ymao/wd20ym/vsdb/wafs/prod.prod/. $VSDBsave/wafs/prod.prod/.
+#--------------------------------------------------
+#wait 01 00 2 * *  export observation=gfs;sh /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/scripts/verify.plot.wafs.cron >/gpfs/dell3/ptmp/Yali.Mao/verify.plot.$observation 2>&1
+#wait 00 01 2 * *  export observation=gcip;sh /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/scripts/verify.plot.wafs.cron >/gpfs/dell3/ptmp/Yali.Mao/verify.plot.$observation 2>&1
+
+# Run GCIP operational in case a satellite is changed
+# between 2 GFS implementations.
+#==================================================
+#55 05 * * * export cyc=00 ; export hb=5 ; sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/scripts/GCIP.prod.rerun.sh 1 > /gpfs/dell3/ptmp/Yali.Mao/gcip.rerun.$cyc 2>&1
+
+# transfer FAA to rzdm (taken from Geoff Manikin) 
+# ftp://ftp.emc.ncep.noaa.gov/gmb/wafs/faa/
+#==================================================
+#25 19  * * *  sh -l /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/wafs_faa/drive_wafs 1 > /gpfs/dell3/ptmp/Yali.Mao/faa.err 2>&1

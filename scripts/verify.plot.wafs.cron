@@ -6,7 +6,7 @@
 # rsync -ravP --min-size=1. wd20ym@emc-lw-ymao:/export/emc-lw-ymao/wd20ym/vsdb/wafs/prod.prod/. $VSDBsave/wafs/prod.prod/.
 #################################################
 
-source ~/.bashrc
+source ~/envir_setting.sh
 # Defined $VSDBsave
 
 set -xa

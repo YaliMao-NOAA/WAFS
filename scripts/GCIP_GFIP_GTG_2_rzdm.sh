@@ -211,7 +211,8 @@ if [ $prod = test ] ; then
   COMIN=$COMOUT
 else
   # COMROOT is pre-defined in job for para
-  COMIN=$COMROOT/gfs/$prod/gfs.$PDY/$cyc/atmos
+  gfsVer=`ls $COMROOT/gfs | tail -1`
+  COMIN=$COMROOT/gfs/$gfsVer/gfs.$PDY/$cyc/atmos
 fi
 
 ########################################################

@@ -27,6 +27,7 @@ elif [ $MACHINE = "hera" ] ; then
     script=GCIP_GFIP_GTG_2_rzdm.plot.sh
     rm -r $DATAROOTplot
 fi
+script=GCIP_GFIP_GTG_2_rzdm.sh
 
 # Use MPMD to speed up the processing
 mpmdCMDfile=$TMP/GCIP_GFIP_GTG_2_rzdm.working/gfipgcipgtg2rzdm.cmdfile

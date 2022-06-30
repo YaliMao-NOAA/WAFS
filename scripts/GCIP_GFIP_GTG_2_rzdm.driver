@@ -1,6 +1,6 @@
 #!/bin/sh
 
-source ~/.bashrc
+source ~/envir_setting.sh
 
 set -xa
 
@@ -25,19 +25,29 @@ logfile=$TMP/GCIP_GFIP_GTG_2_rzdm.working/gfipgcipgtg2rzdm.$cyc
 rm $logfile
 script=$HOMEsave/scripts/GCIP_GFIP_GTG_2_rzdm.job
 
-nfhours=13
+export fhours="003 006 009 012 015 018 021 024 027 030 033 036 000"
+# 000 and 003 needs more time than others because of GCIP.
+# Put 000 at the last of the list to be 'waited'
+nfhours=`echo $fhours | wc -w`
 
-if [ $MACHINE = "dell" ] ; then
-    module load CFP/2.0.1
-    export MPIRUN="mpirun -n $nfhours cfp"
-    SUB=bsub
-    $SUB -q debug -P GFS-DEV -o $logfile -e $logfile -n $nfhours -cwd $TMP -W 00:15  -J $jobname -R span[ptile=1] -R affinity[core] < $script
-#    $SUB < $script
+if [ $MACHINE = "wcoss2" ] ; then
+    set -x
+    module load cray-pals/1.0.12
+    module load cfp/2.0.4
+    set -x
+    export MPIRUN="mpiexec -np $nfhours -cpu-bind verbose,core cfp"
+    SUB=qsub
+    $SUB -V -q debug -A GFS-DEV -j oe -o $logfile -l walltime=00:15:00 -l select=1:ncpus=$nfhours:mem=80GB -N $jobname $script
 elif [ $MACHINE = "hera" ] ; then
     export MPIRUN="srun"
     SUB=sbatch
     ACCOUNT=ovp
     ${SUB} -A ${ACCOUNT} -t 00:15:00 -N $nfhours -q batch -J ${jobname} -o ${logfile} ${script}
+elif [ $MACHINE = "dell" ] ; then
+    module load CFP/2.0.1
+    export MPIRUN="mpirun -n $nfhours cfp"
+    SUB=bsub
+    $SUB -q debug -P GFS-DEV -o $logfile -e $logfile -n $nfhours -cwd $TMP -W 00:15  -J $jobname -R span[ptile=1] -R affinity[core] < $script
 fi
 
 ############################
