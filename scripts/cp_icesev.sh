@@ -6,12 +6,14 @@
 
 module load ips/18.0.5.274
 module load prod_util/1.1.6
+module load prod_envir
 set -x
 
 # Make the following 3 changes for different machines
-cd /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/icesev_verif
-COMROOT=/gpfs/dell1/nco/ops/com/gfs/prod
-DCOMROOT=/gpfs/dell1/nco/ops/dcom/prod
+cd /lfs/h2/emc/vpppg/noscrub/yali.mao/icesev_verif
+gfsVer=`ls $COMROOT/gfs | tail -1`
+COMROOT=$COMROOT/gfs/$gfsVer
+DCOMROOT=$DCOMROOT
 
 date=`$NDATE -24`
 nday=2

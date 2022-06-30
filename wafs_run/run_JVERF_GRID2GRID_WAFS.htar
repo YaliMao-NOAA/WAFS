@@ -24,13 +24,16 @@ fhours="06 09 12 15 18 21 24 27 30 33 36"
 ######################################################################
 # Case 1: if COMINROOT is empty, archive GFIP(ICIP)
 #         (a run-alone cronjob)
-# Run only on Dell and only on dev machine
+# Run only on WCOSS2 and only on dev machine
 ######################################################################
+gfsVer=`ls $COMROOT/gfs | tail -1`
+COMROOT=$COMROOT/gfs/$gfsVer
+
 if [ -z $COMINROOT ] ; then
-  if [ $MACHINE = "dell" ] ; then
+  if [ $MACHINE = "wcoss2" ] ; then
     # Only run on dev machine
     thismachine=`hostname | cut -c 1`
-    runmachine=`cat /etc/dev | cut -c 1`
+    runmachine=`grep primary /lfs/h1/ops/prod/config/prodmachinefile | cut -d: -f2 | cut -c 1`
     if [ ! $thismachine = $runmachine ] ; then
         echo "Only run run_JVERF_GRID2GRID_WAFS.cron on Dev machine"
         exit
@@ -45,12 +48,13 @@ if [ -z $COMINROOT ] ; then
 	nfiles=`htar -tvf /NCEPDEV/emc-global/5year/Yali.Mao/gfip/$PDY.tar | grep gfip | wc -l`
 	if [ $nfiles -eq 0 ] ; then
 	    COMROOTgfip=$TMP/gfip
-	    if [ -d $COMROOT/gfs/prod/gfs.$PDY ] ; then
+	    if [ -d $COMROOT/gfs.$PDY ] ; then
 		for cyc in $cycles ; do
 		    COMOUTgfip=$COMROOTgfip/gfs.$PDY/$cyc/atmos
 		    mkdir -p $COMOUTgfip
 		    for fh in $fhours ; do
-			modelfile=$COMROOT/gfs/prod/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.wafs.grb2f0$fh
+			# ICAO2023
+			modelfile=$COMROOT/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.wafs.grb2f0$fh
 			$WGRIB2 $modelfile | grep ":ICIP:" | grep -v ":70 mb:" | $WGRIB2 -i $modelfile -grib $COMOUTgfip/gfs.t${cyc}z.gfip.grb2f$fh
 		    done
 		done
@@ -78,9 +82,9 @@ else
 
     # Extract analysis data if not previously extracted
     if [ ! -d $COMINROOT/gfs.$PDY ] ; then
-	if [[ -d $COMROOT/gfs/prod/gfs.$PDY ]] && [[ $MACHINE = "dell" ]] ; then
+	if [[ -d $COMROOT/gfs.$PDY ]] && [[ $MACHINE = "wcoss2" ]] ; then
 	    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	    # On Dell, if data is still available at COM, copy it
+	    # On WCOSS2, if data is still available at COM, copy it
 	    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	    for cyc in $cycles ; do
 		COMIN=$COMINROOT/gfs.$PDY/$cyc/atmos
@@ -123,9 +127,9 @@ else
 	nfiles=`ls $COMINROOT/gfs.$PDY/18/atmos | wc -l`
 	if [ $nfiles -le 3 ] ; then
 
-	    if [[ -d $COMROOT/gfs/prod/gfs.$PDY ]] && [[ $MACHINE = "dell" ]] ; then
+	    if [[ -d $COMROOT/gfs/prod/gfs.$PDY ]] && [[ $MACHINE = "wcoss2" ]] ; then
 		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-		# On Dell, if data is still available at COM, copy it
+		# On WCOSS2, if data is still available at COM, copy it
 		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 		for cyc in $cycles ; do
 		    COMIN=$COMINROOT/gfs.$PDY/$cyc/atmos
@@ -162,7 +166,7 @@ else
 		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 		mkdir -p $COMINROOT/$PDY # For extracting DCOM data
 
-		### extract GFIP (high resolution) (archived from Dell)
+		### extract GFIP (high resolution) (archived from WCOSS2)
 		cd $COMINROOT
 		htar -xvf  /NCEPDEV/emc-global/5year/Yali.Mao/gfip/$PDY.tar
 

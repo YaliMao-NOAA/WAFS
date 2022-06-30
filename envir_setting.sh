@@ -301,6 +301,16 @@ elif [[ `hostname` =~ ^[d|c]login ]] ; then
   export OUTPUT=$OPSROOT/output
   export OUTPUTP=/lfs/h1/ops/para/output
 
+  function devmachine(){
+    # Only run on dev machine
+    thismachine=`hostname | cut -c 1`
+    runmachine=`grep primary /lfs/h1/ops/prod/config/prodmachinefile | cut -d: -f2 | cut -c 1`
+    if [[ ! $thismachine = $runmachine ]] ; then
+        echo "Not a dev machine"
+        return 1
+    fi
+  }
+
 #=====================================================#
 else
 #=====================================================#
@@ -364,6 +374,16 @@ else
   export PATH
 
   export GIT_EXEC_PATH=/usrx/local/dev/packages/git/2.14.3/libexec/git-core
+
+  function devmachine(){
+    # Only run on dev machine
+    thismachine=`hostname | cut -c 1`
+    runmachine=`cat /etc/dev | cut -c 1`
+    if [[ ! $thismachine = $runmachine ]] ; then
+        echo "Not a dev machine"
+        return 1
+    fi
+  }
 
 #=====================================================#
 fi
