@@ -1,9 +1,5 @@
 export LANG=en_US.UTF-8
 
-if [ $HOMEnoscrub != $NOSCRUB ] ; then
-   alias syncgit='rsync -avP $HOMEgit/. $NOSCRUB/git/. --delete'
-fi
-
 # check whether the verification cronjob is turned on yet
 if [[ `hostname` =~ ^[g|t|l|s][0-9]{1} ]] ; then
   a="`ls /gpfs/*/ptmp/Yali.Mao/vsdb/grid2grid/wafs/blndmean_gcipconus*.vsdb`"
