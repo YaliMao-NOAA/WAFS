@@ -6,6 +6,7 @@ if [ $MACHINE = "wcoss2" ] ; then
  moduledir=`dirname $(readlink -f ../modulefiles/verf)`
  module use ${moduledir}/verf
  module load v3.0.12-$MACHINE
+ export FC=ftn
 elif [ $MACHINE = "dell" ] ; then
  . $MODULESHOME/init/bash
  moduledir=`dirname $(readlink -f ../modulefiles/verf)`
@@ -17,13 +18,13 @@ else
  moduledir=`dirname $(readlink -f ../modulefiles/verf)`
  module use ${moduledir}
  module load verf/v3.0.12
+ export FC=ifort
 fi
 
 set -xa
 module list
 
 echo IP_LIB4= $IP_INC4 $IP_LIB4
-export FC=ftn
 
 curdir=`pwd`
 
