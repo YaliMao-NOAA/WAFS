@@ -52,17 +52,15 @@ LIBS     = $(WRFIO_LIB) \
            $(BACIO_LIB4) \
            $(CRTM_LIB)
 
-FC=	ifort
-
 .f.o:
-	$(FC) $(FFLAGS) $(INCS) -c $<
+	$(FC) $(FFLAGS) $(INCS) -c -C $<
 
 .f90.o:
-	$(FC) $(FFLAGS) $(INCS) -c $<
+	$(FC) $(FFLAGS) $(INCS) -c -C $<
 
 
 $(CMD):	$(OBJS)
-	$(FC)  -o $(@)  grid2grid.f  $(OBJS)  $(LIBS)
+	$(FC) -o $(@)  grid2grid.f  $(OBJS)  $(LIBS)
 
 clean:
 	@rm -f $(OBJS)

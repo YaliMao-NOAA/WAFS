@@ -1,10 +1,12 @@
-#!/bin/sh
-
 SHELL=/bin/sh
 
 #. ~/.bashrc
-module purge
-if [ $MACHINE = "dell" ] ; then
+module reset
+if [ $MACHINE = "wcoss2" ] ; then
+ moduledir=`dirname $(readlink -f ../modulefiles/verf)`
+ module use ${moduledir}/verf
+ module load v3.0.12-$MACHINE
+elif [ $MACHINE = "dell" ] ; then
  . $MODULESHOME/init/bash
  moduledir=`dirname $(readlink -f ../modulefiles/verf)`
  module use ${moduledir}
@@ -17,11 +19,11 @@ else
  module load verf/v3.0.12
 fi
 
-set -x
-
+set -xa
 module list
 
 echo IP_LIB4= $IP_INC4 $IP_LIB4
+export FC=ftn
 
 curdir=`pwd`
 

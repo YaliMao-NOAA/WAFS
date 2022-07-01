@@ -4,8 +4,6 @@
 # list what we use
 .SUFFIXES: .f90 .o
 
-FC=	ifort
-
 INCS   = -I$(SFCIO_INC4) \
            -I$(NEMSIO_INC) \
            -I$(SIGIO_INC4) \
