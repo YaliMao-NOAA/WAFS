@@ -28,7 +28,7 @@ if [[ `hostname` =~ ^h ]] ; then
 
   export HOMEgit=/scratch2/NCEPDEV/ovp/Yali.Mao/git
   export G2CTL=$HOMEgit/save/grads/g2ctl.hera
-  export VSDBsave=/scratch1/NCEPDEV/global/Yali.Mao/vsdb
+  export VSDBsave=$HOMEnoscrub/vsdb
 
   export TMP='/scratch2/NCEPDEV/stmp3/Yali.Mao'
 
@@ -303,7 +303,7 @@ else
   export MACHINE=dell
 
   #========== Venus/Mars ====================#
-  export HOMEnoscrub=/gpfs/dell2/emc/modeling/noscrub
+  export HOMEnoscrub=/gpfs/dell2/emc/modeling/noscrub/Yali.Mao
 
   export HOMEgit=$HOMEnoscrub/git
   export G2CTL=$HOMEgit/save/grads/g2ctl.new
