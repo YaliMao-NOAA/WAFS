@@ -67,6 +67,7 @@ C
         call st_numb (p2,d2,ier)
 
         r1 = float(d2)
+        r2 = 0.
 
         if(pp2.eq.1) then
           r2 = r1 /10.0

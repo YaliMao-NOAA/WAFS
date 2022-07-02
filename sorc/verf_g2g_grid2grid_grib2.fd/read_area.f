@@ -38,6 +38,8 @@ C-----------------------------------------------------------------------
 C
 C   Note:  no adherence to format is necessary for this input.
 C
+	p2 = ""
+
         READ (5,'(A)', END=100) input
         CALL ST_CLST ( input, ' ', ' ', 10, substr, nx, ier )
 	CALL ST_NUMB ( substr (1), num, ier )

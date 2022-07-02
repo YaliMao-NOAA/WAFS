@@ -86,6 +86,7 @@ C
 	    	    END IF
 		END IF
 
+		if(iend .gt. isize) exit
 CZeus modify to skip space: by Binbin Zhou cccccccccccccccccccccccccc
             do while ( strbuf (iend+1:iend+1) .eq. ' ' )
              iend = iend + 1
