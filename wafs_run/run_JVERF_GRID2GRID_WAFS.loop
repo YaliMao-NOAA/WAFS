@@ -1,5 +1,4 @@
 #!/bin/bash
-. ~/.bashrc
 
 # RZDM is a temporary storage, the target place is local Linux machine
 
@@ -9,6 +8,14 @@
 #4 run_JVERF_GRID2GRID_WAFS.sh
 
 set -xa
+if [ -z $MACHINE ] ; then
+    . ~/envir_setting.sh
+fi
+# If run on WCOSS2, only run on dev machine.
+if [ $MACHINE_DEV = 'no' ] ; then
+    echo "This is not a dev $MACHINE machine, quit job"
+    exit 1
+fi
 date
 
 cd $TMP
@@ -16,7 +23,9 @@ scp ymao@emcrzdm.ncep.noaa.gov:~/wafs.vrfy/wafs.vrfy.vsdb.date .
 
 # Make up the missing dates in case of computer switching
 PDY1=`cat wafs.vrfy.vsdb.date`
-if [[ $MACHINE = "hera" ]] ; then
+if [[ $MACHINE = "wcoss2" ]] ; then
+    PDY2=`$NDATE -24 | cut -c1-8`
+elif [[ $MACHINE = "hera" ]] ; then
     PDY2=`$NDATE -48 | cut -c1-8`
 elif [[ $MACHINE = "dell" ]] ; then
     PDY2=`$NDATE -24 | cut -c1-8`

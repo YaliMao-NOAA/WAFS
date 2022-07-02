@@ -11,7 +11,7 @@
 # add atmos to $COMROOT related locations in jobs/JVERF_GRID2GRID_WAFS (actually ush/verf_g2g_get_wafs.sh) after 2021 GFS implementation
 ########################################################
 
-# 1) /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/wafs_run/run_JVERF_GRID2GRID_WAFS.sh
+# 1) $HOMEsave/wafs_run/run_JVERF_GRID2GRID_WAFS.sh
 # 2) HOMEverf_g2g=$HOMEgit/verf_g2g.v3.0.12
 #      jobs/JVERF_GRID2GRID_WAFS
 #      scripts/exverf_g2g_wafs.sh.ecf

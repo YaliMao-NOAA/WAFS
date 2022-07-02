@@ -1,22 +1,26 @@
 #!/bin/sh
 
-# source ~/.bashrc 
-# Don't need it. Why?
-# In case 1, done in cronjob
-# In case 2/3, done in run_JVERF_GRID2GRID_WAFS.cron
-
 # For verification of aviation products at 1.25 degree
 # Case 1: if COMINROOT is empty, archive GFIP(ICIP) from dev machine
 #         (Run by a cronjob, archive the last recent 7 days of $vday)
 # Case 2: if COMINROOT is not empty, prepare analysis and forecast u/v/t/ICIP data
 #         (Called by run_JVERF_GRID2GRID_WAFS.cron, analysis on $vday, forecast on $vday-2 to $vday. May need GFIP archived in case 1) 
 
+####################################
+# . ~/envir_setting.sh is for case 1
+####################################
 set -xa
+if [ -z $MACHINE ] ; then
+    . ~/envir_setting.sh
+fi
+# If run on WCOSS2, only run on dev machine.
+if [ $MACHINE_DEV = 'no' ] ; then
+    echo "This is not a dev $MACHINE machine, quit job"
+    exit 1
+fi
 
 vday=${1:-`$NDATE -24 | cut -c 1-8`}
 COMINROOT=$2 # For verification, COMINROOT is the folder of input data
-
-PDY=$vday
 
 cycles="00 06 12 18"
 fhours="06 09 12 15 18 21 24 27 30 33 36"
@@ -31,14 +35,6 @@ COMROOT=$COMROOT/gfs/$gfsVer
 
 if [ -z $COMINROOT ] ; then
   if [ $MACHINE = "wcoss2" ] ; then
-    # Only run on dev machine
-    thismachine=`hostname | cut -c 1`
-    runmachine=`grep primary /lfs/h1/ops/prod/config/prodmachinefile | cut -d: -f2 | cut -c 1`
-    if [ ! $thismachine = $runmachine ] ; then
-        echo "Only run run_JVERF_GRID2GRID_WAFS.cron on Dev machine"
-        exit
-    fi
-
     # Check data which still available at COMROOT but not archived because of computer unavailability
     for past_day in 7 6 5 4 3 2 1 0 ; do
         hour=$((past_day*24))
@@ -91,9 +87,9 @@ else
 		mkdir -p $COMIN
 
 		### copy GCIP
-		cp $COMROOT/gfs/prod/gfs.$PDY/$cyc/atmos/gfs.t*z.gcip.f00.grib2 $COMIN/.
+		cp $COMROOT/gfs.$PDY/$cyc/atmos/gfs.t*z.gcip.f00.grib2 $COMIN/.
 		### copy u/v/t analysis
-		cp $COMROOT/gfs/prod/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.pgrb2.0p25.anl $COMIN/.
+		cp $COMROOT/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.pgrb2.0p25.anl $COMIN/.
 	    done
 	else
 	    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -127,7 +123,7 @@ else
 	nfiles=`ls $COMINROOT/gfs.$PDY/18/atmos | wc -l`
 	if [ $nfiles -le 3 ] ; then
 
-	    if [[ -d $COMROOT/gfs/prod/gfs.$PDY ]] && [[ $MACHINE = "wcoss2" ]] ; then
+	    if [[ -d $COMROOT/gfs.$PDY ]] && [[ $MACHINE = "wcoss2" ]] ; then
 		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 		# On WCOSS2, if data is still available at COM, copy it
 		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -137,19 +133,19 @@ else
 
 		    for fh in $fhours ; do
 			### copy GFIP
-			modelfile=$COMROOT/gfs/prod/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.wafs.grb2f0$fh
+			modelfile=$COMROOT/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.wafs.grb2f0$fh
                         $WGRIB2 $modelfile | grep ":ICIP:" | grep -v ":70 mb:" | $WGRIB2 -i $modelfile -grib $COMIN/gfs.t${cyc}z.gfip.grb2f$fh
 			### copy u/v/t forecast
-			cp $COMROOT/gfs/prod/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.pgrb2.0p25.f0$fh $COMIN/.
+			cp $COMROOT/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.pgrb2.0p25.f0$fh $COMIN/.
 			### copy BLENDED icing forecast
-			cp $COMROOT/gfs/prod/gfs.$PDY/$cyc/atmos/WAFS_blended_${PDY}${cyc}f${fh}.grib2 $COMIN/.
+			cp $COMROOT/gfs.$PDY/$cyc/atmos/WAFS_blended_${PDY}${cyc}f${fh}.grib2 $COMIN/.
 			### copy US icing forecast
-			cp $COMROOT/gfs/prod/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.wafs_grb45f${fh}.grib2 $COMIN/.
+			cp $COMROOT/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.wafs_grb45f${fh}.grib2 $COMIN/.
 
 			### copy UK icing forecast
 			COMINuk=$COMINROOT/$PDY/wgrbbul/ukmet_wafs
 			mkdir -p $COMINuk
-			cp $DCOMROOT/prod/$PDY/wgrbbul/ukmet_wafs/EGRR_WAFS_unblended_${PDY}_${cyc}z_t${fh}.grib2 $COMINuk/.
+			cp $DCOMROOT/$PDY/wgrbbul/ukmet_wafs/EGRR_WAFS_unblended_${PDY}_${cyc}z_t${fh}.grib2 $COMINuk/.
 		    done
 		done
 
@@ -158,8 +154,8 @@ else
 		mkdir -p $COMINcip
 		COMINfip=$COMINROOT/$PDY/wgrbbul/adds_fip
 		mkdir -p $COMINfip
-		cp $DCOMROOT/prod/$PDY/wgrbbul/adds_cip/ADDS_CIP_* $COMINcip
-		cp $DCOMROOT/prod/$PDY/wgrbbul/adds_fip/ADDS_FIP_* $COMINfip
+		cp $DCOMROOT/$PDY/wgrbbul/adds_cip/ADDS_CIP_* $COMINcip
+		cp $DCOMROOT/$PDY/wgrbbul/adds_fip/ADDS_FIP_* $COMINfip
 	    else
 		#~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 		# Have to extract from HPSS

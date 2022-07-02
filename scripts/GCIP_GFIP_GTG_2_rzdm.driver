@@ -1,9 +1,15 @@
 #!/bin/sh
 
-source ~/envir_setting.sh
-
 set -xa
 
+if [ -z $MACHINE ] ; then
+    . ~/envir_setting.sh
+fi
+# If run on WCOSS2, only run on dev machine.
+if [ $MACHINE_DEV = 'no' ] ; then
+    echo "This is not a dev $MACHINE machine, quit job"
+    exit 1
+fi
 date
 
 export prod=${prod:-prod}

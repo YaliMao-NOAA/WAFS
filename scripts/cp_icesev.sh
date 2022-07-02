@@ -4,10 +4,16 @@
 #    to noscrub/Yali.Mao/icesev_verif
 # 2. Not HPSS related
 
-module load ips/18.0.5.274
-module load prod_util/1.1.6
-module load prod_envir
-set -x
+set -xa
+
+if [ -z $MACHINE ] ; then
+    . ~/envir_setting.sh
+fi
+# If run on WCOSS2, only run on dev machine.
+if [ $MACHINE_DEV = 'no' ] ; then
+    echo "This is not a dev $MACHINE machine, quit job"
+    exit 1
+fi
 
 # Make the following 3 changes for different machines
 cd /lfs/h2/emc/vpppg/noscrub/yali.mao/icesev_verif

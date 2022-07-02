@@ -11,9 +11,9 @@
 #2 run_JVERF_GRID2GRID_WAFS.htar
 #3 run_JVERF_GRID2GRID_WAFS.sh
 
-# 1.0) (On Dell) $HOMEsave/wafs_run/run_JVERF_GRID2GRID_WAFS.htar to archive GFIP
+# 1.0) (On WCOSS2) $HOMEsave/wafs_run/run_JVERF_GRID2GRID_WAFS.htar to archive GFIP
 # 1.1) (On Hera) $HOMEsave/wafs_run/run_JVERF_GRID2GRID_WAFS.htar to extract all data
-#      (On Dell) $HOMEsave/wafs_run/run_JVERF_GRID2GRID_WAFS.htar to prepare(extract or copy) all data
+#      (On WCOSS2) $HOMEsave/wafs_run/run_JVERF_GRID2GRID_WAFS.htar to prepare(extract or copy) all data
 # 2) $HOMEsave/wafs_run/run_JVERF_GRID2GRID_WAFS.sh
 # 3) HOMEverf_g2g=$HOMEgit/verf_g2g.v3.0.12
 #      jobs/JVERF_GRID2GRID_WAFS
@@ -27,25 +27,18 @@
 #      !!! needs compiling !!! $HOMEverf_g2g/exec/verf_g2g_grid2grid_grib2.$MACHINE
 
 #*******************************************************
-# To load $HOMEsave/envir_setting.sh
-if [ -z $MACHINE ] ; then
-. ~/.bashrc
-fi
-
 set -x
 
-date
-
-# If run on Dell, then only on Dev machine
-if [ $MACHINE = "dell" ] ; then
-    # Only run on dev machine
-    thismachine=`hostname | cut -c 1`
-    runmachine=`cat /etc/dev | cut -c 1`
-    if [ ! $thismachine = $runmachine ] ; then
-	echo "Only run run_JVERF_GRID2GRID_WAFS.cron on Dev machine"
-	exit
-    fi
+if [ -z $MACHINE ] ; then
+    . ~/envir_setting.sh
 fi
+# If run on WCOSS2, only run on dev machine.
+if [ $MACHINE_DEV = 'no' ] ; then
+    echo "This is not a dev $MACHINE machine, quit job"
+    exit 1
+fi
+
+date
 
 ########################################################
 #### arguments, (export)vday                        ####
@@ -92,6 +85,19 @@ if [[ $MACHINE = "hera" ]] ; then
   SUB=sbatch
   ${SUB} -A ${ACCOUNT} -t 04:30:00 -N 1 -q batch -J ${jobname} -o ${logfile} ${script}
 
+elif [[ $MACHINE = "wcoss2" ]] ; then
+
+  # verfication is 1 day before today unless it's predefined.
+  export vday=${vday:-`$NDATE -24 | cut -c1-8`}
+
+  # Prepare data (copy from COM or extract from HPSS)
+  sh $htarscript $vday $COMIN
+
+  # Run verficiation
+  SUB=qsub
+#  $SUB -q debug -P GFS-DEV -o $logfile -e $logfile -n 1 -cwd $TMP -W 4:30  -J $jobname -R span[ptile=1] -R affinity[core] < $script
+  sh $script
+
 elif [[ $MACHINE = "dell" ]] ; then
 
   # verfication is 1 day before today unless it's predefined.
@@ -106,6 +112,8 @@ elif [[ $MACHINE = "dell" ]] ; then
   sh $script
   
 fi
+
+exit
 
 ########################################################
 ### Archive vsdb results to HPSS                    ####
