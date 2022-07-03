@@ -5,11 +5,18 @@
 #================================================
 # rsync -ravP --min-size=1. wd20ym@emc-lw-ymao:/export/emc-lw-ymao/wd20ym/vsdb/wafs/prod.prod/. $VSDBsave/wafs/prod.prod/.
 #################################################
-
-source ~/envir_setting.sh
-# Defined $VSDBsave
-
 set -xa
+
+if [ -z $MACHINE ] ; then
+    . ~/envir_setting.sh
+fi
+# If run on WCOSS2, only run on dev machine.
+if [ $MACHINE_DEV = 'no' ] ; then
+    echo "This is not a dev $MACHINE machine, quit job"
+    exit 1
+fi
+echo "VSDB plotting starts"
+date
 
 # export observation=gfs
 # export observation=gcip
@@ -21,14 +28,24 @@ set -xa
 export observation=${observation:-gcip}
 
 export sdate=20181201
-export edate=`$NDATE -72 | cut -c1-8`
+export edate=${edate:-`$NDATE -72 | cut -c1-8`}
 
 export envirp=prod
 export envirv=prod
 echo $edate $observation
 script=$HOMEgit/verf_g2g.v3.0.12/grads/verify_exp_step2.sh
 $script
+
+echo "VSDB plotting ends"
+date
+
 exit
+
+
+
+
+
+
 
 SUB=sbatch
 ACCOUNT=ovp

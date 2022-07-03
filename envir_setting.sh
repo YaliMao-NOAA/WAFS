@@ -373,7 +373,7 @@ else
 fi
 #=====================================================#
 export HOMEsave=$HOMEgit/save
-export GRADS=$HOMEsave/grads
+export HOMEgrads=$HOMEsave/grads
 
 export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/$NWPROD/lib
 

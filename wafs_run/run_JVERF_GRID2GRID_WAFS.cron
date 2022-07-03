@@ -113,7 +113,6 @@ elif [[ $MACHINE = "dell" ]] ; then
   
 fi
 
-exit
 
 ########################################################
 ### Archive vsdb results to HPSS                    ####
@@ -168,12 +167,12 @@ else
   if [[ ! `hostname` =~ ^h ]] ; then
     remote=/home/people/emc/ymao/wafs.vrfy/vsdb
     remoteServer=ymao@emcrzdm.ncep.noaa.gov
-    rsync -ravP --min-size=1 $TMP/$dataDir/. ${remoteServer}:${remote}/.
+    rsync -ravP --min-size=1 $TMP/$dataDir/*${vday}* ${remoteServer}:${remote}/.
   fi
 
   # to wcoss/save folder
   mkdir -p $VSDBsave/wafs/${envirp}.${envirv}
-  rsync -avP --min-size=1 $TMP/$dataDir/. $VSDBsave/wafs/${envirp}.${envirv}/.
+  rsync -avP --min-size=1 $TMP/$dataDir/*${vday}* $VSDBsave/wafs/${envirp}.${envirv}/.
 fi
 
 date
