@@ -2,7 +2,7 @@ c        real fcst, obsv, threshold
 c        character *10 symbol
 c        character*1 updown
 c        real F, O, H
-c        symbol = 'FHO>'
+c        symbol = 'CFHO>  (5:5)'
 c        fcst = 2.20
 c        obsv = 1.01
 c        threshold = 1.5
@@ -24,7 +24,7 @@ c   Modified: 03/2015 Y Mao: for icing ROC
 
         subroutine getcfho(x, xthr, y, ythr, symbol, f, h, o)
         real, intent(in) :: x, y, xthr, ythr
-        character(len=10), intent(in) :: symbol
+        character(len=1), intent(in) :: symbol
         real, intent(out) :: f, h, o
 
         o = 0.

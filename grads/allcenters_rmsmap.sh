@@ -32,7 +32,7 @@ export doftp=
 export vsdbhome=                 ;#script home, CHANGE TO YOUR SCRIPT HOLDER 
 export srcgrads=$vsdbhome/grads
 export PTMP=
-export GRADSBIN=                 	 ;#grads executable
+export GRADS=                 	 ;#grads executable
 export IMGCONVERT=                       ;#image magic converter 
 export FC=                               ;#compiler
 export FFLAG=                            ;#compiler options
@@ -427,7 +427,7 @@ endwhile
 *-------
 'quit'
 EOF1
-$GRADSBIN/grads -bcp "run ${var}p_${outname1}.gs"
+$GRADS -bcp "run ${var}p_${outname1}.gs"
 
 #============================================
 elif [[ $PLOTTYPES =~ "2" ]] ; then
@@ -649,7 +649,7 @@ if($nmd >9); mdc.10=${mdnamec[9]} ;endif
   'set vpage off'
 'quit'
 EOF1
-$GRADSBIN/grads -bcp "run ${var}pmean_${outname1}.gs"
+$GRADS -bcp "run ${var}pmean_${outname1}.gs"
 
 #============================================
 fi #  $PLOTTYPES
@@ -821,7 +821,7 @@ endwhile
 *-------
 'quit'
 EOF1
-$GRADSBIN/grads -bcp "run ${var}_${outname1}${lev}.gs"
+$GRADS -bcp "run ${var}_${outname1}${lev}.gs"
 
 #============================================
 elif [[ $PLOTTYPES =~ "4" ]] ; then
@@ -1057,7 +1057,7 @@ if($nmd >9); mdc.10=${mdnamec[9]} ;endif
  'set vpage off'
 'quit'
 EOF1
-$GRADSBIN/grads -bcp "run ${var}dieoff_${outname1}${lev}.gs"
+$GRADS -bcp "run ${var}dieoff_${outname1}${lev}.gs"
 
 #============================================
 elif [[ $PLOTTYPES =~ "5" ]] ; then
@@ -1212,7 +1212,7 @@ endwhile
 *-------
 'quit'
 EOF1
-$GRADSBIN/grads -bcp "run ${var}_${outname1}${lev}.gs"
+$GRADS -bcp "run ${var}_${outname1}${lev}.gs"
 
 
 #============================================

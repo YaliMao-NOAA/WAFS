@@ -9,18 +9,28 @@
 #  runs and make maps using GrADS.
 #----------------------------------------------------------------------
 #----------------------------------------------------------------------
-source ~/.bashrc
+if [ -z $MACHINE ] ; then
+    . ~/envir_setting.sh
+fi
+# If run on WCOSS2, only run on dev machine.
+if [ $MACHINE_DEV = 'no' ] ; then
+    echo "This is not a dev $MACHINE machine, quit job"
+    exit 1
+fi
 
 set -xa
 
 LOGNAME=`whoami`
 WEBSERVER="ymao@emcrzdm.ncep.noaa.gov"
 WEBDIR="/home/www/emc/htdocs/gmb/icao"
-if [[ `hostname` =~ ^tfe ]] ; then
-   export doftp="NO"
-else
+if [[ $MACHINE = 'wcoss2' ]] ; then
    export doftp="YES"
+   export FC=ftn
+else
+   export doftp="NO"
+   export FC=ifort
 fi
+export FFLAG="-O2 -mcmodel large -shared-intel -convert big_endian -FR"			# intel compiler options
 
 ############# Set up environments ##################
 
@@ -31,10 +41,12 @@ echo $GrADS_ROOT
 
 export vsdbhome=$HOMEgit/verf_g2g.v3.0.12	#script home
 export PTMP=`dirname $TMP`		#temporary directory without user name
-if [[ `hostname` =~ ^h ]] ; then
-   export GRADSBIN=/apps/grads/2.0.2/bin
+if [[ $MACHINE = 'wcoss2' ]] ; then
+   export GRADS=grads 
+elif [[ $MACHINE = 'hera' ]] ; then
+   export GRADS=/apps/grads/2.0.2/bin/grads
 else
-   export GRADSBIN=$GrADS_ROOT/bin		#GrADS executables
+   export GRADS=$GrADS_ROOT/bin/grads		#GrADS executables
 fi
 
 #image magic converter
@@ -43,6 +55,9 @@ if [ $MACHINE = hera ] ; then
   module load contrib
   module load anaconda/latest
   export PYTHON=/contrib/anaconda/anaconda3/latest/bin/python
+elif [ $MACHINE = wcoss2 ] ; then
+    imagemagick=imagemagick/7.0.8-7
+    export PYTHON=python
 elif [ $MACHINE = dell ] ; then
   imagemagick=imagemagick/6.9.9-25
   module load python/2.7.14
@@ -59,10 +74,6 @@ export IMGCONVERT=`module display $imagemagick  2>&1 | grep bin | sed s/[\(\",\)
 if [[ ! $IMGCONVERT == */convert ]] ; then
     IMGCONVERT=$IMGCONVERT/convert
 fi
-
-export FC=ifort							# intel compiler
-export FFLAG="-O2 -mcmodel large -shared-intel -convert big_endian -FR"			# intel compiler options
-
 
 ## -- data and output directories
 #gather vsdb stats and put in a central location
@@ -159,7 +170,7 @@ for region in  $regions ; do
 
     # change all related variables in allcenters_rmsmap.sh
     genericlist="WEBSERVER WEBDIR doftp"
-    genericlist="$genericlist vsdbhome PTMP GRADSBIN IMGCONVERT FC FFLAG PYTHON"
+    genericlist="$genericlist vsdbhome PTMP GRADS IMGCONVERT FC FFLAG PYTHON"
     genericlist="$genericlist vsdb_data makemap mapdir scorecard scoredir"
     genericlist="$genericlist sdate edate vlength fcycle"
     specificlist="obsvlist mdlist reglist rundir vhrlist vtype vnamlist levlist"
