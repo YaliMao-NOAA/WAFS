@@ -10,13 +10,13 @@ export OUTPUT_FILE=${4:-"netcdf"}
 export COMINP=/lfs/h1/ops/prod/com/gfs/v16.2
 
 #Working directory
-tmp=/lfs/h2/emc/ptmp/Yali.Mao
+tmp=/lfs/h2/emc/ptmp/yali.mao
 mkdir -p $tmp/outputs
 diroutp=$tmp/outputs
 
 #UPP location
 export svndir=`pwd`
-export rundir=/lfs/h2/emc/ptmp/Yali.Mao/upp
+export rundir=/lfs/h2/emc/ptmp/yali.mao/upp
 
 module load prod_util/2.0.5
 
