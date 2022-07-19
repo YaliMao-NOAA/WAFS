@@ -139,18 +139,14 @@ if [ $MACHINE = "hera" ] ; then # On Hera, verification is done by submitting a 
 	fi
 	if [ $sleeptime -eq $sleepmax ] ; then
 	    echo " *** FATA ERROR: No verification data is generated for $vday"
-	    exit
+	    exit 2
 	fi
     done
 fi
 
-cd $TMP
-day=`echo $vday | cut -c1-6`
-htar -Pcvf /NCEPDEV/emc-global/5year/Yali.Mao/wafs_vsdb/${envirp}.${envirv}/$day/$vday.vsdb.tar `find wafs.vrfy.${envirp}_${envirv}.vsdb/wafs -name "*$vday*" -size +1c -type f`
-
 ########################################################
-### transfer vsdb to RZDM and save to               ####
-### /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/vsdb  #### 
+### archive the verification results to HPSS         ###
+### transfer vsdb to RZDM and save to $VSDBsave      ###
 ########################################################
 dataDir=wafs.vrfy.${envirp}_${envirv}.vsdb/wafs
 
@@ -161,8 +157,12 @@ if [[ $allfilesize  -eq 0 ]] ; then
   echo "No ${envirp}.${envirv} vsdb result is generated. Please check."
   echo "No ${envirp}.${envirv} vsdb result is generated on $vday." | mailx -s "VSDB verification is not generated." yali.mao@noaa.gov
   date
-  exit 1
+  exit 3
 else
+  # to HPSS
+  day=`echo $vday | cut -c1-6`
+  htar -Pcvf /NCEPDEV/emc-global/5year/Yali.Mao/wafs_vsdb/${envirp}.${envirv}/$day/$vday.vsdb.tar `find wafs.vrfy.${envirp}_${envirv}.vsdb/wafs -name "*$vday*" -size +1c -type f`
+
   # to rzdm server (linux computer will download data from rzdm server then delete 
   if [[ ! `hostname` =~ ^h ]] ; then
     remote=/home/people/emc/ymao/wafs.vrfy/vsdb

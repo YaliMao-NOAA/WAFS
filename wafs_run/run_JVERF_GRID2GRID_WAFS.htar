@@ -77,7 +77,8 @@ else
     yearmonth=`echo $PDY | cut -c1-6`
 
     # Extract analysis data if not previously extracted
-    if [ ! -d $COMINROOT/gfs.$PDY ] ; then
+    nfiles=`ls $COMINROOT/gfs.$PDY/18/atmos/*gcip* | wc -l`
+    if [ $nfiles -eq 0 ] ; then
 	if [[ -d $COMROOT/gfs.$PDY ]] && [[ $MACHINE = "wcoss2" ]] ; then
 	    #~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	    # On WCOSS2, if data is still available at COM, copy it
