@@ -113,6 +113,7 @@ alias lsd='ls -ld */'
 alias lsda='echo "`ls -Cd .*/`" "`ls -Cd */`"'
 
 alias mydegrib2='$HOMEsave/grib2/degrib2'
+alias clean='find . -type d -empty -delete'
 
 #alias g130='function _g130() {
 #               wgrib2 $1 -new_grid_winds earth -new_grid lambert:-95:25 -126.138:451:13545 16.281:337:13545 $1.g130

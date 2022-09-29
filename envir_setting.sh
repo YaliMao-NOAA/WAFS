@@ -278,6 +278,9 @@ elif [[ `hostname` =~ ^[d|c]login ]] ; then
   module use /apps/test/lmodules/core/
   module load GrADS/2.2.2
 
+  # display/convert images
+  module load imagemagick/7.0.8-7
+
   module load python/3.8.6
 
   PATH=$PATH:/apps/prod/hpss
