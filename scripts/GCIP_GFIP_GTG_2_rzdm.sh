@@ -227,20 +227,21 @@ if [[ $fhour = "000" ]] || [[ $fhour = "003" ]] ; then
   cp $modelfile  $DATAgrib2/.
 else
   # GFIP needs to be extracted from wafs file
-  modelfile=$COMIN/gfs.t${cyc}z.wafs.grb2f$fh
-  $WGRIB2 $modelfile | grep ":ICIP:" | grep -v ":70 mb:" | $WGRIB2 -i $modelfile -grib gfs.t${cyc}z.master.grb2f$fh
-
+  modelfile=$COMIN/gfs.t${cyc}z.wafs_icao.grb2f$fh
+  $WGRIB2 $modelfile | egrep ":ICIP:|:EDPARM:|:ICESEV:|parm=37:" | grep -v ":70 mb:" | $WGRIB2 -i $modelfile -grib gfs.t${cyc}z.master.grb2f$fh
   #Convert to 0.25 degree for blending purpose
   opt1=' -set_grib_type same -new_grid_winds earth '
-  opt2=' -new_grid_interpolation bilinear '
+  opt21=' -new_grid_interpolation bilinear -if'
+  opt22="(:ICESEV|parm=37):"
+  opt23=' -new_grid_interpolation neighbor -fi '
   opt3=' -set_bitmap 1 -set_grib_max_bits 16 '
   newgrid="latlon 0:1440:0.25 90:721:-0.25"
 
   $WGRIB2 gfs.t${cyc}z.master.grb2f$fh \
-          $opt1 $opt2 $opt3 \
+          $opt1 $opt21 $opt22 $opt23 $opt3 \
           -new_grid $newgrid $DATAgrib2/gfs.t${cyc}z.wafs_0p25.grb2f$fh
 
-  cat $COMIN/gfs.t${cyc}z.wafs_0p25.f${fh}.grib2 >> $DATAgrib2/gfs.t${cyc}z.wafs_0p25.grb2f$fh
+#  cat $COMIN/gfs.t${cyc}z.wafs_0p25.f${fh}.grib2 >> $DATAgrib2/gfs.t${cyc}z.wafs_0p25.grb2f$fh
 
 fi
 
