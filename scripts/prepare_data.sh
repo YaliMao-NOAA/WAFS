@@ -17,10 +17,19 @@
 # hsi (login in HPSS)
 # rm /NCEPDEV/emc-global/2year/Yali.Mao/regression_data*
 
+set -x
+
 basedir=`pwd`
 
-PDY=20220118
-cyc=00
+# new input data
+COMROOTgfs_in=/lfs/h1/ops/prod/com/gfs/v16.3
+# old/operational output data to be compared
+COMROOTgfs_out=/lfs/h1/ops/prod/com/gfs/v16.2
+
+COMROOTradar=/lfs/h1/ops/prod/com/radarl2/v1.2
+
+PDY=20221014
+cyc=12
 cyc1=03 # cyc1=cyc+03
 fh=36
 
@@ -59,15 +68,17 @@ echo "Prepare input data under $basedir"
 mkdir -p gfs.$PDY/$cyc/atmos
 
 # for GRIB2
-cp $COMROOT/gfs/*/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.master.grb2f$fh3  gfs.$PDY/$cyc/atmos/.
-cp $COMROOT/gfs/*/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.master.grb2if$fh3 gfs.$PDY/$cyc/atmos/.
+cp $COMROOTgfs_in/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.master.grb2f$fh3  gfs.$PDY/$cyc/atmos/.
+cp $COMROOTgfs_in/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.master.grb2if$fh3 gfs.$PDY/$cyc/atmos/.
 # For GRIB2 and GRIB2_0P25
-cp $COMROOT/gfs/*/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.wafs.grb2f$fh3  gfs.$PDY/$cyc/atmos/.
-cp $COMROOT/gfs/*/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.wafs.grb2if$fh3 gfs.$PDY/$cyc/atmos/.
+cp $COMROOTgfs_in/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.wafs.grb2f$fh3  gfs.$PDY/$cyc/atmos/.
+cp $COMROOTgfs_in/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.wafs.grb2f$fh3.idx gfs.$PDY/$cyc/atmos/.
+cp $COMROOTgfs_in/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.wafs_icao.grb2f$fh3 gfs.$PDY/$cyc/atmos/.
+cp $COMROOTgfs_in/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.wafs_icao.grb2f$fh3.idx gfs.$PDY/$cyc/atmos/.
 # blending uses GRIB2 output as the input, so no data preparation
 # For GCIP
-cp $COMROOT/gfs/*/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.master.grb2f000 gfs.$PDY/$cyc/atmos/.
-cp $COMROOT/gfs/*/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.master.grb2f003 gfs.$PDY/$cyc/atmos/.
+cp $COMROOTgfs_in/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.master.grb2f000 gfs.$PDY/$cyc/atmos/.
+cp $COMROOTgfs_in/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.master.grb2f003 gfs.$PDY/$cyc/atmos/.
 
 # UK data for blending
 mkdir -p $DCOM/$PDY/wgrbbul/ukmet_wafs
@@ -86,36 +97,36 @@ cp -r $DCOMROOT/$PDY/b007 $DCOM/$PDY/.
 
 # Radar data for GCIP
 mkdir -p radar.$PDY
-cp $COMROOT/*/*/radar.$PDY/refd3d.t${cyc}z.grb2f00  radar.$PDY/.
-cp $COMROOT/*/*/radar.$PDY/refd3d.t${cyc1}z.grb2f00 radar.$PDY/.
+cp $COMROOTradar/radar.$PDY/refd3d.t${cyc}z.grb2f00  radar.$PDY/.
+cp $COMROOTradar/radar.$PDY/refd3d.t${cyc1}z.grb2f00 radar.$PDY/.
 
 #==================================
 # Part 2: data_out
 #==================================
-mkdir -p $basedir/data_out
-cd $basedir/data_out
-mkdir -p $basedir/data_out/wmo
+mkdir -p $basedir/data_out/$PDY
+cd $basedir/data_out/$PDY
+mkdir -p $basedir/data_out/$PDY/wmo
 echo "Prepare output data under $basedir"
 
 # GRIB2 1p25
-#cp $COMROOT/gfs/prod/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.awf_grb45f${fh}.grib2  gfs.t${cyc}z.awf_grb45f${fh}.grib2.$machine
-cp $COMROOT/gfs/prod/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.wafs_grb45f${fh}.grib2 gfs.t${cyc}z.wafs_grb45f${fh}.grib2.$machine
-cp $COMROOT/gfs/prod/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.wafs_grb45f${fh}.nouswafs.grib2 gfs.t${cyc}z.wafs_grb45f${fh}.nouswafs.grib2.$machine
+#cp $COMROOTgfs_out/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.awf_grb45f${fh}.grib2  gfs.t${cyc}z.awf_grb45f${fh}.grib2
+cp $COMROOTgfs_out/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.wafs_grb45f${fh}.grib2 gfs.t${cyc}z.wafs_grb45f${fh}.grib2
+cp $COMROOTgfs_out/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.wafs_grb45f${fh}.nouswafs.grib2 gfs.t${cyc}z.wafs_grb45f${fh}.nouswafs.grib2
 
-#cp $COMROOT/gfs/prod/gfs.$PDY/$cyc/atmos/wmo/grib2.t${cyc}z.awf_grbf${fh}.45 wmo/grib2.t${cyc}z.awf_grbf${fh}.45.$machine
-cp $COMROOT/gfs/prod/gfs.$PDY/$cyc/atmos/wmo/grib2.t${cyc}z.wafs_grbf${fh}.45 wmo/grib2.t${cyc}z.wafs_grbf${fh}.45.$machine
-cp $COMROOT/gfs/prod/gfs.$PDY/$cyc/atmos/wmo/grib2.t${cyc}z.wafs_grb_wifsf${fh}.45 wmo/grib2.t${cyc}z.wafs_grb_wifsf${fh}.45.$machine
+#cp $COMROOTgfs_out/gfs.$PDY/$cyc/atmos/wmo/grib2.t${cyc}z.awf_grbf${fh}.45 wmo/grib2.t${cyc}z.awf_grbf${fh}.45
+cp $COMROOTgfs_out/gfs.$PDY/$cyc/atmos/wmo/grib2.t${cyc}z.wafs_grbf${fh}.45 wmo/grib2.t${cyc}z.wafs_grbf${fh}.45
+cp $COMROOTgfs_out/gfs.$PDY/$cyc/atmos/wmo/grib2.t${cyc}z.wafs_grb_wifsf${fh}.45 wmo/grib2.t${cyc}z.wafs_grb_wifsf${fh}.45
 
 # blend 1p25
-cp $COMROOT/gfs/prod/gfs.$PDY/$cyc/atmos/WAFS_blended_${PDY}${cyc}f${fh}.grib2 WAFS_blended_${PDY}${cyc}f${fh}.grib2.$machine
-cp $COMROOT/gfs/prod/gfs.$PDY/$cyc/atmos/wmo/grib2.t${cyc}z.WAFS_blended_f${fh} wmo/grib2.t${cyc}z.WAFS_blended_f${fh}.$machine
+cp $COMROOTgfs_out/gfs.$PDY/$cyc/atmos/WAFS_blended_${PDY}${cyc}f${fh}.grib2 WAFS_blended_${PDY}${cyc}f${fh}.grib2
+cp $COMROOTgfs_out/gfs.$PDY/$cyc/atmos/wmo/grib2.t${cyc}z.WAFS_blended_f${fh} wmo/grib2.t${cyc}z.WAFS_blended_f${fh}
 
 # GRIB2 0p25
-cp $COMROOT/gfs/prod/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.wafs_0p25_unblended.f${fh}.grib2 gfs.t${cyc}z.wafs_0p25_unblended.f${fh}.grib2.$machine
+cp $COMROOTgfs_out/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.wafs_0p25_unblended.f${fh}.grib2 gfs.t${cyc}z.wafs_0p25_unblended.f${fh}.grib2
 
 # blend 0p25
-cp $COMROOT/gfs/prod/gfs.$PDY/$cyc/atmos/WAFS_0p25_blended_${PDY}${cyc}f${fh}.grib2 WAFS_0p25_blended_${PDY}${cyc}f${fh}.grib2.$machine
+cp $COMROOTgfs_out/gfs.$PDY/$cyc/atmos/WAFS_0p25_blended_${PDY}${cyc}f${fh}.grib2 WAFS_0p25_blended_${PDY}${cyc}f${fh}.grib2
 
 # GCIP
-cp $COMROOT/gfs/prod/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.gcip.f00.grib2  gfs.t${cyc}z.gcip.f00.grib2.$machine
-cp $COMROOT/gfs/prod/gfs.$PDY/$cyc/atmos/gfs.t${cyc1}z.gcip.f00.grib2 gfs.t${cyc1}z.gcip.f00.grib2.$machine
+cp $COMROOTgfs_out/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.gcip.f00.grib2  gfs.t${cyc}z.gcip.f00.grib2
+cp $COMROOTgfs_out/gfs.$PDY/$cyc/atmos/gfs.t${cyc1}z.gcip.f00.grib2 gfs.t${cyc1}z.gcip.f00.grib2

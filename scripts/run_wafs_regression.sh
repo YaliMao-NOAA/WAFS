@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 ######################################################################
 # Start point of doing WAFS regression test
 # Yali Mao Sept 2021
@@ -72,48 +72,48 @@
 #
 ######################################################################
 
+#load module
+
 set -x
 
-# Transfer the date values of canned data to drivers
-export PDY=20220118
-export cyc=00
-export FHOURS=36
-export SHOUR=36
-export EHOUR=36
-
-# WAFS inventory copy to be regression-tested
-export test_v=/gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/EMC_wafs.work.v6
-
-# Build WAFS executable files or not
-build_exe=no
-# Is it cmake version? (yes/no)
-cmake=no
-
-# Specify packages to test:
-joblist="GRIB2_1P25 BLEND_1P25 GRIB2_0P25 BLEND_0P25 GCIP"
-#joblist="GRIB2_0P25 BLEND_0P25 GCIP"
-#joblist="GRIB2_1P25 BLEND_1P25"
-joblist="GCIP"
-
-#load module
 module load prod_util
 
 # find machine
 if [[ `hostname` =~ ^[v|m] ]] ; then # Dell (venus and mars) 
+  module load grib_util/1.1.1
   export machine=dell
   export basedir=/gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/regression_wafs
   export workdir=/gpfs/dell3/ptmp/$USER/regression_wafs
   export cmp_grib2_grib2=$basedir/ush/cmp_grib2_grib2 # 0: different 1: same
   # To use wgrib2 by cmp_grib2_grib2_new
-  module load grib_util/1.1.1
 elif [[ `hostname` =~ ^[d|c]login ]] ; then # WCOSS2 (dogwood and cactus)
+  module load wgrib2/2.0.8
   export machine=wcoss2
-  export basedir=/lfs/h2/emc/vpppg/noscrub/Yali.Mao/git/regression_wafs
+  export basedir=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/regression_wafs
   export workdir=/lfs/h2/emc/ptmp/$USER/regression_wafs
   export cmp_grib2_grib2=$basedir/ush/cmp_grib2_grib2 # 0: different 1: same
   # To use wgrib2 by cmp_grib2_grib2_new
-  module load wgrib2/2.0.8
 fi
+
+# Transfer the date values of canned data to drivers
+export PDY=20221014
+export cyc=12
+export FHOURS=36
+export SHOUR=36
+export EHOUR=36
+
+# WAFS inventory copy to be regression-tested
+export test_v=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/fork.implement2023
+
+# Specify packages to test:
+joblist="GRIB2_1P25 BLEND_1P25 GRIB2_0P25 BLEND_0P25 GCIP"
+#joblist="GRIB2_0P25 BLEND_0P25 GCIP"
+#joblist="GRIB2_1P25 BLEND_1P25"
+
+# Build WAFS executable files or not
+build_exe=no
+# Is it cmake version? (yes/no)
+cmake=no
 
 mkdir -p $workdir/log
 
@@ -179,24 +179,28 @@ for ajob in $joblist ; do
       cp $basedir/driver.v6/$driver .
   fi
 
-  sed -e "s|^#BSUB -oo.*|#BSUB -oo $workdir/log/$outputfile|" \
-      -e "s|^#BSUB -eo.*|#BSUB -eo $workdir/log/$outputfile|" \
-      -e "s|^#BSUB -J.*|#BSUB -J $ajob|" -i $driver
+  sed -e "s|^#PBS -o.*|#PBS -o $workdir/log/$outputfile|" \
+      -e "s|^#PBS -N.*|#PBS -N $ajob|"\  -i $driver
 
   if   [[ $ajob = "BLEND_1P25" ]] && [[ $joblist =~ "GRIB2_1P25" ]] ; then
-      # BLEND_1P25 is a downstream of GRIB2_1P25 
-      status=`bsub -w "done(GRIB2_1P25)" < $driver`
+      # BLEND_1P25 is a downstream of GRIB2_1P25
+      qsub -W depend=afterok:$job_GRIB2_1P25 $driver
   elif [[ $ajob = "BLEND_0P25" ]] && [[ $joblist =~ "GRIB2_0P25" ]]; then
       # BLEND_0P25 is a downstream of GRIB2_0P25 
-      status=`bsub -w "done(GRIB2_0P25)" < $driver`
+      qsub -W depend=afterok:$job_GRIB2_0P25 $driver
+  elif [[ $ajob = "GRIB2_0P25" ]] ; then
+      job_GRIB2_0P25=$(qsub $driver)
+  elif [[ $ajob = "GRIB2_1P25" ]] ; then
+      job_GRIB2_1P25=$(qsub $driver)
   else
-      status=`bsub < $driver`
+      job0=$(qsub -V $driver)
   fi
   job_id=`echo $status | cut -d'<' -f2|cut -d'>' -f1`
   jobid_list="$jobid_list $job_id"
 
-
 done
+
+exit
 
 #get run time for each test
 for job_id in $jobid_list; do

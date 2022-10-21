@@ -1,15 +1,14 @@
 #!/bin/sh
 
 set -x
+echo "current dir=" `pwd`
 
 #############################################
 # compare data with baseline data
 #############################################
 
-cd $COMOUT
-
 for file in $filelist; do
-  if [ -e $file ] ; then
+  if [ -e $COMOUT/$file ] ; then
 
     # compare to UK blended data if it's available
     comparetypes="base"
@@ -25,9 +24,9 @@ for file in $filelist; do
 	else
 	    newtestname=$testname
 	    diffile=${file}.diff
-	    basefile=${file}.$machine
+	    basefile=${file}
 	fi
-	cmp $COMOUT/$file $basedir/data_out/$basefile
+	cmp $COMOUT/$file $basedir/data_out/$PDY/$basefile
 	err=$?
 	if [ $err -eq 0 ] ; then
 	    msg="$newtestname generates bitwise identical file: $file"
@@ -43,9 +42,9 @@ for file in $filelist; do
 	    # If B is a subset of A and the first records are the same,
 	    # cmp_grib2_grib2 A B => no difference
 	    # cmp_grib2_grib2 B A => with error message
-	    $cmp_grib2_grib2 $basedir/data_out/$basefile $file > $diffile
+	    $cmp_grib2_grib2 $basedir/data_out/$PDY/$basefile $COMOUT/$file > $diffile
 	    err1=$?
-	    $cmp_grib2_grib2 $file $basedir/data_out/$basefile
+	    $cmp_grib2_grib2 $COMOUT/$file $basedir/data_out/$PDY/$basefile
 	    err2=$?
 
 	    if [[ $err1 -eq $err2 && $err1 -eq 0 ]] || [[ $err1 -ne $err2 ]] ; then
@@ -56,12 +55,12 @@ for file in $filelist; do
 		fi
 		# List fields of each file
 		# 1. File names
-		echo $basedir/data_out/$basefile  > diffile.prepend
+		echo $basedir/data_out/$PDY/$basefile  > diffile.prepend
 		echo "vs" >> diffile.prepend
 		echo $COMOUT/$file >> diffile.prepend
 
 		# 2. File sizes
-		echo "`stat -c %s $basedir/data_out/$basefile` bytes    vs   `stat -c %s $file` bytes" >> diffile.prepend
+		echo "`stat -c %s $basedir/data_out/$PDY/$basefile` bytes    vs   `stat -c %s $COMOUT/$file` bytes" >> diffile.prepend
 		echo >> diffile.prepend
 
 		# Prepend #1 #2 to $diffile
@@ -69,15 +68,15 @@ for file in $filelist; do
 		echo >> $diffile
 
 		# 3. List of fields side by side
-		$WGRIB2 $basedir/data_out/$basefile | cut -d':' -f1,4- > base.fields
-		$WGRIB2 $file | cut -d':' -f1,4- > this.fields
+		$WGRIB2 $basedir/data_out/$PDY/$basefile | cut -d':' -f1,4- > base.fields
+		$WGRIB2 $COMOUT/$file | cut -d':' -f1,4- > this.fields
 		paste base.fields this.fields |awk -F'\t' '{printf("%-50s %s\n",$1,$2)}' > comp.fields
 
 		# 4. Min, Max and Max difference in percentile
-		$WGRIB2 $basedir/data_out/$basefile -min | cut -d"=" -f2 > base.min
-		$WGRIB2 $file -min | cut -d"=" -f2 > this.min
-		$WGRIB2 $basedir/data_out/$basefile -max | cut -d"=" -f2 > base.max
-		$WGRIB2 $file -max | cut -d"=" -f2 > this.max
+		$WGRIB2 $basedir/data_out/$PDY/$basefile -min | cut -d"=" -f2 > base.min
+		$WGRIB2 $COMOUT/$file -min | cut -d"=" -f2 > this.min
+		$WGRIB2 $basedir/data_out/$PDY/$basefile -max | cut -d"=" -f2 > base.max
+		$WGRIB2 $COMOUT/$file -max | cut -d"=" -f2 > this.max
 		while true ; do
 		    read -r compfield <&3 || break
 		    read -r min1 <&4 || break
@@ -109,10 +108,11 @@ for file in $filelist; do
 		    tail -n $ndiff comp.fields >> $diffile
 		fi
 
-		rm comp.fields base* this*
+#		rm comp.fields base* this*
 	    fi
 	fi
 	postmsg "$logfile" "$msg"
+	cp $diffile $COMOUT/.
     done
 
   else

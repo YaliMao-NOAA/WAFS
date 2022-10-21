@@ -1,0 +1,131 @@
+#!/bin/sh
+
+#PBS -j oe
+#PBS -o /lfs/h2/emc/ptmp/yali.mao/working_wafs/log.wafs_grib2
+#PBS -N wafs_grib2
+#PBS -l walltime=00:30:00
+#PBS -l select=1:ncpus=18:mem=80GB
+#PBS -q debug
+#PBS -A GFS-DEV
+#PBS -V
+##PBS -W umask=022
+
+#As first line, cd to current working directory where the job was submitted from
+#cd $PBS_O_WORKDIR
+
+set -xa
+
+# specify computation resource
+#OpenMP
+#export OMP_NUM_THREADS=128
+#export OMP_PLACES=cores
+#Serial
+export threads=1
+export OMP_NUM_THREADS=$threads
+export MP_LABELIO=yes
+
+############################################
+# Loading module
+############################################
+module purge
+. $MODULESHOME/init/sh 
+module load envvar/1.0
+module load intel/19.1.3.304 PrgEnv-intel/8.1.0 craype/2.7.10
+module load cray-pals/1.0.12
+# For MPMD
+module load cfp/2.0.4
+
+module load libjpeg/9c
+
+module load prod_util/2.0.9
+module load prod_envir/2.0.4
+module load grib_util/1.2.3
+module load wgrib2/2.0.7
+
+module list
+
+############################################
+# required exports!
+############################################
+### envir: prod/dev/para/bkup/ges/test bkup2/ges2/para2/prod2/prd_p6
+export envir=prod
+
+############################################
+# set NET RUN
+############################################
+### NET: gfs/para/parallel-test/nam/rap/ dump/ens/nawips/nesdis/
+export NET=gfs
+export RUN=gfs
+export COMPONENT=${COMPONENT:-atmos}
+
+############################################
+# Specify versions
+############################################
+export gfs_ver=v16.3.0
+
+
+############################################
+# user defined
+############################################
+export PDY=${PDY:-20221018}
+export cyc=${cyc:-00}
+
+# gfs_atmos_wafs_grib2 for generating global WAFS on grid 45
+export job=gfs_atmos_wafs_grib2_${cyc}
+
+export pid=${pid:-$$}
+export jobid=${job}.${pid}
+
+USER=`whoami`
+
+############################################
+# SENDCOM=YES--Copy output file to /com
+# SENDECF=YES--Allow to talk back to ECF
+# SENDDBN=YES--Alert output file to TOC
+# KEEPDATA=NO--Remove temporary working
+############################################
+export SENDCOM=YES
+export SENDDBN=YES
+export SENDDBN_NTC=YES
+export KEEPDATA=YES
+ 
+############################################
+# Define ROOT directories
+############################################
+export NWROOT=/lfs/h2/emc/vpppg/noscrub/yali.mao/git
+
+export DBNROOT=${UTILROOT}/fakedbn
+
+############################################
+# Define DATA, COMOUT and COMIN
+############################################
+export COMIN=$basedir/data_in/gfs.$PDY/$cyc/atmos
+export COMOUT=$workdir/gfs.$PDY
+
+export DATA=$workdir/working_grib2.1p25
+rm -rf $DATA
+
+################################
+# Set up the HOME directory
+################################
+export HOMEgfs=$test_v
+
+############################################
+# run the job
+#############################################
+
+export ICAO2023=no
+export FHOURS=36
+
+sh $HOMEgfs/jobs/JGFS_ATMOS_WAFS_GRIB2
+
+############################################
+# compare data with baseline data
+#############################################
+fh=$FHOURS
+export filelist="gfs.t${cyc}z.awf_grb45f${fh}.grib2 \
+          gfs.t${cyc}z.wafs_grb45f${fh}.grib2 \
+          gfs.t${cyc}z.wafs_grb45f${fh}.nouswafs.grib2"
+
+cd $DATA
+sh $basedir/ush/compare_data.sh
