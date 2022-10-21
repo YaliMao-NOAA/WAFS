@@ -76,25 +76,6 @@
 
 set -x
 
-module load prod_util
-
-# find machine
-if [[ `hostname` =~ ^[v|m] ]] ; then # Dell (venus and mars) 
-  module load grib_util/1.1.1
-  export machine=dell
-  export basedir=/gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/regression_wafs
-  export workdir=/gpfs/dell3/ptmp/$USER/regression_wafs
-  export cmp_grib2_grib2=$basedir/ush/cmp_grib2_grib2 # 0: different 1: same
-  # To use wgrib2 by cmp_grib2_grib2_new
-elif [[ `hostname` =~ ^[d|c]login ]] ; then # WCOSS2 (dogwood and cactus)
-  module load wgrib2/2.0.8
-  export machine=wcoss2
-  export basedir=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/regression_wafs
-  export workdir=/lfs/h2/emc/ptmp/$USER/regression_wafs
-  export cmp_grib2_grib2=$basedir/ush/cmp_grib2_grib2 # 0: different 1: same
-  # To use wgrib2 by cmp_grib2_grib2_new
-fi
-
 # Transfer the date values of canned data to drivers
 export PDY=20221014
 export cyc=12
@@ -109,6 +90,25 @@ export test_v=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/fork.implement2023
 joblist="GRIB2_1P25 BLEND_1P25 GRIB2_0P25 BLEND_0P25 GCIP"
 #joblist="GRIB2_0P25 BLEND_0P25 GCIP"
 #joblist="GRIB2_1P25 BLEND_1P25"
+
+module load prod_util
+
+# find machine
+if [[ `hostname` =~ ^[v|m] ]] ; then # Dell (venus and mars) 
+  module load grib_util/1.1.1
+  export machine=dell
+  export basedir=/gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/regression_wafs
+  export workdir=/gpfs/dell3/ptmp/$USER/regression_wafs
+  export cmp_grib2_grib2=$basedir/ush/cmp_grib2_grib2 # 0: different 1: same
+  # To use wgrib2 by cmp_grib2_grib2_new
+elif [[ `hostname` =~ ^[d|c]login ]] ; then # WCOSS2 (dogwood and cactus)
+  module load wgrib2/2.0.8
+  export machine=wcoss2
+  export basedir=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/regression_wafs
+  export workdir=/lfs/h2/emc/ptmp/$USER/regression_wafs.$PDY
+  export cmp_grib2_grib2=$basedir/ush/cmp_grib2_grib2 # 0: different 1: same
+  # To use wgrib2 by cmp_grib2_grib2_new
+fi
 
 # Build WAFS executable files or not
 build_exe=no
