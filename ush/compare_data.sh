@@ -19,11 +19,11 @@ for file in $filelist; do
     for comparetype in $comparetypes ; do
 	if [[ $comparetype == "uk" ]] ; then
 	    newtestname="$testname (compared to UK)"
-	    diffile=${file}.UK.diff
+	    diffile=$COMOUT/${file}.UK.diff
 	    basefile=$fileUK
 	else
 	    newtestname=$testname
-	    diffile=${file}.diff
+	    diffile=$COMOUT/${file}.diff
 	    basefile=${file}
 	fi
 	cmp $COMOUT/$file $basedir/data_out/$PDY/$basefile
@@ -112,7 +112,6 @@ for file in $filelist; do
 	    fi
 	fi
 	postmsg "$logfile" "$msg"
-	cp $diffile $COMOUT/.
     done
 
   else

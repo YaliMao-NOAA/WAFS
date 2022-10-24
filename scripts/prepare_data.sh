@@ -19,7 +19,8 @@
 
 set -x
 
-basedir=`pwd`
+basedir=${basedir:-`pwd`}
+cd $basedir
 
 # new input data
 COMROOTgfs_in=/lfs/h1/ops/prod/com/gfs/v16.3
@@ -28,10 +29,11 @@ COMROOTgfs_out=/lfs/h1/ops/prod/com/gfs/v16.2
 
 COMROOTradar=/lfs/h1/ops/prod/com/radarl2/v1.2
 
-PDY=20221014
-cyc=12
-cyc1=03 # cyc1=cyc+03
-fh=36
+PDY=${PDY:-20221020}
+cyc=${cyc:-18}
+cyc1=$(( cyc + 3 ))
+cyc1="$(printf "%02d" $(( 10#$cyc1 )) )"
+fh=${FHOURS:-36}
 
 if [ $fh -le 100 ] ; then
   fh3=0$fh

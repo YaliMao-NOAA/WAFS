@@ -77,11 +77,11 @@
 set -x
 
 # Transfer the date values of canned data to drivers
-export PDY=20221014
-export cyc=12
-export FHOURS=36
-export SHOUR=36
-export EHOUR=36
+export PDY=${PDY:-20221020}
+export cyc=${cyc:-18}
+export FHOURS=${FHOURS:-36}
+export SHOUR=$FHOURS
+export EHOUR=$FHOURS
 
 # WAFS inventory copy to be regression-tested
 export test_v=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/fork.implement2023
@@ -104,7 +104,7 @@ if [[ `hostname` =~ ^[v|m] ]] ; then # Dell (venus and mars)
 elif [[ `hostname` =~ ^[d|c]login ]] ; then # WCOSS2 (dogwood and cactus)
   module load wgrib2/2.0.8
   export machine=wcoss2
-  export basedir=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/regression_wafs
+  export basedir=${basedir:-/lfs/h2/emc/vpppg/noscrub/yali.mao/git/regression_wafs}
   export workdir=/lfs/h2/emc/ptmp/$USER/regression_wafs.$PDY
   export cmp_grib2_grib2=$basedir/ush/cmp_grib2_grib2 # 0: different 1: same
   # To use wgrib2 by cmp_grib2_grib2_new

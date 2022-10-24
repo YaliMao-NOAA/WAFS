@@ -1,0 +1,13 @@
+#!/bin/bash
+
+set -x
+
+export basedir=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/regression_wafs
+
+export PDY=20221024
+export cyc=00
+export FHOURS=36
+
+sh $basedir/scripts/prepare_data.sh
+
+sh $basedir/scripts/run_wafs_regression.sh
