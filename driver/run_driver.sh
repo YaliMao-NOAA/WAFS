@@ -17,15 +17,15 @@ if [ $job = GRIB ] ; then
     driver="run_JGFS_WAFS.$MACHINE"
 fi
 
-PDY=20220623
+PDY=20221014
 HOMEgfs=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/fork.implement2023
 #FHOURS=48
 SHOUR=
 EHOUR=
-cyc=06
-ICAO2023=yes
+cyc=00
+ICAO2023=no
 FHOUT_GFS=
-COMPATH=/lfs/h2/emc/vpppg/noscrub/yali.mao/wafs2023input/com/gfs
+COMPATH=/lfs/h1/ops/para/com/gfs
 #for GCIP
 #COMPATH=/lfs/h1/ops/prod/com/gfs
 #For blending
@@ -36,14 +36,14 @@ if [[ $job =~ 'BLENDING' ]] ; then
 	else
 	    COMPATH=/lfs/h2/emc/vpppg/noscrub/yali.mao/wafs_dwn2022_1p25/com/gfs
 	fi
-	DCOMROOT=/lfs/h2/emc/vpppg/noscrub/yali.mao/dcom_2022
+#	DCOMROOT=/lfs/h2/emc/vpppg/noscrub/yali.mao/dcom_2022
     else # BLENDING_0P25
 	if [ "$ICAO2023" = 'yes' ] ; then
 	    COMPATH=/lfs/h2/emc/vpppg/noscrub/yali.mao/wafs_dwn2023_5.3/com/gfs
-	    DCOMROOT=/lfs/h2/emc/vpppg/noscrub/yali.mao/dcom_2023
+#	    DCOMROOT=/lfs/h2/emc/vpppg/noscrub/yali.mao/dcom_2023
 	else
 	    COMPATH=/lfs/h2/emc/vpppg/noscrub/yali.mao/wafs_dwn2022/com/gfs
-	    DCOMROOT=/lfs/h2/emc/vpppg/noscrub/yali.mao/dcom_2022
+#	    DCOMROOT=/lfs/h2/emc/vpppg/noscrub/yali.mao/dcom_2022
 	fi
     fi
     COMPATH=/lfs/h2/emc/ptmp/yali.mao/wafs_dwn/com/gfs
@@ -78,5 +78,11 @@ fi
 if [[ ! -z $DCOMROOT ]] ; then
     sed -e "s|DCOMROOT=.*|DCOMROOT=$DCOMROOT|" -i $TMP/$driver
 fi
-
 qsub < $TMP/$driver
+
+if [[ $job = 'GRIB' ]] ; then
+    for fcsthrs in 00 03 06 09 12 15 18 21 24 27 30 33 36 42 48 54 60 66 72 78 84 90 96 102 108 114 120 ; do
+	sed -e "s|fcsthrs=.*|fcsthrs=$fcsthrs|" -i $TMP/$driver
+	qsub < $TMP/$driver
+    done
+fi
