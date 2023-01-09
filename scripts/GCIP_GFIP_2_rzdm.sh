@@ -143,7 +143,7 @@ done
 mv *.png $COMPLOT/.
 cd $COMPLOT/.
 rm -r $DATAPLOT
-ksh $WCOSSSAVE/scripts/ftp_wafs.sh exp plot $PDY$cyc
+sh $WCOSSSAVE/scripts/ftp_wafs.sh exp plot $PDY$cyc
 
 ########################################################
 #### Step 4: cleanup if data  48 hours before       ####
@@ -154,5 +154,5 @@ dates="$dates "`/nwprod/util/exec/ndate -1 ${PDY}00 | cut -c1-8`
 if [[ $cyc <  18 ]] ; then
     dates="$dates "`/nwprod/util/exec/ndate -25 ${PDY}00 | cut -c1-8`
 fi
-ssh ymao@emcrzdm "ksh ~/scripts/wafs_gcip_maintenance.sh $runGCIP $cyc $dates"
-ssh ymao@emcrzdm "ksh ~/scripts/wafs_web.ftp_maintenance.sh $runGFIP $runGCIP $cyc $dates"
+ssh ymao@emcrzdm "sh ~/scripts/wafs_gcip_maintenance.sh $runGCIP $cyc $dates"
+ssh ymao@emcrzdm "sh ~/scripts/wafs_web.ftp_maintenance.sh $runGFIP $runGCIP $cyc $dates"

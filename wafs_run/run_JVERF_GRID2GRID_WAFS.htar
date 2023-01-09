@@ -41,8 +41,19 @@ if [ -z $COMINROOT ] ; then
         past=`$NDATE -$hour ${vday}00`
 
         PDY=`echo ${past} | cut -c 1-8`
-	nfiles=`htar -tvf /NCEPDEV/emc-global/5year/Yali.Mao/gfip/$PDY.tar | grep gfip | wc -l`
-	if [ $nfiles -eq 0 ] ; then
+
+	cd $TMP
+	extract='YES'
+	htar -tvf /NCEPDEV/emc-global/5year/Yali.Mao/gfip/20221031.tar | grep gfs | grep gfip > run_JVERF_GRID2GRID_WAFS.tmp
+	filesizes=`awk '{ print $4}' run_JVERF_GRID2GRID_WAFS.tmp`
+	for size in $filesizes ; do
+	    if [ $size -gt 0 ] ; then
+		extract='NO'
+		break
+	    fi
+	done
+	
+	if [ $extract='YES' ] ; then
 	    COMROOTgfip=$TMP/gfip
 	    if [ -d $COMROOT/gfs.$PDY ] ; then
 		for cyc in $cycles ; do
@@ -50,14 +61,16 @@ if [ -z $COMINROOT ] ; then
 		    mkdir -p $COMOUTgfip
 		    for fh in $fhours ; do
 			# ICAO2023
-			modelfile=$COMROOT/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.wafs.grb2f0$fh
+			modelfile=$COMROOT/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.wafs_icao.grb2f0$fh
 			$WGRIB2 $modelfile | grep ":ICIP:" | grep -v ":70 mb:" | $WGRIB2 -i $modelfile -grib $COMOUTgfip/gfs.t${cyc}z.gfip.grb2f$fh
 		    done
 		done
 
 		cd $COMROOTgfip
-		#filesize=`du -c ./gfs.$PDY/*/atmos/*gfip* | tail -n 1 | cut -f 1`
-		htar -Pcvf /NCEPDEV/emc-global/5year/Yali.Mao/gfip/$PDY.tar ./gfs.$PDY/*/atmos/*gfip*
+		filesize=`du -c ./gfs.$PDY/*/atmos/*gfip* | tail -n 1 | cut -f 1`
+		if [ $filesize -lt 0 ] ; then
+		    htar -Pcvf /NCEPDEV/emc-global/5year/Yali.Mao/gfip/$PDY.tar ./gfs.$PDY/*/atmos/*gfip*
+		fi
 	    else
 		echo "Warning: no GFIP data available to be archived on $PDY"
 	    fi
@@ -134,7 +147,7 @@ else
 
 		    for fh in $fhours ; do
 			### copy GFIP
-			modelfile=$COMROOT/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.wafs.grb2f0$fh
+			modelfile=$COMROOT/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.wafs_icao.grb2f0$fh
                         $WGRIB2 $modelfile | grep ":ICIP:" | grep -v ":70 mb:" | $WGRIB2 -i $modelfile -grib $COMIN/gfs.t${cyc}z.gfip.grb2f$fh
 			### copy u/v/t forecast
 			cp $COMROOT/gfs.$PDY/$cyc/atmos/gfs.t${cyc}z.pgrb2.0p25.f0$fh $COMIN/.

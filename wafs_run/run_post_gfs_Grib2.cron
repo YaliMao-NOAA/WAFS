@@ -107,4 +107,4 @@ dates="$dates "`/nwprod/util/exec/ndate -1 ${PDY}00 | cut -c1-8`
 if [[ $cyc <  18 ]] ; then
     dates="$dates "`/nwprod/util/exec/ndate -25 ${PDY}00 | cut -c1-8`
 fi
-ssh ymao@emcrzdm "ksh ~/scripts/wafs_web.ftp_maintenance.sh $run $cyc $dates"
+ssh ymao@emcrzdm "sh ~/scripts/wafs_web.ftp_maintenance.sh $run $cyc $dates"

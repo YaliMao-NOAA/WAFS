@@ -86,7 +86,7 @@ while [ $ic -le 180 ] ; do
 	if [[ $cyc <  18 ]] ; then
 	    dates="$dates `$NDATE -25 ${PDY}00 | cut -c1-8`"
 	fi
-	ssh ymao@emcrzdm.ncep.noaa.gov "ksh ~/scripts/wafs_web.ftp_maintenance.sh $prod $cyc $dates"
+	ssh ymao@emcrzdm.ncep.noaa.gov "sh ~/scripts/wafs_web.ftp_maintenance.sh $prod $cyc $dates"
 
         break
     else
