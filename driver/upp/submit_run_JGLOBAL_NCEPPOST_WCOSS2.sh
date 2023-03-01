@@ -1,6 +1,6 @@
 run=${1:-gfs}
-bdate=${2:-2023010200}
-edate=${2:-2023010200}
+bdate=${2:-2023022100}
+edate=${2:-2023022100}
 export allfhr=${3:-"012"}
 export OUTPUT_FILE=${4:-"netcdf"}
 
@@ -17,8 +17,13 @@ cd $diroutp
 
 #UPP location
 export svndir=`pwd`
-export svndir=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/UPP.v16
+export svndir=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/UPP.v17
 export rundir=/lfs/h2/emc/ptmp/yali.mao/upp
+#Spedify numx
+export numx=1
+#exec file
+export exec=ncep_post
+export exec=upp.x
 
 module load prod_util/2.0.5
 

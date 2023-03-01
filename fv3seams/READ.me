@@ -1,0 +1,35 @@
+This purpose of this small app is to find the seams and smooth the seams.
+Running environment: WCOSS2
+
+Step 1: create text file from the global 6 tiles in netcdf. Use the command line:
+sh get_tile_header.sh
+  Notes: 1) module load netcdf
+         2) fixfile points to where the global 6 tiles reside
+	    GFSv17: https://github.com/NOAA-EMC/global-workflow/blob/develop/sorc/link_workflow.sh#L59
+	    GFSv16: /lfs/h2/emc/global/save/emc.global/FIX/fix_nco_gfsv16/fix_fv3
+	 3) C768 - GFSv17 ; C384 - GEFSv13
+
+Step 2: compile the source code find_imprintings.f90 and create the exetutable file 'find_imprintings'
+sh build.find_imprintings.sh
+  Notes: Use the same modulefile as EMC_wafs for compiling
+
+Step 3: create a sample grib2 file to simplify the output of the mosaic results
+For GFS:
+sample=`ls $COMROOT/gfs/v*/gfs.*/00/atmos/gfs.t00z.master.grb2f006 | tail -1`
+$WGRIB2 $sample | grep ICETMP | $WGRIB2 -i $sample -grib for_imprintings.gfs.grib2
+For GEFS:
+sample=`ls $COMROOT/gefs/*/gefs.*/00/atmos/pgrb2bp5/*.t00z.pgrb2b.0p50.f006 | tail -1`
+$WGRIB2 $sample | grep "CAPE:surface" | $WGRIB2 -i $sample -grib for_imprintings.gefs.grib2
+
+Step 4: run 'find_imprintings' and generate the seam file in text 'imprintings.txt'
+For GFS:
+res=C768
+./find_imprintings 2 for_imprintings.gfs.grib2 6 `ls $res*txt`
+For GEFS:
+res=C384
+./find_imprintings 2 for_imprintings.gefs.grib2 6 `ls $res*txt`
+
+Step 5: (optional but recommended) Re-assgin value: fillnumber=4 in 'imprintings.txt'
+
+Step 6: smooth your GFS or GEFS files with subroutines in gtg_smoothseams.F90
+

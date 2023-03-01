@@ -1,3 +1,4 @@
+! 
 module find_imprintings
   use grib_mod
   use GDSWZD_MOD
@@ -428,7 +429,11 @@ contains
 
 end module find_imprintings
 
-
+! 1 : fillnumber: how many i gridpoints along the seams
+!     can be modified to 
+! 2 : grib2file: a sample grib2 file with the same resolution. gfld simplifies the output
+! 3 : number of tilefiles
+! 4-9: tilefiles
 program main
   use find_imprintings
 
