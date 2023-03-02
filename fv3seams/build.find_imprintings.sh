@@ -4,12 +4,9 @@ set -x
 module reset
 set -x
 
-moduledir=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/EMC_wafs_v6/modulefiles
-machine=wcoss2
-module use ${moduledir}/wafs
-module load wafs_v6.0.0-${machine}
+module use ./
+module load modulefile.wcoss2
 module list
-
 
 cd $HOMEgit/save/fv3seams
 
