@@ -24,15 +24,15 @@ Step 3: create a sample grib2 file to simplify the output of the mosaic results
 ========================================
 For GFS:
 sample=`ls $COMROOT/gfs/v*/gfs.*/00/atmos/gfs.t00z.master.grb2f006 | tail -1`
-$WGRIB2 $sample | grep ICETMP | $WGRIB2 -i $sample -grib for_imprintings.gfs.grib2
+$WGRIB2 $sample | grep "ICETMP" | $WGRIB2 -i $sample -grib for_imprintings.gfs.grib2
 
 For GEFS:
 sample=`ls $COMROOT/gefs/*/gefs.*/00/atmos/pgrb2p25/*.t00z.pgrb2.0p25.f006 | tail -1`
 $WGRIB2 $sample | grep "VRATE" | $WGRIB2 -i $sample -grib for_imprintings.gefs.grib2
 
-GEFS model outputs (or GEFS upp inputs):
+For GEFS: use  model outputs (or GEFS upp inputs):
 ls $COMROOT/gefs/*/gefs.*/00/atmos/sfcsig/*f006* | tail -3
-Run UPP to generate master file in grib2 (As to March 2023, using UPPv16)
+(Run UPP to generate master file in grib2 - as to March 2023, using UPPv16)
 sample=(the above master file)
 $WGRIB2 $sample | grep "VIS" | $WGRIB2 -i $sample -grib for_imprintings.gefs.grib2
 
