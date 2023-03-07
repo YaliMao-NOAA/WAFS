@@ -1,8 +1,8 @@
 export LANG=en_US.UTF-8
 
 # check whether the verification cronjob is turned on yet
-if [[ `hostname` =~ ^[g|t|l|s][0-9]{1} ]] ; then
-  a="`ls /gpfs/*/ptmp/Yali.Mao/vsdb/grid2grid/wafs/blndmean_gcipconus*.vsdb`"
+if [[ `hostname` =~ ^[c|d|]login ]] ; then
+  a="`ls /lfs/h2/emc/ptmp/yali.mao/wafs.vrfy.prod_prod.vsdb/wafs/blndmean_gcipconus*.vsdb`"
   a=`echo $a | cut -d' ' -f1`
   if [[ ! -s $a ]] ; then
     echo "The verification cronjob may not be turned on yet. Please check."

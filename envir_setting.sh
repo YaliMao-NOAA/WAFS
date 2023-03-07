@@ -263,9 +263,9 @@ elif [[ `hostname` =~ ^[d|c]login ]] ; then
 
   module load envvar/${envvar_ver:-1.0}
   module load intel/${intel_ver:-19.1.3.304}
-  module load PrgEnv-intel/${PrgEnv_intel_ver:-8.1.0}
-  module load craype/${craype:-2.7.8}
-  module load cray-mpich/${cray_mpich_ver:-8.1.9}
+  module load PrgEnv-intel/${PrgEnv_intel_ver:-8.3.3}
+  module load craype/${craype:-2.7.17}
+  module load cray-mpich/${cray_mpich_ver:-8.1.12}
 
   module load libjpeg/9c
 ##  module load gcc
