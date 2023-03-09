@@ -17,7 +17,7 @@ if [ $job = GRIB ] ; then
     driver="run_JGFS_WAFS.$MACHINE"
 fi
 
-PDY=20221128
+PDY=20230308
 HOMEgfs=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/fork.implement2023
 #FHOURS=48
 SHOUR=
@@ -25,24 +25,24 @@ EHOUR=
 cyc=00
 ICAO2023=yes
 FHOUT_GFS=
-COMPATH=/lfs/h1/ops/prod/com/gfs
+COMIN=/lfs/h2/emc/vpppg/noscrub/yali.mao/4uk_blending/gfs.$PDY/$cyc/atmos
 #for GCIP
-#COMPATH=/lfs/h1/ops/prod/com/gfs
+#COMIN=/lfs/h1/ops/prod/com/gfs
 #For blending
 if [[ $job =~ 'BLENDING' ]] ; then
     if [ $job = 'BLENDING' ] ; then
 	if [ "$ICAO2023" = 'yes' ] ; then
-	    COMPATH=/lfs/h2/emc/vpppg/noscrub/yali.mao/wafs_dwn2023_1p25/com/gfs
+	    COMIN=/lfs/h2/emc/vpppg/noscrub/yali.mao/wafs_dwn2023_1p25/com/gfs
 	else
-	    COMPATH=/lfs/h2/emc/vpppg/noscrub/yali.mao/wafs_dwn2022_1p25/com/gfs
+	    COMIN=/lfs/h2/emc/vpppg/noscrub/yali.mao/wafs_dwn2022_1p25/com/gfs
 	fi
 #	DCOMROOT=/lfs/h2/emc/vpppg/noscrub/yali.mao/dcom_2022
     else # BLENDING_0P25
 	if [ "$ICAO2023" = 'yes' ] ; then
-	    COMPATH=/lfs/h2/emc/vpppg/noscrub/yali.mao/wafs_dwn2023_5.3/com/gfs
-#	    DCOMROOT=/lfs/h2/emc/vpppg/noscrub/yali.mao/dcom_2023
+	    COMIN=/lfs/h2/emc/ptmp/yali.mao/wafs_dwn/com/gfs/v16.3/gfs.$PDY/$cyc/atmos
+	    DCOMROOT=/lfs/h2/emc/vpppg/noscrub/yali.mao/4uk_blending
 	else
-	    COMPATH=/lfs/h2/emc/vpppg/noscrub/yali.mao/wafs_dwn2022/com/gfs
+	    COMIN=/lfs/h2/emc/vpppg/noscrub/yali.mao/wafs_dwn2022/com/gfs
 #	    DCOMROOT=/lfs/h2/emc/vpppg/noscrub/yali.mao/dcom_2022
 	fi
     fi
@@ -68,10 +68,10 @@ fi
 if [[ ! -z $FHOUT_GFS ]] ; then
     sed -e "s|FHOUT_GFS=.*|FHOUT_GFS=$FHOUT_GFS|" -i $TMP/$driver
 fi
-if [[ ! -z $COMPATH ]] ; then
-    sed -e "s|COMPATH=.*|COMPATH=$COMPATH|" -i $TMP/$driver
+if [[ ! -z $COMIN ]] ; then
+    sed -e "s|COMIN=.*|COMIN=$COMIN|" -i $TMP/$driver
     if [[ $job = 'GCIP' ]] ; then
-	sed -e "s|COMPATH=.*|COMPATH=$COMPATH:/lfs/h1/ops/prod/com/radarl2|" -i $TMP/$driver
+	sed -e "s|COMIN=.*|COMIN=$COMIN:/lfs/h1/ops/prod/com/radarl2|" -i $TMP/$driver
     fi
 fi
 if [[ ! -z $DCOMROOT ]] ; then
