@@ -23,7 +23,7 @@ HOMEgfs=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/fork.implement2023
 SHOUR=
 EHOUR=
 cyc=00
-ICAO2023=yes
+ICAO2023=no
 FHOUT_GFS=
 COMIN=/lfs/h2/emc/vpppg/noscrub/yali.mao/4uk_blending/gfs.$PDY/$cyc/atmos
 #for GCIP
@@ -43,7 +43,8 @@ if [[ $job =~ 'BLENDING' ]] ; then
 	    DCOMROOT=/lfs/h2/emc/vpppg/noscrub/yali.mao/4uk_blending
 	else
 	    COMIN=/lfs/h2/emc/vpppg/noscrub/yali.mao/wafs_dwn2022/com/gfs
-#	    DCOMROOT=/lfs/h2/emc/vpppg/noscrub/yali.mao/dcom_2022
+	    COMIN=/lfs/h1/ops/prod/com/gfs/v16.3/gfs.$PDY/$cyc/atmos
+	    DCOMROOT=/lfs/h2/emc/vpppg/noscrub/yali.mao/4uk_blending
 	fi
     fi
 fi

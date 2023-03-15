@@ -25,6 +25,8 @@ export numx=1
 export exec=ncep_post
 export exec=upp.x
 
+cp $svndir/sorc/ncep_post.fd/post_gtg.fd/gtg.config.gfs $svndir/parm/.
+
 module load prod_util/2.0.5
 
 while [[ $bdate -le $edate ]]; do
