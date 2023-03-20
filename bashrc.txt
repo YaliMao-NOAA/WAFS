@@ -125,7 +125,7 @@ alias plot="echo ksh $HOMEsave/grads/plotWafs.sh conus potential grb2file"
 alias output="ls -l $OUTPUT | grep -v tar.xz ; echo $OUTPUT"
 alias outputp="ls -l $OUTPUTP | grep -v tar.xz ; echo $OUTPUTP"
 
-alias prod="ll $COMROOT/gfs/*/gfs.`$NDATE|cut -c1-8`"
+alias prod="echo $COMROOT/gfs/*/gfs.`$NDATE|cut -c1-8`; ll $COMROOT/gfs/*/gfs.`$NDATE|cut -c1-8`"
 
 alias master="ls -l $comd/gfs/*/gfs.*/00/atmos/gfs.t00z.master.grb2f006"
 alias   wafs="ls -l $comd/gfs/*/gfs.`$NDATE|cut -c1-8`/00/atmos/gfs.t00z.wafs_grb45f06*"
@@ -139,8 +139,7 @@ alias nam="ls -l $comd/nam/*/nam.`$NDATE|cut -c1-8`/nam.t00z.awip1230.tm00"
 alias radar="ls -l $comd/radar*/*/radar.`$NDATE|cut -c1-8`/refd3d.t01z*"
 alias metar="ls -l $dcom/ldmdata/obs/surface/metar/*"
 
-alias gtg="ls -l $com2/gtg/prod/gtg.`$NDATE|cut -c1-8`/gtg.t00z.edr.f*.grb2"
-alias rap="ls -l $comh/rap/prod/rap.`$NDATE|cut -c1-8`/rap.t00z.awp130bgrbf03.grib2"
+alias rap="ls -l $COMROOT/rap/*/rap.`$NDATE|cut -c1-8`/rap.t00z.awp130bgrbf03.grib2"
 
 alias wcossnomad='sudo -u emc.nomad -i'
 
