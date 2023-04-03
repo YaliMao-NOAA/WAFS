@@ -1,9 +1,10 @@
+SHELL=/bin/bash -l
 # Collect icing severity data to local machine for verification
 #==================================================
 # cd /lfs/h2/emc/vpppg/noscrub/yali.mao/icesev_verif
 # sh send2hera.sh
 #==================================================
-10 14 * * * /bin/bash -l /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/scripts/cp_icesev.sh > /lfs/h2/emc/ptmp/yali.mao/CP_ICESEV.log 2>&1
+10 14 * * * /bin/bash /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/scripts/cp_icesev.sh > /lfs/h2/emc/ptmp/yali.mao/CP_ICESEV.log 2>&1
 
 # For operational
 # collect GFIP, GCIP and GTG to rzdm FTP server, plus plotting and maintenance
@@ -15,18 +16,17 @@
 # gfs_prod_rzdm_plotting_00
 # gfs_prod_rzdm_prod
 #==================================================
-15 05 * * * export cyc=00; export prod=prod; /bin/bash -l /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.driver > /lfs/h2/emc/ptmp/yali.mao/GCIP_GFIP_GTG_2_rzdm.$cyc 2>&1
-15 11 * * * export cyc=06; export prod=prod; /bin/bash -l /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.driver > /lfs/h2/emc/ptmp/yali.mao/GCIP_GFIP_GTG_2_rzdm.$cyc 2>&1
-15 17 * * * export cyc=12; export prod=prod; /bin/bash -l /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.driver > /lfs/h2/emc/ptmp/yali.mao/GCIP_GFIP_GTG_2_rzdm.$cyc 2>&1
-15 23 * * * export cyc=18; export prod=prod; /bin/bash -l /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.driver > /lfs/h2/emc/ptmp/yali.mao/GCIP_GFIP_GTG_2_rzdm.$cyc 2>&1
-
+15 05 * * * export cyc=00; export prod=prod; /bin/bash /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.driver > /lfs/h2/emc/ptmp/yali.mao/GCIP_GFIP_GTG_2_rzdm.$cyc 2>&1
+15 11 * * * export cyc=06; export prod=prod; /bin/bash /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.driver > /lfs/h2/emc/ptmp/yali.mao/GCIP_GFIP_GTG_2_rzdm.$cyc 2>&1
+15 17 * * * export cyc=12; export prod=prod; /bin/bash /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.driver > /lfs/h2/emc/ptmp/yali.mao/GCIP_GFIP_GTG_2_rzdm.$cyc 2>&1
+15 23 * * * export cyc=18; export prod=prod; /bin/bash /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/scripts/GCIP_GFIP_GTG_2_rzdm.driver > /lfs/h2/emc/ptmp/yali.mao/GCIP_GFIP_GTG_2_rzdm.$cyc 2>&1
 
 # Archive GFIP to HPSS from WCOSS2 for verification on Hera
 #==================================================
 # /lfs/h2/emc/ptmp/yali.mao/gfip
 # htar -Pcvf /NCEPDEV/emc-global/5year/Yali.Mao/gfip/20220630.tar ./gfs.20220630/00/atmos/*gfip*
 #==================================================
-00 00  * * *  /bin/bash -l /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/wafs_run/run_JVERF_GRID2GRID_WAFS.htar > /lfs/h2/emc/ptmp/yali.mao/JVERF_GRID2GRID_WAFS.htar.wcoss2.log 2>&1
+00 00  * * *  /bin/bash /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/wafs_run/run_JVERF_GRID2GRID_WAFS.htar > /lfs/h2/emc/ptmp/yali.mao/JVERF_GRID2GRID_WAFS.htar.wcoss2.log 2>&1
 
 # Run vsdb verification
 # Suggestion: 3:40 hours for each run if data available on $COMROOT
@@ -37,12 +37,12 @@
 # htar -Pcvf /NCEPDEV/emc-global/5year/Yali.Mao/wafs_vsdb/prod.prod/202207/20220701.vsdb.tar $TMP/wafs.vrfy.prod_prod.vsdb/wafs/*20220701*vsdb
 # May (not) need input from cronjob run_JVERF_GRID2GRID_WAFS.htar: /NCEPDEV/emc-global/5year/Yali.Mao/gfip/20220701.tar
 #==================================================
-10 00 * * *  /bin/bash -l /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/wafs_run/run_JVERF_GRID2GRID_WAFS.loop > /lfs/h2/emc/ptmp/yali.mao/WAFS.VRFY.log 2>&1
+54 01 * * *  /bin/bash /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/wafs_run/run_JVERF_GRID2GRID_WAFS.loop > /lfs/h2/emc/ptmp/yali.mao/WAFS.VRFY.log 2>&1
 
 # Make up some day
-#55 11  * * *  export vday=20220702; /bin/bash -l /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/wafs_run/run_JVERF_GRID2GRID_WAFS.cron prod prod > /lfs/h2/emc/ptmp/yali.mao/WAFS.VRFY.log.$vday 2>&1
+#55 11  * * *  export vday=20220702; /bin/bash /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/wafs_run/run_JVERF_GRID2GRID_WAFS.cron prod prod > /lfs/h2/emc/ptmp/yali.mao/WAFS.VRFY.log.$vday 2>&1
 # Make up some day for twind only (data from HPSS)
-#35 13  * * *  export vday=20210423; /bin/bash -l /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/wafs_run/run_JVERF_GRID2GRID_WAFS.cron prod prod wind > /lfs/h2/emc/ptmp/yali.mao/WAFS.VRFY.log.twind.$vday 2>&1
+#35 13  * * *  export vday=20210423; /bin/bash /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/wafs_run/run_JVERF_GRID2GRID_WAFS.cron prod prod wind > /lfs/h2/emc/ptmp/yali.mao/WAFS.VRFY.log.twind.$vday 2>&1
 
 
 # Plot verification from vsdb (monthly)
@@ -52,15 +52,15 @@
 # Before running, synchronize data from Linux   #
 # rsync -ravP --min-size=1. wd20ym@emc-lw-ymao:/export/emc-lw-ymao/wd20ym/vsdb/wafs/prod.prod/. $VSDBsave/wafs/prod.prod/.
 #--------------------------------------------------
-01 00 2 * *  export observation=gfs;  /bin/bash -l /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/scripts/verify.plot.wafs.cron >/lfs/h2/emc/ptmp/yali.mao/VSDB.PLOT.log.$observation 2>&1
-02 02 2 * *  export observation=gcip; /bin/bash -l /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/scripts/verify.plot.wafs.cron >/lfs/h2/emc/ptmp/yali.mao/VSDB.PLOT.log.$observation 2>&1
+01 00 2 * *  export observation=gfs;  /bin/bash /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/scripts/verify.plot.wafs.cron >/lfs/h2/emc/ptmp/yali.mao/VSDB.PLOT.log.$observation 2>&1
+02 02 2 * *  export observation=gcip; /bin/bash /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/scripts/verify.plot.wafs.cron >/lfs/h2/emc/ptmp/yali.mao/VSDB.PLOT.log.$observation 2>&1
 
 # Run GCIP operational in case a satellite is changed
 # between 2 GFS implementations.
 #==================================================
-#55 05 * * * export cyc=00 ; export hb=5 ; sh -l /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/scripts/GCIP.prod.rerun.sh 1 > /lfs/h2/emc/ptmp/yali.mao/gcip.rerun.$cyc 2>&1
+#55 05 * * * export cyc=00 ; export hb=5 ; sh /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/scripts/GCIP.prod.rerun.sh 1 > /lfs/h2/emc/ptmp/yali.mao/gcip.rerun.$cyc 2>&1
 
 # transfer FAA to rzdm (taken from Geoff Manikin) 
 # ftp://ftp.emc.ncep.noaa.gov/gmb/wafs/faa/
 #==================================================
-#25 19  * * *  sh -l /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/wafs_faa/drive_wafs 1 > /lfs/h2/emc/ptmp/yali.mao/faa.err 2>&1
+#25 19  * * *  sh /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/wafs_faa/drive_wafs 1 > /lfs/h2/emc/ptmp/yali.mao/faa.err 2>&1
