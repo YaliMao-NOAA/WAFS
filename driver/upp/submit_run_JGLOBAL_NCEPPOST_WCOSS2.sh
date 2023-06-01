@@ -1,13 +1,15 @@
 run=${1:-gfs}
-bdate=${2:-2023022100}
-edate=${2:-2023022100}
-export allfhr=${3:-"012"}
+bdate=${2:-2023042600}
+edate=${2:-2023042600}
+export allfhr=${3:-"018"}
 export OUTPUT_FILE=${4:-"netcdf"}
 
 #Input Data
 #export COMINP=/u/Wen.Meng/noscrub/gfsnetcdf
 #export COMINP=/lfs/h1/ops/canned/com/gfs/v16.2
 export COMINP=/lfs/h1/ops/prod/com/gfs/v16.3
+#export COMIN=/u/wen.meng/noscrub/ncep_post/post_regression_test_new/data_in/gfs
+export COMIN=/lfs/h2/emc/vpppg/noscrub/yali.mao/gtg4/gfs.20230426
 
 #Working directory
 tmp=/lfs/h2/emc/ptmp/$USER
@@ -26,6 +28,15 @@ export exec=ncep_post
 export exec=upp.x
 
 cp $svndir/sorc/ncep_post.fd/post_gtg.fd/gtg.config.gfs $svndir/parm/.
+
+cp $svndir/parm/gtg_imprintings.txt.gfs $svndir/parm/gtg_imprintings.txt
+#gtg
+cp $svndir/parm/postxconfig-NT-GFS-WAFS.txt.gtg $svndir/parm/postxconfig-NT-GFS-WAFS.txt
+#no gtg
+#cp $svndir/parm/postxconfig-NT-GFS-WAFS.txt.nogtg $svndir/parm/postxconfig-NT-GFS-WAFS.txt
+
+# restore master control file after GEFS test run
+cp $svndir/parm/postxconfig-NT-GFS.txt.gfs $svndir/parm/postxconfig-NT-GFS.txt
 
 module load prod_util/2.0.5
 

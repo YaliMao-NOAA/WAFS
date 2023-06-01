@@ -17,15 +17,16 @@ if [ $job = GRIB ] ; then
     driver="run_JGFS_WAFS.$MACHINE"
 fi
 
-PDY=20230308
+PDY=20230526
 HOMEgfs=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/fork.implement2023
 #FHOURS=48
 SHOUR=
 EHOUR=
 cyc=00
-ICAO2023=no
+ICAO2023=yes
 FHOUT_GFS=
 COMIN=/lfs/h2/emc/vpppg/noscrub/yali.mao/4uk_blending/gfs.$PDY/$cyc/atmos
+COMIN=/lfs/h1/ops/prod/com/gfs/v16.3/gfs.$PDY/$cyc/atmos/
 #for GCIP
 #COMIN=/lfs/h1/ops/prod/com/gfs
 #For blending

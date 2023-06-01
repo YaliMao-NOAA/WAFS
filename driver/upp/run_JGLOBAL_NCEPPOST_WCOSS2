@@ -108,7 +108,7 @@ export HOMEgfs=${svndir}
 # Define COM directories
 ##############################################
 #export COMIN=$COMINP/gfs.${PDY}/${cyc}
-export COMIN=$COMINP/gfs.${PDY}/${cyc}/atmos
+export COMIN=${COMIN:-$COMINP/gfs.${PDY}/${cyc}/atmos}
 # specify my own COMOUT dir to mimic operations
 export COMOUT=$rundir/com/${RUN}.$PDY/${cyc}
 mkdir -p $COMOUT
