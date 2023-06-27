@@ -6,6 +6,8 @@
 #PBS -l walltime=00:30:00
 #PBS -q debug
 #PBS -A GFS-DEV
+## For GEFS
+##PBS -l place=vscatter,select=2:ncpus=48:mem=300GB
 #PBS -l place=vscatter,select=2:ncpus=96:mem=300GB
 #PBS -V
 #PBS -W umask=022
@@ -20,6 +22,8 @@ export MP_LABELIO=yes
 export OMP_NUM_THREADS=$threads
 #export APRUN="mpiexec -l -ppn 48 -n 96 --cpu-bind verbose --depth 1"
 #export APRUN="mpiexec -l -n 112 -ppn 12 --cpu-bind core --depth 1"
+# For GEFS
+#export APRUN="mpiexec -ppn 24 -n 48"
 export APRUN="mpiexec -ppn 48 -n 96"
 export APRUN_DWN="mpiexec -np 24 -cpu-bind verbose,core cfp"
 export machine=WCOSS2
@@ -79,8 +83,8 @@ export envir=prod
 ####################################
 # Specify RUN Name and model
 ####################################
-export NET=gfs
-export RUN=gfs
+export NET=${NET:-gfs}
+export RUN=${RUN:-gfs}
 
 # set up running dir
 export job=${RUN}_post_${cyc}
@@ -109,6 +113,7 @@ export HOMEgfs=${svndir}
 ##############################################
 #export COMIN=$COMINP/gfs.${PDY}/${cyc}
 export COMIN=${COMIN:-$COMINP/gfs.${PDY}/${cyc}/atmos}
+
 # specify my own COMOUT dir to mimic operations
 export COMOUT=$rundir/com/${RUN}.$PDY/${cyc}
 mkdir -p $COMOUT

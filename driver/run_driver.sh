@@ -17,7 +17,7 @@ if [ $job = GRIB ] ; then
     driver="run_JGFS_WAFS.$MACHINE"
 fi
 
-PDY=20230526
+PDY=20230626
 HOMEgfs=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/fork.implement2023
 #FHOURS=48
 SHOUR=
@@ -25,8 +25,9 @@ EHOUR=
 cyc=00
 ICAO2023=yes
 FHOUT_GFS=
+COMPATH=/lfs/h1/ops/prod/com/gfs
 COMIN=/lfs/h2/emc/vpppg/noscrub/yali.mao/4uk_blending/gfs.$PDY/$cyc/atmos
-COMIN=/lfs/h1/ops/prod/com/gfs/v16.3/gfs.$PDY/$cyc/atmos/
+COMIN=/lfs/h1/ops/prod/com/gfs/v16.3/gfs.$PDY/$cyc/atmos
 #for GCIP
 #COMIN=/lfs/h1/ops/prod/com/gfs
 #For blending
@@ -72,8 +73,10 @@ if [[ ! -z $FHOUT_GFS ]] ; then
 fi
 if [[ ! -z $COMIN ]] ; then
     sed -e "s|COMIN=.*|COMIN=$COMIN|" -i $TMP/$driver
+fi
+if [[ ! -z $COMPATH ]] ; then
     if [[ $job = 'GCIP' ]] ; then
-	sed -e "s|COMIN=.*|COMIN=$COMIN:/lfs/h1/ops/prod/com/radarl2|" -i $TMP/$driver
+	sed -e "s|COMPATH=.*|COMPATH=$COMPATH:/lfs/h1/ops/prod/com/radarl2|" -i $TMP/$driver
     fi
 fi
 if [[ ! -z $DCOMROOT ]] ; then

@@ -4,6 +4,8 @@ edate=${2:-2023042600}
 export allfhr=${3:-"018"}
 export OUTPUT_FILE=${4:-"netcdf"}
 
+export RUN=gfs
+
 #Input Data
 #export COMINP=/u/Wen.Meng/noscrub/gfsnetcdf
 #export COMINP=/lfs/h1/ops/canned/com/gfs/v16.2
@@ -27,16 +29,13 @@ export numx=1
 export exec=ncep_post
 export exec=upp.x
 
-cp $svndir/sorc/ncep_post.fd/post_gtg.fd/gtg.config.gfs $svndir/parm/.
+cp $svndir/sorc/ncep_post.fd/post_gtg.fd/gtg.config.$RUN $svndir/parm/.
 
-cp $svndir/parm/gtg_imprintings.txt.gfs $svndir/parm/gtg_imprintings.txt
+#cp $svndir/parm/imprintings.gtg_${RUN}.txt $svndir/parm/.
 #gtg
-cp $svndir/parm/postxconfig-NT-GFS-WAFS.txt.gtg $svndir/parm/postxconfig-NT-GFS-WAFS.txt
+cp $svndir/parm/postxconfig-NT-${RUN^^}-WAFS.txt.gtg $svndir/parm/postxconfig-NT-${RUN^^}-WAFS.txt
 #no gtg
-#cp $svndir/parm/postxconfig-NT-GFS-WAFS.txt.nogtg $svndir/parm/postxconfig-NT-GFS-WAFS.txt
-
-# restore master control file after GEFS test run
-cp $svndir/parm/postxconfig-NT-GFS.txt.gfs $svndir/parm/postxconfig-NT-GFS.txt
+#cp $svndir/parm/postxconfig-NT-${RUN^^}-WAFS.txt.nogtg $svndir/parm/postxconfig-NT-${RUN^^}-WAFS.txt
 
 module load prod_util/2.0.5
 
