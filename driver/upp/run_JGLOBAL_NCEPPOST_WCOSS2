@@ -6,9 +6,9 @@
 #PBS -l walltime=00:30:00
 #PBS -q debug
 #PBS -A GFS-DEV
+#PBS -l place=vscatter,select=2:ncpus=96:mem=300GB
 ## For GEFS
 ##PBS -l place=vscatter,select=2:ncpus=48:mem=300GB
-#PBS -l place=vscatter,select=2:ncpus=96:mem=300GB
 #PBS -V
 #PBS -W umask=022
 
@@ -22,9 +22,11 @@ export MP_LABELIO=yes
 export OMP_NUM_THREADS=$threads
 #export APRUN="mpiexec -l -ppn 48 -n 96 --cpu-bind verbose --depth 1"
 #export APRUN="mpiexec -l -n 112 -ppn 12 --cpu-bind core --depth 1"
+export APRUN="mpiexec -ppn 48 -n 96"
+
 # For GEFS
 #export APRUN="mpiexec -ppn 24 -n 48"
-export APRUN="mpiexec -ppn 48 -n 96"
+
 export APRUN_DWN="mpiexec -np 24 -cpu-bind verbose,core cfp"
 export machine=WCOSS2
 
@@ -53,6 +55,8 @@ module load prod_envir/2.0.4
 module load libjpeg/9c
 module load grib_util/1.2.2
 module load wgrib2/2.0.7
+# memory leak
+#module load valgrind4hpc/2.12.10
 
 module list
 
@@ -67,7 +71,7 @@ msg="Starting fv3gfs test"
 #homedir=/u/Wen.Meng/noscrubd/ncep_post/post_regression_test_new
 
 # specify user's own post working directory for testing
-export POSTGPEXEC=$svndir/exec/$exec
+export POSTGPEXEC=${POSTGPEXEC:-$svndir/exec/$exec}
 
 # specify PDY (the cycle start yyyymmdd) and cycle
 #export CDATE=2018042000
@@ -113,7 +117,6 @@ export HOMEgfs=${svndir}
 ##############################################
 #export COMIN=$COMINP/gfs.${PDY}/${cyc}
 export COMIN=${COMIN:-$COMINP/gfs.${PDY}/${cyc}/atmos}
-
 # specify my own COMOUT dir to mimic operations
 export COMOUT=$rundir/com/${RUN}.$PDY/${cyc}
 mkdir -p $COMOUT

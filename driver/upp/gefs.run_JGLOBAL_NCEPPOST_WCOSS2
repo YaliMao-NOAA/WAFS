@@ -79,8 +79,8 @@ export envir=prod
 ####################################
 # Specify RUN Name and model
 ####################################
-export NET=gfs
-export RUN=gfs
+export NET=${NET:-gfs}
+export RUN=${RUN:-gfs}
 
 # set up running dir
 export job=${RUN}_post_${cyc}
