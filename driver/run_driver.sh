@@ -17,13 +17,13 @@ if [ $job = GRIB ] ; then
     driver="run_JGFS_WAFS.$MACHINE"
 fi
 
-PDY=20230626
+PDY=${PDY:-20230626}
 HOMEgfs=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/fork.implement2023
 #FHOURS=48
 SHOUR=
 EHOUR=
-cyc=00
-ICAO2023=yes
+cyc=${cyc:-00}
+ICAO2023=${ICAO2023:-yes}
 FHOUT_GFS=
 COMPATH=/lfs/h1/ops/prod/com/gfs
 COMIN=/lfs/h2/emc/vpppg/noscrub/yali.mao/4uk_blending/gfs.$PDY/$cyc/atmos

@@ -57,7 +57,7 @@ function convertFormat(){
                     done
 		    statics="NA NA $statics NA"
 		fi
-		echo "V00 gfs   G045 ${ff}0000    ${vday}_${vhour}0000 ${vday}_${vhour}0000 000000   ${vday}_${vhour}0000 ${vday}_${vhour}0000 $var          $pp     $var         $pp    ANALYS $newregion  NEAREST     1          NA          NA         NA         NA    SL1L2      $nn $statics" >> $outputfilename
+		echo "V00 gfs   G045 ${ff}0000    ${vday}_${vhour}0000 ${vday}_${vhour}0000 000000   ${vday}_${vhour}0000 ${vday}_${vhour}0000 $var          $pp     $var         $pp    ANALYS $newregion  NEAREST     1          NA          NA         NA         NA    SL1L2      $nn $statics" >> $outputfile
 	    done < $region.vsdb
 	fi
     done    
@@ -70,30 +70,31 @@ cd $DATA ; rm *
 VSDBin=/lfs/h2/emc/vpppg/noscrub/yali.mao/vsdb/wafs/prod.prod
 VSDBout=/lfs/h2/emc/vpppg/noscrub/yali.mao/stats_from_vsdb
 
+PDYs="20230719 20230719"
+for PDY in $PDYs ; do
+    YYYY=`echo $PDY | cut -c 1-4`
+    mkdir -p $VSDBout/$YYYY
+
+    #PDY=`echo $twind |  sed s/.*twind_gfs_//g | sed s/.vsdb//g`
+    twind="$VSDBin/twind_gfs_${PDY}.vsdb"
+    outputfile=evs.stats.wafs.atmos.grid2grid_uvt1p25.v${PDY}.stat
+
+    echo "VERSION MODEL DESC FCST_LEAD FCST_VALID_BEG  FCST_VALID_END  OBS_LEAD OBS_VALID_BEG   OBS_VALID_END   FCST_VAR FCST_UNITS FCST_LEV OBS_VAR OBS_UNITS OBS_LEV OBTYPE VX_MASK  INTERP_MTHD INTERP_PNTS FCST_THRESH OBS_THRESH COV_THRESH ALPHA LINE_TYPE" > $outputfile
+
+    temp=tmp.vsdb
+    wind=wind.vsdb
+    wind80=w80.vsdb
+    wdir=wdir.vsdb
+    grep "SL1L2 T " $twind > $temp
+    grep "SL1L2 DIRECTION " $twind > $wdir 
+    grep "VL1L2 WIND " $twind > $wind
+    grep "VL1L2 WIND80 " $twind > $wind80
 
 
-pdy=`echo $twind |  sed s/.*twind_gfs_//g | sed s/.vsdb//g`
-YYYY=`cat $PDY | cut -c 1-4`
-VSDBout=$VSDBout/$YYYY
-mkdir -p $VSDBout
+    convertFormat $temp SL1L2
+    convertFormat $wind VL1L2
+    convertFormat $wind80 VL1L2
+    convertFormat $wdir SL1L2
 
-twind="../twind_gfs_20230719.vsdb"
-
-
-outputfilename=evs.stats.wafs.atmos.grid2grid_uvt1p25.v${pdy}.stat
-echo "VERSION MODEL DESC FCST_LEAD FCST_VALID_BEG  FCST_VALID_END  OBS_LEAD OBS_VALID_BEG   OBS_VALID_END   FCST_VAR FCST_UNITS FCST_LEV OBS_VAR OBS_UNITS OBS_LEV OBTYPE VX_MASK  INTERP_MTHD INTERP_PNTS FCST_THRESH OBS_THRESH COV_THRESH ALPHA LINE_TYPE" > $outputfilename
-
-temp=tmp.vsdb
-wind=wind.vsdb
-wind80=w80.vsdb
-wdir=wdir.vsdb
-grep "SL1L2 T " $twind > $temp
-grep "SL1L2 DIRECTION " $twind > $wdir 
-grep "VL1L2 WIND " $twind > $wind
-grep "VL1L2 WIND80 " $twind > $wind80
-
-
-convertFormat $temp SL1L2
-convertFormat $wind VL1L2
-convertFormat $wind80 VL1L2
-convertFormat $wdir SL1L2
+    mv $outputfile $VSDBout/$YYYY/.
+done
