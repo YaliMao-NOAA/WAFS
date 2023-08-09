@@ -13,16 +13,19 @@ if [ -z $MACHINE ] ; then
     . ~/envir_setting.sh
 fi
 
+date
+
 RUN=${RUN:-"para"}
 PDY=${PDY:-`$NDATE | cut -c1-8`}
 
 plotDir=/lfs/h2/emc/vpppg/noscrub/yali.mao/evs/v1.0/plots/wafs
-remoteDir=/home/people/emc/www/htdocs/users/verification/aviation/wafs/para/tar_files
+remoteTar=/home/people/emc/www/htdocs/users/verification/aviation/wafs/para/tar_files
 
-rsync -ahr -P $plotDir/atmos.$PDY/*.tar ymao@emcrzdm.ncep.noaa.gov:$remoteDir/.
+rsync -ahr -P $plotDir/atmos.$PDY/*.tar ymao@emcrzdm.ncep.noaa.gov:$remoteTar/.
 
+remoteScript=/home/people/emc/www/htdocs/users/verification/aviation/wafs/scripts
+ssh ymao@emcrzdm.ncep.noaa.gov "sh $remoteScript/untar_images_atmos.sh $RUN"
 
-remoteUntarScript=/home/people/emc/www/htdocs/users/verification/aviation/wafs/scripts
-
+date
 
 
