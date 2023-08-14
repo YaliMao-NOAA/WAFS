@@ -29,8 +29,8 @@ export numx=1
 export exec=ncep_post
 export exec=upp.x
 
-cp $svndir/sorc/ncep_post.fd/post_gtg.fd/gtg.config.$RUN $svndir/parm/.
-cp $svndir/sorc/ncep_post.fd/post_gtg.fd/gtg.input.$RUN $svndir/parm/.
+#cp $svndir/sorc/ncep_post.fd/post_gtg.fd/gtg.config.$RUN $svndir/parm/.
+#cp $svndir/sorc/ncep_post.fd/post_gtg.fd/gtg.input.$RUN $svndir/parm/.
 
 #cp $svndir/parm/imprintings.gtg_${RUN}.txt $svndir/parm/.
 #gtg

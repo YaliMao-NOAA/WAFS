@@ -144,6 +144,10 @@ alias gtg="ls -l $COMROOT/rap/*/rap.`$NDATE -24|cut -c1-8`/rap.t00z.gtg130f06.gr
 
 alias wcossnomad='sudo -u emc.nomad -i'
 
+alias ltmp='function _ltmp() {
+      	      ls -ltr $TMP/$1
+      	      echo $TMP/$1
+	    }; _ltmp'
 alias gm='function _gm() {
               if [ $1 = "2" ] ; then 
                 $G2CTL -verf $2 > $2.ctl
