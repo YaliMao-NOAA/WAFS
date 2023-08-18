@@ -1,17 +1,27 @@
 run=${1:-gfs}
-bdate=${2:-2023042600}
-edate=${2:-2023042600}
-export allfhr=${3:-"018"}
-export OUTPUT_FILE=${4:-"netcdf"}
+export RUN=$run
 
-export RUN=gfs
+if [ $run = 'gfs' ] ; then
+#GFS canned data
+    bdate=${2:-2023042600}
+    edate=${2:-2023042600}
+    export allfhr=${3:-"018"}
+    export COMIN=/lfs/h2/emc/vpppg/noscrub/yali.mao/gtg4/gfs.20230426
+else
+#GEFS canned data
+    bdate=${2:-2022012112}
+    edate=${2:-2022012112}
+    export allfhr=${3:-"036"}
+    export COMIN=/lfs/h2/emc/vpppg/noscrub/yali.mao/gefs13_c384_sample/gefs.20220121
+fi
+
+export OUTPUT_FILE=${4:-"netcdf"}
 
 #Input Data
 #export COMINP=/u/Wen.Meng/noscrub/gfsnetcdf
 #export COMINP=/lfs/h1/ops/canned/com/gfs/v16.2
 export COMINP=/lfs/h1/ops/prod/com/gfs/v16.3
 #export COMIN=/u/wen.meng/noscrub/ncep_post/post_regression_test_new/data_in/gfs
-export COMIN=/lfs/h2/emc/vpppg/noscrub/yali.mao/gtg4/gfs.20230426
 
 #Working directory
 tmp=/lfs/h2/emc/ptmp/$USER
@@ -34,7 +44,7 @@ export exec=upp.x
 
 #cp $svndir/parm/imprintings.gtg_${RUN}.txt $svndir/parm/.
 #gtg
-cp $svndir/parm/postxconfig-NT-${RUN^^}-WAFS.txt.gtg $svndir/parm/postxconfig-NT-${RUN^^}-WAFS.txt
+#cp $svndir/parm/postxconfig-NT-${RUN^^}-WAFS.txt.gtg $svndir/parm/postxconfig-NT-${RUN^^}-WAFS.txt
 #no gtg
 #cp $svndir/parm/postxconfig-NT-${RUN^^}-WAFS.txt.nogtg $svndir/parm/postxconfig-NT-${RUN^^}-WAFS.txt
 
