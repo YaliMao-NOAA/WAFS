@@ -23,6 +23,9 @@ if [[ -z $dataFile ]] ; then
   exit
 fi
 
+# Use the newer version of wgrib2 before it's installed for RRFS
+WGRIB2=/u/hui-ya.chuang/bin/wgrib2
+
 prefix=${domain}.
 prefix=`echo $prefix | sed "s/original.//g"` # original has no prefix
 
