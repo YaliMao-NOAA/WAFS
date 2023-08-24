@@ -1,4 +1,14 @@
 SHELL=/bin/bash -l
+
+#38 14 * * * qsub < /lfs/h2/emc/vpppg/noscrub/yali.mao/git/EVS/ecf/global_det/stats/jevs_global_det_aviation_stats.ecf 
+#00 15 * * * qsub < /lfs/h2/emc/vpppg/noscrub/yali.mao/git/EVS/ecf/global_det/plots/jevs_global_det_aviation_plots.ecf
+
+01 05 * * * export cyc=00; /bin/bash /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/scripts/para_uk_0P25.sh > /lfs/h2/emc/ptmp/yali.mao/para_uk_0P25.log 2>&1
+01 11 * * * export cyc=06; /bin/bash /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/scripts/para_uk_0P25.sh > /lfs/h2/emc/ptmp/yali.mao/para_uk_0P25.log 2>&1
+01 17 * * * export cyc=12; /bin/bash /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/scripts/para_uk_0P25.sh > /lfs/h2/emc/ptmp/yali.mao/para_uk_0P25.log 2>&1
+01 23 * * * export cyc=18; /bin/bash /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/scripts/para_uk_0P25.sh > /lfs/h2/emc/ptmp/yali.mao/para_uk_0P25.log 2>&1
+
+
 # Collect icing severity data to local machine for verification
 #==================================================
 # cd /lfs/h2/emc/vpppg/noscrub/yali.mao/icesev_verif
