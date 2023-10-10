@@ -14,8 +14,10 @@ CYC2=$(( 3 + $CYC ))
 CYC2="$(printf "%02d" $(( 10#$CYC2 )) )"
 echo $PDY $CYC $CYC2
 
-com_radar=/lfs/h2/emc/vpppg/noscrub/yali.mao/com_radar
-dcomfolder=/lfs/h2/emc/vpppg/noscrub/yali.mao/dcom/$PDY
+testfolder=satellite_test_2023sep/
+
+com_radar=/lfs/h2/emc/vpppg/noscrub/yali.mao/${testfolder}com
+dcomfolder=/lfs/h2/emc/vpppg/noscrub/yali.mao/${testfolder}dcom/$PDY
 
 
 # copy radar data for GCIP
