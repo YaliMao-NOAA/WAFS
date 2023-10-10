@@ -6,7 +6,7 @@
 #PBS -l walltime=00:30:00
 #PBS -q debug
 #PBS -A GFS-DEV
-#PBS -l place=vscatter,select=2:ncpus=72:mem=300GB
+#PBS -l place=vscatter,select=2:ncpus=96:mem=300GB
 ## For GEFS
 ##PBS -l place=vscatter,select=2:ncpus=48:mem=300GB
 #PBS -V
@@ -22,7 +22,7 @@ export MP_LABELIO=yes
 export OMP_NUM_THREADS=$threads
 #export APRUN="mpiexec -l -ppn 48 -n 96 --cpu-bind verbose --depth 1"
 #export APRUN="mpiexec -l -n 112 -ppn 12 --cpu-bind core --depth 1"
-export APRUN="mpiexec -ppn 36 -n 72"
+export APRUN="mpiexec -ppn 48 -n 96"
 
 # For GEFS
 #export APRUN="mpiexec -ppn 24 -n 48"
@@ -118,7 +118,7 @@ export HOMEgfs=${svndir}
 #export COMIN=$COMINP/gfs.${PDY}/${cyc}
 export COMIN=${COMIN:-$COMINP/gfs.${PDY}/${cyc}/atmos}
 # specify my own COMOUT dir to mimic operations
-export COMOUT=$rundir/com/${RUN}.$PDY/${cyc}
+export COMOUT=$rundir/com/${RUN}.$PDY/${cyc}.96
 mkdir -p $COMOUT
 
 # specify variables if testing post in non gfs structure environment
@@ -138,7 +138,7 @@ export OUTPUT_FILE=netcdf
 
 for post_times in $allfhr; do
 
-    export DATA=$rundir/working.upp.$post_times
+    export DATA=$rundir/working.upp.$post_times.96
     rm -rf ${DATA}
     mkdir -p $DATA
     cd $DATA

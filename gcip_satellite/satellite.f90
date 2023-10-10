@@ -113,7 +113,7 @@ CONTAINS
     read(satfile(19:20),*,iostat=iret) dd
     read(satfile(21:22),*,iostat=iret) hh
 
-    outfile = "sat" // satfile(13:22) // ".grib2"
+    outfile = "sat." // trim(satfile(13:22)) // ".grib2"
 
     write(*,*) trim(outfile)
 

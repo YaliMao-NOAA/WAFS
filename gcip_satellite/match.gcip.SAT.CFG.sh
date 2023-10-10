@@ -1,8 +1,8 @@
 #!/bin/sh
 
 # 1) Check whether satellite sensor numbers match GCIP configuration
-# satellite sensor data: $DCOMROOT/us007003/*/mcidas/GLOBCOMPSSR.*00
-# GCIP cfg: /gpfs/dell1/nco/ops/nw*/gfs.v*/parm/wafs/wafs_gcip_gfs.cfg
+# satellite sensor data: $DCOMROOT/*/mcidas/GLOBCOMPSSR.*00
+# GCIP cfg: $HOMEgit/*/parm/wafs/wafs_gcip_gfs.cfg
 #
 # Satellite sensor numbers are written in grib2
 #
@@ -10,7 +10,7 @@
 #
 # 3) Plot satellite sensor numbers and save in png image
 
-. /gpfs/dell2/emc/modeling/noscrub/Yali.Mao/git/save/envir_setting.sh
+. $HOMEsave/envir_setting.sh
 set -xa
 
 DATA=$TMP/match.gcip.sat.cfg
@@ -18,14 +18,20 @@ rm -rf $DATA
 mkdir -p $DATA
 cd $DATA
 
+wafsfolder=fork.implement2023
+
 PDY=`$NDATE | cut -c1-8`
-cp $DCOMROOT/us007003/$PDY/mcidas/GLOBCOMPSSR.${PDY}00 GLOBCOMPSSR.${PDY}00
+PDY=20230929
+CC=06
+inputfile=GLOBCOMPSSR.$PDY$CC
+#cp $DCOMROOT/$PDY/mcidas/GLOBCOMPSSR.${PDY}00 GLOBCOMPSSR.${PDY}00
+cp /lfs/h2/emc/vpppg/noscrub/yali.mao/satellite_test_2023sep/dcom/$PDY/mcidas/GLOBCOMPSSR.${PDY}$CC GLOBCOMPSSR.$PDY$CC
 # cp `ls -t /gpfs/dell1/nco/ops/nw*/gfs.v*/parm/wafs/wafs_gcip_gfs.cfg | head -1` wafs_gcip_gfs.cfg
-cp $HOMEgit/EMC_wafs_branch/parm/wafs/wafs_gcip_gfs.cfg wafs_gcip_gfs.cfg
+cp $HOMEgit/$wafsfolder/parm/wafs/wafs_gcip_gfs.cfg wafs_gcip_gfs.cfg
 
 pgm=$HOMEsave/gcip_satellite/gcip_satellite
 
-$pgm GLOBCOMPSSR.${PDY}00 wafs_gcip_gfs.cfg > out.txt
+$pgm GLOBCOMPSSR.$PDY$CC wafs_gcip_gfs.cfg > out.txt
 
 cfgss=`grep "cfg ss=" out.txt | sed s/.*=//g`
 satss=`grep "sat ss=" out.txt | sed s/.*=//g`
@@ -37,14 +43,15 @@ for sat in $satss ; do
    fi
 done
 
+outputfile=`ls *grib2`
 
-$G2CTL -verf sat${PDY}00.grib2 >  sat${PDY}00.grib2.ctl
-gribmap -i sat${PDY}00.grib2.ctl
+$G2CTL -verf $outputfile >  ${outputfile}.ctl
+gribmap -i ${outputfile}.ctl
 
 cp $HOMEsave/grads/cbar.gs .
 
 cat <<EOF > tmp.gs
-'open sat${PDY}00.grib2.ctl'
+'open ${outputfile}.ctl'
 'set gxout shaded'
 'set clevs $satss'
 'd pressfc'
