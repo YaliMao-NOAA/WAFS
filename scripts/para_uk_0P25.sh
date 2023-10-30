@@ -41,4 +41,19 @@ while [ $ic -le $sleep_loop_max ]; do
     fi
 done
 
+ic=1
+sleep_loop_max=200
+while [ $ic -le $sleep_loop_max ]; do
+    nfiles=`ls $TMP/wafs_dwn/com/gfs/v16.3/gfs.$PDY/$cyc/atmos/*wafs_0p25.f*.grib2.idx | wc -l`
+    if [ $nfiles -eq 39 ] ; then
+	remoteDir=/home/ftp/emc/gmb/wafs/uk/unblended_for_uk
+	ssh ymao@emcrzdm.ncep.noaa.gov "sh $remoteDir/newfolder.sh $PDY"
+	scp $TMP/wafs_dwn/com/gfs/v16.3/gfs.$PDY/$cyc/atmos/*wafs_0p25.f*.grib2  ymao@emcrzdm:$remoteDir/$PDY/.
+	break
+    else
+	ic=`expr $ic + 1`
+	sleep 15
+    fi
+done
+
 date
