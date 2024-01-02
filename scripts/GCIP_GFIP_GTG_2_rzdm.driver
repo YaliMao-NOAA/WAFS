@@ -16,8 +16,10 @@ export prod=${prod:-prod}
 export cyc=${cyc:-00}
 export PDY=${PDY:-`$NDATE | cut -c1-8`}
 
-mkdir -p $TMP/GCIP_GFIP_GTG_2_rzdm.working
-rm $TMP/GCIP_GFIP_GTG_2_rzdm.working/GCIP_GFIP_GTG_2_rzdm.list
+export DATA=$TMP/GCIP_GFIP_GTG_2_rzdm.working
+mkdir -p $DATA
+cd $DATA
+rm $DATA/GCIP_GFIP_GTG_2_rzdm.list
 
 export DATAgrib2=$TMP/gfs_${prod}_rzdm_prod/gfs.$PDY/$cyc
 export DATAROOTplot=$TMP/gfs_${prod}_rzdm_plotting_$cyc
@@ -38,7 +40,7 @@ nfhours=`echo $fhours | wc -w`
 
 if [ $MACHINE = "wcoss2" ] ; then
     set -x
-    module load cray-pals/1.0.12
+    module load cray-pals/1.2.2
     module load cfp/2.0.4
     set -x
     export MPIRUN="mpiexec -np $nfhours -cpu-bind verbose,core cfp"
@@ -71,10 +73,14 @@ while [ $ic -le 180 ] ; do
 
     if [ $lines -eq $nfhours ] ; then
 	ssh ymao@emcrzdm.ncep.noaa.gov "mkdir -p $remoteData"
-	rsync -avP $DATAgrib2/* ${remoteServer}:${remoteData}/.
+	export localfiles="$DATAgrib2/*"
+	export remoteDir=$remoteData
+	qsub $HOMEsave/scripts/transfer2rzdm.sh
 
 	ssh ymao@emcrzdm.ncep.noaa.gov "mkdir -p $remotePlot"
-	rsync -avP $DATAROOTplot/*/*png ${remoteServer}:${remotePlot}/.
+	export localfiles="$DATAROOTplot/*/*png"
+	export remoteDir=$remotePlot
+	qsub $HOMEsave/scripts/transfer2rzdm.sh
 
 	########################################################
 	####        cleanup grib data and plottings if      ####

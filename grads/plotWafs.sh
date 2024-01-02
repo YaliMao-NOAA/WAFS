@@ -27,23 +27,25 @@ fi
 WGRIB2=/u/hui-ya.chuang/bin/wgrib2
 
 prefix=${domain}.
-prefix=`echo $prefix | sed "s/original.//g"` # original has no prefix
 
 if [ $prd = potential ] ; then
    dataFileTmp=${dataFile}.icip
-   $WGRIB2 $dataFile | grep ":ICIP:" | $WGRIB2 -i $dataFile -grib ${dataFile}.icip
+   $WGRIB2 $dataFile | grep ":ICIP:" | $WGRIB2 -i $dataFile -grib $dataFileTmp
 elif [[ $prd =~ severity ]] ; then
-   dataFileTmp=${dataFile}.icsev
-   $WGRIB2 $dataFile | grep ":ICSEV:" | $WGRIB2 -i $dataFile -grib ${dataFile}.icsev
+   dataFileTmp=${dataFile}.icesev
+   $WGRIB2 $dataFile | grep ":ICESEV:" | $WGRIB2 -i $dataFile -grib $dataFileTmp
+   field=ICESEV
    ##########################################
-   #### start: For new ICSEV grib2 table ####
-   $WGRIB2 $dataFile | grep "parmcat=19 parm=37:" | $WGRIB2 -i $dataFile -grib ${dataFile}.icsev1
-   cat ${dataFile}.icsev1 >> ${dataFile}.icsev
-   rm ${dataFile}.icsev1
-   #### end: For new ICSEV grib2 table  #####
+   #### start: For new ICESEV grib2 table ####
+   if [ ! -f $dataFileTmp ] ; then
+       field=var01937prs
+       $WGRIB2 $dataFile | grep "parmcat=19 parm=37:" | $WGRIB2 -i $dataFile -grib $dataFileTmp
+   fi
+   #### end: For new ICESEV grib2 table  #####
    ##########################################
 else
-   dataFileTmp=$dataFile
+   dataFileTmp=${dataFile}.turb
+   cp $dataFile $dataFileTmp 
 fi
 
 # using 'neighbor' to avoid incorrect interpolation of icing severity category
@@ -65,6 +67,8 @@ if [ $domain != 'original' ] ; then
     if [ $dataFile != $dataFileTmp ] ; then
        rm $dataFileTmp
     fi
+else
+    mv $dataFileTmp $prefix$dataFile
 fi
 
 ctlFile=$prefix$dataFile.ctl
@@ -82,7 +86,7 @@ gribmap -i $ctlFile
 #=========================================================
 # determine date time
 #========================================================= 
-avar=`$WGRIB2 $dataFile | grep 1:0`
+avar=`$WGRIB2 $prefix$dataFile | grep 1:0`
 PDYHH=`echo $avar | awk -F':' '{ print $3; }' | cut -c3-12`
 FH=`echo $avar | awk -F':' '{ print $6; }' | awk '{ print $1; }'`
 if [ $FH = 'anl' ] ; then
@@ -150,7 +154,7 @@ elif [ $prd = probability ] ; then
    prdname="Icing Probability=>Potential"
 elif [ $prd = severity ] ; then
    clevs="0 1 2 3"
-   field=var01937prs
+#   field is previously defined
    ccols="99 110 120 130 140 "
    prdname="Icing Severity"
 elif [ $prd = iseverity ] ; then
@@ -160,7 +164,7 @@ elif [ $prd = iseverity ] ; then
    prdname="Icing Severity"
 elif [ $prd = rseverity ] ; then
    clevs="0.08 .21 .37 .67"
-   field=ICSEV
+   field=ICESEV
    ccols="99 110 120 130 140 "
    prdname="Icing Severity"
 elif [ $prd = turbulence ] ; then
@@ -172,6 +176,7 @@ else
    echo "Warning!!!!!!! No plot for $prd"
    exit
 fi
+echo grep $field $ctlFile  | awk '{ print $1; }'
 fields=`grep $field $ctlFile  | awk '{ print $1; }'`
 if [[ -z $fields ]] ; then
    echo "Warning!!!! The grib file doesn't have field $fields."
@@ -248,6 +253,7 @@ else                          # pressure level
   clvl="${lvl}hPa"
 fi
 
+prefix=`echo $prefix | sed "s/original.//g"` # original has no prefix
 cat <<EOF >>tmp.gs
 'c'
 'set lev $lvl'

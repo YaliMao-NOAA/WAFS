@@ -8,15 +8,15 @@ date
 
 if [ $prod = test ] ; then # Developer's parallel
 #   DATA is for running a job card
-    export DATA=$TMP/fv3_para_working_$cyc
+    export DATA=${DATA:-$TMP/fv3_para_working_$cyc}
     rm -r $DATA
     mkdir -p $DATA
 elif [ $prod = "para" ] ; then
     export COMROOT="paraCOMROOT"
-    export DATA=$TMP/GCIP_GFIP_GTG_2_rzdm.working
+    export DATA=${DATA:-$TMP/GCIP_GFIP_GTG_2_rzdm.working}
 else # prod
     echo $COMROOT
-    export DATA=$TMP/GCIP_GFIP_GTG_2_rzdm.working
+    export DATA=${DATA:-$TMP/GCIP_GFIP_GTG_2_rzdm.working}
 fi
 cd $DATA
 

@@ -9,18 +9,20 @@
 ####################################
 # . ~/envir_setting.sh is for case 1
 ####################################
-set -xa
 if [ -z $MACHINE ] ; then
     . ~/envir_setting.sh
 fi
+set -xa
 # If run on WCOSS2, only run on dev machine.
 if [ $MACHINE_DEV = 'no' ] ; then
     echo "This is not a dev $MACHINE machine, quit job"
     exit 1
 fi
 
-vday=${1:-`$NDATE -24 | cut -c 1-8`}
-COMINROOT=$2 # For verification, COMINROOT is the folder of input data
+#vday=${1:-`$NDATE -24 | cut -c 1-8`}
+#COMINROOT=$2 # For verification, COMINROOT is the folder of input data
+vday=${vday:-`$NDATE -24 | cut -c 1-8`}
+COMINROOT=$COMIN
 
 cycles="00 06 12 18"
 fhours="06 09 12 15 18 21 24 27 30 33 36"
@@ -44,7 +46,7 @@ if [ -z $COMINROOT ] ; then
 
 	cd $TMP
 	extract='YES'
-	htar -tvf /NCEPDEV/emc-global/5year/Yali.Mao/gfip/20221031.tar | grep gfs | grep gfip > run_JVERF_GRID2GRID_WAFS.tmp
+	htar -tvf /NCEPDEV/emc-global/5year/Yali.Mao/gfip/$PDY.tar | grep gfs | grep gfip > run_JVERF_GRID2GRID_WAFS.tmp
 	filesizes=`awk '{ print $4}' run_JVERF_GRID2GRID_WAFS.tmp`
 	for size in $filesizes ; do
 	    if [ $size -gt 0 ] ; then
@@ -68,7 +70,7 @@ if [ -z $COMINROOT ] ; then
 
 		cd $COMROOTgfip
 		filesize=`du -c ./gfs.$PDY/*/atmos/*gfip* | tail -n 1 | cut -f 1`
-		if [ $filesize -lt 0 ] ; then
+		if [ $filesize -gt 0 ] ; then
 		    htar -Pcvf /NCEPDEV/emc-global/5year/Yali.Mao/gfip/$PDY.tar ./gfs.$PDY/*/atmos/*gfip*
 		fi
 	    else

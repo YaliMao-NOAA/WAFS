@@ -19,7 +19,9 @@ fi
 date
 
 cd $TMP
-scp ymao@emcrzdm.ncep.noaa.gov:~/wafs.vrfy/wafs.vrfy.vsdb.date .
+if [ -z wafs.vrfy.vsdb.date ] ; then
+    scp ymao@emcrzdm.ncep.noaa.gov:~/wafs.vrfy/wafs.vrfy.vsdb.date .
+fi
 
 # Make up the missing dates in case of computer switching
 PDY1=`cat wafs.vrfy.vsdb.date`
@@ -37,8 +39,9 @@ else
 fi
 
 export vday=$PDY1
+export jobid=""
 while [[ $vday < $PDY2 || $vday = $PDY2 ]] ; do
-  sh $HOMEsave/wafs_run/run_JVERF_GRID2GRID_WAFS.cron prod prod > $TMP/wafs.vrfy.log.${vday} 2>&1
+  source $HOMEsave/wafs_run/run_JVERF_GRID2GRID_WAFS.cron prod prod > $TMP/wafs.vrfy.log.${vday} 2>&1
   err=$?
   if [ $err -eq 0 ] ; then
       echo $vday > wafs.vrfy.vsdb.date

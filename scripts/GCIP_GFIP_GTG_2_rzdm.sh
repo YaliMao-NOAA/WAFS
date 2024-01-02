@@ -227,8 +227,9 @@ if [[ $fhour = "000" ]] || [[ $fhour = "003" ]] ; then
   cp $modelfile  $DATAgrib2/.
 else
   # GFIP needs to be extracted from wafs file
-  modelfile=$COMIN/gfs.t${cyc}z.wafs_icao.grb2f$fh
-  $WGRIB2 $modelfile | egrep ":ICIP:|:EDPARM:|:ICESEV:|parm=37:" | grep -v ":70 mb:" | $WGRIB2 -i $modelfile -grib gfs.t${cyc}z.master.grb2f$fh
+#  modelfile=$COMIN/gfs.t${cyc}z.awf_0p25.f$fh.grib2  # after ICAO2023
+  modelfile=$COMIN/gfs.t${cyc}z.wafs_icao.grb2f$fh   # before ICAO2023  
+  $WGRIB2 $modelfile | egrep ":ICIP:|:EDPARM:|:ICESEV:|parm=37:"| $WGRIB2 -i $modelfile -grib gfs.t${cyc}z.master.grb2f$fh
   #Convert to 0.25 degree for blending purpose
   opt1=' -set_grib_type same -new_grid_winds earth '
   opt21=' -new_grid_interpolation bilinear -if'

@@ -34,26 +34,24 @@ export envirp=prod
 export envirv=prod
 echo $edate $observation
 script=$HOMEgit/verf_g2g.v3.0.12/grads/verify_exp_step2.sh
-$script
-
-echo "VSDB plotting ends"
-date
-
-exit
-
-
-
-
-
-
-
-SUB=sbatch
-ACCOUNT=ovp
-jobname=verif_plot
-logfile=/scratch2/NCEPDEV/stmp3/Yali.Mao/verify.plot.$observation
+logfile=$TMP/vsdb.verify.plot.$observation
 rm $logfile
-script=$HOMEgit/verf_g2g.v3.0.12/grads/verify_exp_step2.sh
-${SUB} -A ${ACCOUNT} -t 00:30:00 -N 1 -q batch -J ${jobname} -o ${logfile} ${script}
+jobname=verif_plot
 
-#   For WCOSS
-#   $SUB -q $JOB_QUEUE -P $PROJECT -o ${logfile} -M 100 -R affinity[core] -W 0:20 -J ${jobname} -cwd ${PWD} ${plot_hist}
+if [[ $MACHINE = "hera" ]] ; then
+    SUB=sbatch
+    ACCOUNT=ovp
+
+    ${SUB} -A ${ACCOUNT} -t 00:30:00 -N 1 -q batch -J ${jobname} -o ${logfile} ${script}
+elif [[ $MACHINE = "wcoss2" ]] ; then
+    set -x
+    module load cray-pals/1.2.2
+    module load cfp/2.0.4
+    set -x
+
+    SUB=qsub
+    $SUB -V -q dev_transfer -A GFS-DEV -j oe -o $logfile -l walltime=00:30:00 -l select=1:ncpus=1 -N $jobname $script
+
+    # $script
+
+fi

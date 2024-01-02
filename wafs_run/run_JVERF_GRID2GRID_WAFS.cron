@@ -53,6 +53,7 @@ fi
 
 export DATA=$TMP/wafs.vrfy.${envirp}_${envirv}.working
 mkdir -p $DATA
+cd $DATA
 
 export COMIN=$TMP/wafs.vrfy.com
 mkdir -p $COMIN # For extracting data from HPSS
@@ -65,8 +66,7 @@ mkdir -p $COMIN # For extracting data from HPSS
 htarscript=$HOMEsave/wafs_run/run_JVERF_GRID2GRID_WAFS.htar
 script=$HOMEsave/wafs_run/run_JVERF_GRID2GRID_WAFS.sh
 
-logfile=$DATA/wafs_verif.grid2grid.vsdb.log
-rm $logfile
+logfile=$DATA/wafs_verif.grid2grid.vsdb.log.$vday
 jobname=wafs_verif
 
 if [[ $MACHINE = "hera" ]] ; then
@@ -90,13 +90,24 @@ elif [[ $MACHINE = "wcoss2" ]] ; then
   # verfication is 1 day before today unless it's predefined.
   export vday=${vday:-`$NDATE -24 | cut -c1-8`}
 
+  set -x
+  module load cray-pals/1.2.2
+  module load cfp/2.0.4
+  set -x
+  rm $logfile
+  SUB=qsub
+
   # Prepare data (copy from COM or extract from HPSS)
-  sh $htarscript $vday $COMIN
+  if [ -z $jobid ] ; then
+      jobid=$($SUB -V -q dev_transfer -A GFS-DEV -j oe -o $logfile -l walltime=00:30:00 -l select=1:ncpus=1 -N $jobname $htarscript)
+  else
+      jobid=$($SUB -W depend=afterok:$jobid -V -q dev_transfer -A GFS-DEV -j oe -o $logfile -l walltime=00:30:00 -l select=1:ncpus=1 -N $jobname $htarscript)
+  fi
+  # sh $htarscript $vday $COMIN
 
   # Run verficiation
-  SUB=qsub
-#  $SUB -q debug -P GFS-DEV -o $logfile -e $logfile -n 1 -cwd $TMP -W 4:30  -J $jobname -R span[ptile=1] -R affinity[core] < $script
-  sh $script
+  jobid=$($SUB -W depend=afterok:$jobid -V -q dev -A GFS-DEV -j oe -o $logfile -l walltime=04:30:00 -l select=1:ncpus=1 -N $jobname $script)
+  #sh $script
 
 elif [[ $MACHINE = "dell" ]] ; then
 
@@ -118,7 +129,8 @@ fi
 ### Archive vsdb results to HPSS                    ####
 ########################################################
 
-if [ $MACHINE = "hera" ] ; then # On Hera, verification is done by submitting a job, so needs to wait
+#################
+#if [ $MACHINE = "hera" ] ; then # On Hera, verification is done by submitting a job, so needs to wait
     if [[ $windonly = "wind" ]] ; then
 	sleep 720
 	sleepmax=1800
@@ -142,8 +154,9 @@ if [ $MACHINE = "hera" ] ; then # On Hera, verification is done by submitting a 
 	    exit 2
 	fi
     done
-fi
-
+#fi
+##############
+    
 ########################################################
 ### archive the verification results to HPSS         ###
 ### transfer vsdb to RZDM and save to $VSDBsave      ###
@@ -161,13 +174,19 @@ if [[ $allfilesize  -eq 0 ]] ; then
 else
   # to HPSS
   day=`echo $vday | cut -c1-6`
-  htar -Pcvf /NCEPDEV/emc-global/5year/Yali.Mao/wafs_vsdb/${envirp}.${envirv}/$day/$vday.vsdb.tar `find wafs.vrfy.${envirp}_${envirv}.vsdb/wafs -name "*$vday*" -size +1c -type f`
+  export hpssTarball=/NCEPDEV/emc-global/5year/Yali.Mao/wafs_vsdb/${envirp}.${envirv}/$day/$vday.vsdb.tar
+  export localfiles="`find wafs.vrfy.${envirp}_${envirv}.vsdb/wafs -name "*$vday*" -size +1c -type f`"
+  qsub $HOMEsave/scripts/transfer2hpss.sh
+#  htar -Pcvf /NCEPDEV/emc-global/5year/Yali.Mao/wafs_vsdb/${envirp}.${envirv}/$day/$vday.vsdb.tar `find wafs.vrfy.${envirp}_${envirv}.vsdb/wafs -name "*$vday*" -size +1c -type f`
 
   # to rzdm server (linux computer will download data from rzdm server then delete 
   if [[ ! `hostname` =~ ^h ]] ; then
     remote=/home/people/emc/ymao/wafs.vrfy/vsdb
     remoteServer=ymao@emcrzdm.ncep.noaa.gov
-    rsync -ravP --min-size=1 $TMP/$dataDir/*${vday}* ${remoteServer}:${remote}/.
+    export localfiles="$TMP/$dataDir/*${vday}*"
+    export remoteDir=${remoteServer}:${remote}/.
+    qsub $HOMEsave/scripts/transfer2rzdm.sh
+    #rsync -ravP --min-size=1 $TMP/$dataDir/*${vday}* ${remoteServer}:${remote}/.
   fi
 
   # to wcoss/save folder

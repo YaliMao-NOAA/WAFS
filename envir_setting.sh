@@ -238,7 +238,7 @@ elif [[ `hostname` =~ ^[l|s]login ]] ; then
   export PATH
 
 #=====================================================#
-elif [[ `hostname` =~ ^[d|c]login ]] ; then
+elif [[ `hostname` =~ ^[d|c][login|dxfer] ]]  ; then
 #=====================================================#
   export MACHINE=wcoss2
   alias qjobs='qstat | grep yali.mao'
