@@ -24,7 +24,9 @@ if [[ -z $dataFile ]] ; then
 fi
 
 # Use the newer version of wgrib2 before it's installed for RRFS
-WGRIB2=/u/hui-ya.chuang/bin/wgrib2
+if [ -f /u/hui-ya.chuang/bin/wgrib2 ] ; then
+    WGRIB2=/u/hui-ya.chuang/bin/wgrib2
+fi
 
 prefix=${domain}.
 
@@ -45,7 +47,7 @@ elif [[ $prd =~ severity ]] ; then
    ##########################################
 else
    dataFileTmp=${dataFile}.turb
-   cp $dataFile $dataFileTmp 
+   $WGRIB2 $dataFile | egrep "(:EDPARM:|:CATEDR:|:MWTURB)" | $WGRIB2 -i $dataFile -grib $dataFileTmp
 fi
 
 # using 'neighbor' to avoid incorrect interpolation of icing severity category

@@ -52,7 +52,7 @@ alias mxterms="xterm -geometry 155x55+30+5 &
                xterm -geometry 155x55+30+5 &"
 
 # RZDM
-alias rzdmftp='scp ymao@emcrzdm:/home/ftp/emc/unaff/ymao/     ymao@emcrzdm:/home/people/emc/www/htdocs/users/verification/aviation/wafs/para/grid2grid/images/ '
+alias rzdmftp='scp ymao@emcrzdm.ncep.noaa.gov:/home/ftp/emc/unaff/ymao/     ymao@emcrzdm:/home/people/emc/www/htdocs/users/verification/aviation/wafs/para/grid2grid/images/ '
 alias rzdm='ssh -X ymao@emcrzdm.ncep.noaa.gov'
 # TEMPEST
 alias tempest='ssh -X wd20ym@tempest'
