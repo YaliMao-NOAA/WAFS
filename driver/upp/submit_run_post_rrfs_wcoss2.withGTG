@@ -1,0 +1,139 @@
+#!/bin/sh
+
+#PBS -j oe
+#PBS -N rrfs_post_GTG120
+#PBS -l walltime=02:30:00
+#PBS -q dev
+#PBS -A GFS-DEV
+#PBS -l place=vscatter,select=4:ncpus=120
+#PBS -V
+
+cd $PBS_O_WORKDIR
+
+set -x
+
+# specify computation resource
+export threads=1
+export MP_LABELIO=yes
+export OMP_NUM_THREADS=$threads
+export APRUN="mpiexec -l -n 240 -ppn 60 --cpu-bind core --depth 2"
+
+echo "starting time"
+date
+
+############################################
+# Loading module
+############################################
+module reset
+module load intel/19.1.3.304
+module load PrgEnv-intel/8.1.0
+module load craype/2.7.8
+module load cray-mpich/8.1.7
+module load cray-pals/1.0.12
+module load cfp/2.0.4
+module load hdf5/1.10.6
+module load netcdf/4.7.4
+module load crtm/2.4.0
+module load prod_util/2.0.10
+module load prod_envir/2.0.8
+module load libjpeg/9c
+module load grib_util/1.2.2
+module load wgrib2/2.0.8
+module list
+
+# specify your UPP directory
+export gitdir=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/UPP.v17_hsinmu
+
+export POSTGPEXEC=${gitdir}/exec/upp.x
+#export POSTGPEXEC=/lfs/h2/emc/physics/save/hsin-mu.lin/CIRA-C/UPP/exec/upp.x
+export rundir=/lfs/h2/emc/ptmp/$USER
+
+#Input Data
+#export datain=/u/wen.meng/noscrub/ncep_post/post_regression_test_new/data_in/fv3r
+#export datain=/lfs/h2/emc/stmp/emc.lam/Shun.Liu/stmp/tmpnwprd/rrfs_a/2022120206/fcst_fv3lam_spinup
+#export datain=/u/wen.meng/noscrub/ncep_post/develop/RRFS_data
+#export datain=/u/wen.meng/noscrub/rrfs/gsl_rrfs
+#export datain=/u/wen.meng/noscrub/ncep_post/RRFS/data
+export datain=/u/wen.meng/noscrub/ncep_post/RRFS/data_NA
+
+
+# specify forecast start time and hour for running your post job
+export startdate=2023060614
+
+#export startdate=2023062800
+export fhr=010
+
+# specify your running and output directory
+export DATA=$rundir/post_rrfs_${startdate}_GTG120
+rm -rf $DATA; mkdir -p $DATA
+cd $DATA
+
+
+export tmmark=tm00
+
+export NEWDATE=`${NDATE} +${fhr} $startdate`
+
+export YY=`echo $NEWDATE | cut -c1-4`
+export MM=`echo $NEWDATE | cut -c5-6`
+export DD=`echo $NEWDATE | cut -c7-8`
+export HH=`echo $NEWDATE | cut -c9-10`
+
+cat > itag <<EOF
+&model_inputs
+fileName='$datain/dynf${fhr}.nc'
+IOFORM='netcdf'
+grib='grib2'
+DateStr='${YY}-${MM}-${DD}_${HH}:00:00'
+MODELNAME='FV3R'
+SUBMODELNAME='FV3R'
+fileNameFlux='$datain/phyf${fhr}.nc'
+/
+&NAMPGB
+KPO=47,PO=1000.,975.,950.,925.,900.,875.,850.,825.,800.,775.,750.,725.,700.,675.,650.,625.,600.,575.,550.,525.,500.,475.,450.,425.,400.,375.,350.,325.,300.,275.,250.,225.,200.,175.,150.,125.,100.,70.,50.,30.,20.,10.,7.,5.,3.,2.,1.,gtg_on=.true.,
+/
+EOF
+
+
+rm -f fort.*
+
+###----- copy GTG_rrfs config file ----------------------
+
+cp ${gitdir}/sorc/ncep_post.fd/post_gtg.fd/gtg.config.rrfs ./gtg.config.rrfs
+cp /lfs/h2/emc/vpppg/noscrub/yali.mao/git/GTG.v17_Yali/gtg.input.rrfs ./.
+
+###------------------------------------------------------
+
+cp ${gitdir}/parm/nam_micro_lookup.dat ./eta_micro_lookup.dat
+
+# copy flat files instead
+cp ${gitdir}/parm/postxconfig-NT.txt.new ./postxconfig-NT.txt
+#cp ${gitdir}/parm/postxconfig-NT.txt.GTGonly4 ./postxconfig-NT.txt
+
+cp ${gitdir}/parm/params_grib2_tbl_new ./params_grib2_tbl_new
+#cp /lfs/h2/emc/vpppg/noscrub/andrew.benjamin/g2tmpl.git/src/params_grib2_tbl_new ./params_grib2_tbl_new
+
+#get crtm fix file
+for what in "amsre_aqua" "imgr_g11" "imgr_g12" "imgr_g13" \
+    "imgr_g15" "imgr_mt1r" "imgr_mt2" "seviri_m10" \
+    "ssmi_f13" "ssmi_f14" "ssmi_f15" "ssmis_f16" \
+    "ssmis_f17" "ssmis_f18" "ssmis_f19" "ssmis_f20" \
+    "tmi_trmm" "v.seviri_m10" "imgr_insat3d" "abi_gr" \
+    "ahi_himawari8" ; do
+    ln -s "${CRTM_FIX}/${what}.TauCoeff.bin" .
+    ln -s "${CRTM_FIX}/${what}.SpcCoeff.bin" .
+done
+
+for what in 'Aerosol' 'Cloud' ; do
+    ln -s "${CRTM_FIX}/${what}Coeff.bin" .
+done
+
+for what in  ${CRTM_FIX}/*Emis* ; do
+   ln -s $what .
+done
+
+
+${APRUN} ${POSTGPEXEC} < itag > outpost_nems_${NEWDATE}
+
+echo "PROGRAM IS COMPLETE!!!!!"
+date
+

@@ -10,6 +10,14 @@ SHELL=/bin/bash -l
 #01 23 * * * export cyc=18; /bin/bash /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/scripts/para_uk_0P25.sh > /lfs/h2/emc/ptmp/yali.mao/para_uk_0P25.log 2>&1
 
 
+# Monthly cronjob to backup EVS WAFS stat file of the last month
+#==================================================
+00 00 02 * * qsub /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/evs/backup_stat_2hpss.sh
+
+# Monthly cronjob to plot EVS WAFS verification
+#==================================================
+00 03 02 * * export VDAY1=20171201; sh /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/evs/plot_alljobs.sh > /lfs/h2/emc/ptmp/yali.mao/evs_plot.alljob.log 2>&1
+
 # Collect icing severity data to local machine for verification
 #==================================================
 # cd /lfs/h2/emc/vpppg/noscrub/yali.mao/icesev_verif

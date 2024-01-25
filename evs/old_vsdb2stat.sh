@@ -1,4 +1,11 @@
-#!/bin/bash
+#!/bin/sh
+
+MM=$1
+mkdir -p $MM
+cd $MM
+
+YYYY=$YYYY
+DDs="$DDs"
 
 function convertFormat(){
     allfile=$1
@@ -63,20 +70,20 @@ function convertFormat(){
     done    
 }
 
-DATA=/lfs/h2/emc/ptmp/$USER/vsdb2stat
-mkdir -p $DATA
-cd $DATA ; rm *
-
 VSDBin=/lfs/h2/emc/vpppg/noscrub/yali.mao/vsdb/wafs/prod.prod
 VSDBout=/lfs/h2/emc/vpppg/noscrub/yali.mao/stats_from_vsdb
 
-PDYs="20230719 20230719"
-for PDY in $PDYs ; do
-    YYYY=`echo $PDY | cut -c 1-4`
+for DD in $DDs ; do
+
+#    YYYY=`echo $PDY | cut -c 1-4`
     mkdir -p $VSDBout/$YYYY
 
     #PDY=`echo $twind |  sed s/.*twind_gfs_//g | sed s/.vsdb//g`
+    PDY=$YYYY$MM$DD
     twind="$VSDBin/twind_gfs_${PDY}.vsdb"
+    if [ ! -f $twind ] ; then
+	continue
+    fi
     outputfile=evs.stats.wafs.atmos.grid2grid_uvt1p25.v${PDY}.stat
 
     echo "VERSION MODEL DESC FCST_LEAD FCST_VALID_BEG  FCST_VALID_END  OBS_LEAD OBS_VALID_BEG   OBS_VALID_END   FCST_VAR FCST_UNITS FCST_LEV OBS_VAR OBS_UNITS OBS_LEV OBTYPE VX_MASK  INTERP_MTHD INTERP_PNTS FCST_THRESH OBS_THRESH COV_THRESH ALPHA LINE_TYPE" > $outputfile
@@ -89,7 +96,6 @@ for PDY in $PDYs ; do
     grep "SL1L2 DIRECTION " $twind > $wdir 
     grep "VL1L2 WIND " $twind > $wind
     grep "VL1L2 WIND80 " $twind > $wind80
-
 
     convertFormat $temp SL1L2
     convertFormat $wind VL1L2

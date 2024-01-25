@@ -1,6 +1,6 @@
 #PBS -N transfer_EVS_wafs_plots_to_rzdm
-#PBS -o /lfs/h2/emc/ptmp/yali.mao/log_transfer_EVS_wafs_plots_to_rzdm.out
-#PBS -e /lfs/h2/emc/ptmp/yali.mao/log_transfer_EVS_wafs_plots_to_rzdm.out
+#PBS -o /lfs/h2/emc/ptmp/yali.mao/evs_plot/plot_transfer2rzdm.log
+#PBS -e /lfs/h2/emc/ptmp/yali.mao/evs_plot/plot_transfer2rzdm.log
 #PBS -S /bin/bash
 #PBS -q dev_transfer
 #PBS -A VERF-DEV
@@ -9,19 +9,15 @@
 #PBS -l debug=true
 #PBS -V
 
-if [ -z $MACHINE ] ; then
-    . ~/envir_setting.sh
-fi
-
 date
 
 RUN=${RUN:-"para"}
-PDY=${PDY:-`$NDATE | cut -c1-8`}
 
-plotDir=/lfs/h2/emc/vpppg/noscrub/yali.mao/evs/v1.0/plots/wafs
+plotdir=$COMOUT
+
 remoteTar=/home/people/emc/www/htdocs/users/verification/aviation/wafs/para/tar_files
 
-rsync -ahr -P $plotDir/atmos.$PDY/*.tar ymao@emcrzdm.ncep.noaa.gov:$remoteTar/.
+rsync -ahr -P $plotdir/*.tar ymao@emcrzdm.ncep.noaa.gov:$remoteTar/.
 
 remoteScript=/home/people/emc/www/htdocs/users/verification/aviation/wafs/scripts
 ssh ymao@emcrzdm.ncep.noaa.gov "sh $remoteScript/untar_images_atmos.sh $RUN"
