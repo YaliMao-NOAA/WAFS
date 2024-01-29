@@ -1,14 +1,3 @@
-#PBS -N jevs_wafs_plots
-#PBS -o /lfs/h2/emc/ptmp/yali.mao/evs_plot/plotting.log
-#PBS -e /lfs/h2/emc/ptmp/yali.mao/evs_plot/plotting.log
-#PBS -S /bin/bash
-#PBS -q dev
-#PBS -A VERF-DEV
-#PBS -l walltime=02:00:00
-#PBS -l place=shared,select=1:ncpus=40:mem=200GB
-#PBS -l debug=true
-#PBS -V
-
 set -x
 date
 
@@ -72,5 +61,3 @@ $HOMEevs/jobs/JEVS_WAFS_ATMOS_PLOTS
 ############################################################
 #
 date
-
-

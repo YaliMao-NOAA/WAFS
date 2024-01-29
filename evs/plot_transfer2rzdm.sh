@@ -8,16 +8,22 @@
 #PBS -l select=1:ncpus=1:mem=5GB
 #PBS -l debug=true
 #PBS -V
-
+set -x
 date
 
 RUN=${RUN:-"para"}
 
-plotdir=$COMOUT
+plotdir=$COMROOT
 
 remoteTar=/home/people/emc/www/htdocs/users/verification/aviation/wafs/para/tar_files
 
-rsync -ahr -P $plotdir/*.tar ymao@emcrzdm.ncep.noaa.gov:$remoteTar/.
+cd $plotdir
+files=`ls tar*/*tar`
+n=0
+for file in $files ; do
+    rsync -ahr -P $file  ymao@emcrzdm.ncep.noaa.gov:$remoteTar/$n.${file##*/}
+    n=$(( n + 1))
+done
 
 remoteScript=/home/people/emc/www/htdocs/users/verification/aviation/wafs/scripts
 ssh ymao@emcrzdm.ncep.noaa.gov "sh $remoteScript/untar_images_atmos.sh $RUN"
