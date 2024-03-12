@@ -95,6 +95,6 @@ fi
 ######################################
 # Step 3: transfer to RZDM (rely on job 2)
 ######################################
-export RUN='para'
+export RUN='prod'
 export COMROOT=$DATAplot
 qsub -W depend=afterok:$jobid $SCRIPTplot/plot_transfer2rzdm.sh

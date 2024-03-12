@@ -31,7 +31,7 @@ cd $diroutp
 
 #UPP location
 export svndir=`pwd`
-export svndir=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/UPP.v17
+export svndir=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/UPP.fork
 export rundir=/lfs/h2/emc/ptmp/yali.mao/upp
 #Spedify numx
 export numx=1

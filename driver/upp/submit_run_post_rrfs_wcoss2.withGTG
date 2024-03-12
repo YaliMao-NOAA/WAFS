@@ -2,8 +2,8 @@
 
 #PBS -j oe
 #PBS -N rrfs_post_GTG120
-#PBS -l walltime=02:30:00
-#PBS -q dev
+#PBS -l walltime=00:30:00
+#PBS -q debug
 #PBS -A GFS-DEV
 #PBS -l place=vscatter,select=4:ncpus=120
 #PBS -V
@@ -42,7 +42,7 @@ module load wgrib2/2.0.8
 module list
 
 # specify your UPP directory
-export gitdir=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/UPP.v17_hsinmu
+export gitdir=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/UPP.v17
 
 export POSTGPEXEC=${gitdir}/exec/upp.x
 #export POSTGPEXEC=/lfs/h2/emc/physics/save/hsin-mu.lin/CIRA-C/UPP/exec/upp.x
@@ -106,7 +106,7 @@ cp /lfs/h2/emc/vpppg/noscrub/yali.mao/git/GTG.v17_Yali/gtg.input.rrfs ./.
 cp ${gitdir}/parm/nam_micro_lookup.dat ./eta_micro_lookup.dat
 
 # copy flat files instead
-cp ${gitdir}/parm/postxconfig-NT.txt.new ./postxconfig-NT.txt
+cp ${gitdir}/parm/postxconfig-NT-fv3lam_rrfs.txt ./postxconfig-NT.txt
 #cp ${gitdir}/parm/postxconfig-NT.txt.GTGonly4 ./postxconfig-NT.txt
 
 cp ${gitdir}/parm/params_grib2_tbl_new ./params_grib2_tbl_new

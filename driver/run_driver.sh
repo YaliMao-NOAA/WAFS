@@ -17,7 +17,7 @@ if [ $job = GRIB ] ; then
     driver="run_JGFS_WAFS.$MACHINE"
 fi
 
-PDY=${PDY:-20231030}
+PDY=${PDY:-20240208}
 HOMEgfs=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/fork.implement2023
 #FHOURS=48
 SHOUR=
@@ -47,9 +47,9 @@ if [[ $job =~ 'BLENDING' ]] ; then
 #	DCOMROOT=/lfs/h2/emc/vpppg/noscrub/yali.mao/dcom_2022
     else # BLENDING_0P25
 	if [ "$ICAO2023" = 'yes' ] ; then
-	    COMIN=/lfs/h2/emc/ptmp/yali.mao/wafs_dwn/com/gfs/v16.3/gfs.$PDY/$cyc/atmos
-	    DCOMROOT=/lfs/h2/emc/vpppg/noscrub/yali.mao/4uk_blending
-	    DCOMROOT=/lfs/h2/emc/ptmp/yali.mao/ukblenddcom
+	    COMIN=/lfs/h1/ops/prod/com/gfs/v16.3/gfs.$PDY/$cyc/atmos
+	    DCOMROOT=/lfs/h1/ops/dev/dcom/test
+#	    DCOMROOT=/lfs/h1/ops/prod/dcom
 	else
 	    COMIN=/lfs/h2/emc/vpppg/noscrub/yali.mao/wafs_dwn2022/com/gfs
 	    COMIN=/lfs/h1/ops/prod/com/gfs/v16.3/gfs.$PDY/$cyc/atmos

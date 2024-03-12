@@ -1,8 +1,5 @@
 SHELL=/bin/bash -l
 
-#38 14 * * * qsub < /lfs/h2/emc/vpppg/noscrub/yali.mao/git/EVS/ecf/global_det/stats/jevs_global_det_aviation_stats.ecf 
-#00 15 * * * qsub < /lfs/h2/emc/vpppg/noscrub/yali.mao/git/EVS/ecf/global_det/plots/jevs_global_det_aviation_plots.ecf
-
 #parallel unblended 0.25 hazard data to UK
 #01 05 * * * export cyc=00; /bin/bash /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/scripts/para_uk_0P25.sh > /lfs/h2/emc/ptmp/yali.mao/para_uk_0P25.log 2>&1
 #01 11 * * * export cyc=06; /bin/bash /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/scripts/para_uk_0P25.sh > /lfs/h2/emc/ptmp/yali.mao/para_uk_0P25.log 2>&1
@@ -11,12 +8,14 @@ SHELL=/bin/bash -l
 
 
 # Monthly cronjob to backup EVS WAFS stat file of the last month
+# /NCEPDEV/emc-global/5year/Yali.Mao/evs  YYYYMM.tar
 #==================================================
 00 00 02 * * qsub /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/evs/backup_stat_2hpss.sh
 
 # Monthly cronjob to plot EVS WAFS verification
+# https://www.emc.ncep.noaa.gov/users/verification/aviation/wafs/prod/
 #==================================================
-00 03 02 * * export VDAY1=20171201; sh /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/evs/plot_alljobs.sh > /lfs/h2/emc/ptmp/yali.mao/evs_plot.alljob.log 2>&1
+00 03 02 * * export VDAY1=20190101; sh /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/evs/plot_alljobs.sh > /lfs/h2/emc/ptmp/yali.mao/evs_plot.alljob.log 2>&1
 
 # Collect icing severity data to local machine for verification
 #==================================================

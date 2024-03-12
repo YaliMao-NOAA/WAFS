@@ -11,11 +11,11 @@
 set -x
 date
 
-RUN=${RUN:-"para"}
+RUN=${RUN:-"prod"}
 
 plotdir=$COMROOT
 
-remoteTar=/home/people/emc/www/htdocs/users/verification/aviation/wafs/para/tar_files
+remoteTar=/home/people/emc/www/htdocs/users/verification/aviation/wafs/$RUN/tar_files
 
 cd $plotdir
 files=`ls tar*/*tar`
