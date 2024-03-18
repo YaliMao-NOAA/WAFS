@@ -30,17 +30,6 @@ export TERM=xterm-256color
 alias xterm='xterm -fn 9x15'
 alias emacs='emacs -nw '
 
-alias wcoss='function _wcoss() {
-              if [[ `/bin/hostname | cut -c1-1` == 't' ]] ; then
-                if [[  `/bin/hostname` != 't10a1' ]] ; then
-                  ssh -X t10a1
-                fi
-              else
-                if [[  `/bin/hostname` != 'g10a1' ]] ; then
-                  ssh -X g10a1
-                fi
-              fi
-            }; _wcoss '
 alias xterms="xterm -geometry 175x72+2+2 &
               xterm -geometry 175x72+2+2 &
               xterm -geometry 175x72+2+2 &
@@ -97,7 +86,7 @@ alias crons='crontab $HOMEsave/cronjobs.$MACHINE'
 #
 alias tmp='cd $TMP'
 # Goto NWS source code folder
-alias sorc='cd $NWPROD'
+alias nwprod='cd $NWPROD'
 
 alias regression="echo /gpfs/hps3/emc/global/noscrub/Hui-Ya.Chuang/post_regression_test/scripts/"
 

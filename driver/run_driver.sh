@@ -17,24 +17,24 @@ if [ $job = GRIB ] ; then
     driver="run_JGFS_WAFS.$MACHINE"
 fi
 
-PDY=${PDY:-20240208}
-HOMEgfs=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/fork.implement2023
+PDY=${PDY:-20240315}
+HOMEgfs=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/EMC_wafs.fork
 #FHOURS=48
 SHOUR=
 EHOUR=
 cyc=${cyc:-00}
 ICAO2023=${ICAO2023:-yes}
 FHOUT_GFS=
-COMPATH=/lfs/h1/ops/prod/com/gfs
+#COMPATH=/lfs/h1/ops/prod/com/gfs
 COMPATHradar=/lfs/h1/ops/prod/com/radarl2
 COMIN=/lfs/h2/emc/vpppg/noscrub/yali.mao/4uk_blending/gfs.$PDY/$cyc/atmos
 COMIN=/lfs/h1/ops/prod/com/gfs/v16.3/gfs.$PDY/$cyc/atmos
 #for GCIP
 if [ $job = GCIP ] ; then
-    COMIN=
-    COMPATH=/lfs/h2/emc/vpppg/noscrub/yali.mao/satellite_test_2023sep/com/gfs
-    COMPATHradar=/lfs/h2/emc/vpppg/noscrub/yali.mao/satellite_test_2023sep/com/radarl2
-    DCOMROOT=/lfs/h2/emc/vpppg/noscrub/yali.mao/satellite_test_2023sep/dcom
+#    COMPATH=/lfs/h2/emc/vpppg/noscrub/yali.mao/satellite_test_2023sep/com/gfs
+#    COMPATHradar=/lfs/h2/emc/vpppg/noscrub/yali.mao/satellite_test_2023sep/com/radarl2
+#    DCOMROOT=/lfs/h2/emc/vpppg/noscrub/yali.mao/satellite_test_2023sep/dcom
+    echo
 fi
 #For blending
 if [[ $job =~ 'BLENDING' ]] ; then
@@ -47,7 +47,7 @@ if [[ $job =~ 'BLENDING' ]] ; then
 #	DCOMROOT=/lfs/h2/emc/vpppg/noscrub/yali.mao/dcom_2022
     else # BLENDING_0P25
 	if [ "$ICAO2023" = 'yes' ] ; then
-	    COMIN=/lfs/h1/ops/prod/com/gfs/v16.3/gfs.$PDY/$cyc/atmos
+	    COMIN=/lfs/h2/emc/ptmp/yali.mao/wafs_dwn/com/gfs/v16.3/gfs.$PDY/$cyc/atmos
 	    DCOMROOT=/lfs/h1/ops/dev/dcom/test
 #	    DCOMROOT=/lfs/h1/ops/prod/dcom
 	else
@@ -90,11 +90,13 @@ fi
 if [[ ! -z $DCOMROOT ]] ; then
     sed -e "s|DCOMROOT=.*|DCOMROOT=$DCOMROOT|" -i $TMP/$driver
 fi
-qsub < $TMP/$driver
 
 if [[ $job = 'GRIB' ]] ; then
     for fcsthrs in 00 03 06 09 12 15 18 21 24 27 30 33 36 42 48 54 60 66 72 78 84 90 96 102 108 114 120 ; do
+#    for fcsthrs in 12 ; do
 	sed -e "s|fcsthrs=.*|fcsthrs=$fcsthrs|" -i $TMP/$driver
 	qsub < $TMP/$driver
     done
+else
+    qsub < $TMP/$driver
 fi
