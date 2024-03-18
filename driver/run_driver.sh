@@ -48,8 +48,8 @@ if [[ $job =~ 'BLENDING' ]] ; then
     else # BLENDING_0P25
 	if [ "$ICAO2023" = 'yes' ] ; then
 	    COMIN=/lfs/h2/emc/ptmp/yali.mao/wafs_dwn/com/gfs/v16.3/gfs.$PDY/$cyc/atmos
-	    DCOMROOT=/lfs/h1/ops/dev/dcom/test
-#	    DCOMROOT=/lfs/h1/ops/prod/dcom
+	    DCOMROOT=/lfs/h1/ops/prod/dcom
+#	    DCOMROOT=/lfs/h1/ops/dev/dcom/test
 	else
 	    COMIN=/lfs/h2/emc/vpppg/noscrub/yali.mao/wafs_dwn2022/com/gfs
 	    COMIN=/lfs/h1/ops/prod/com/gfs/v16.3/gfs.$PDY/$cyc/atmos
