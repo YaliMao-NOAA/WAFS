@@ -27,8 +27,8 @@ date
 #export observation=gfs
 export observation=${observation:-gcip}
 
-export sdate=20181201
 export edate=${edate:-`$NDATE -72 | cut -c1-8`}
+export sdate=`$NDATE -$((24*365*5)) ${edate}00 | cut -c1-8`
 
 export envirp=prod
 export envirv=prod
@@ -42,7 +42,7 @@ if [[ $MACHINE = "hera" ]] ; then
     SUB=sbatch
     ACCOUNT=ovp
 
-    ${SUB} -A ${ACCOUNT} -t 00:30:00 -N 1 -q batch -J ${jobname} -o ${logfile} ${script}
+    ${SUB} -A ${ACCOUNT} -t 01:00:00 -N 1 -q batch -J ${jobname} -o ${logfile} ${script}
 elif [[ $MACHINE = "wcoss2" ]] ; then
     set -x
     module load cray-pals/1.2.2
@@ -50,7 +50,7 @@ elif [[ $MACHINE = "wcoss2" ]] ; then
     set -x
 
     SUB=qsub
-    $SUB -V -q dev_transfer -A GFS-DEV -j oe -o $logfile -l walltime=00:30:00 -l select=1:ncpus=1 -N $jobname $script
+    $SUB -V -q dev_transfer -A GFS-DEV -j oe -o $logfile -l walltime=01:00:00 -l select=1:ncpus=1 -N $jobname $script
 
     # $script
 

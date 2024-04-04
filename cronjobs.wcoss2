@@ -72,7 +72,7 @@ SHELL=/bin/bash -l
 # rsync -ravP --min-size=1. wd20ym@emc-lw-ymao:/export/emc-lw-ymao/wd20ym/vsdb/wafs/prod.prod/. $VSDBsave/wafs/prod.prod/.
 #--------------------------------------------------
 01 00 2 * *  export observation=gfs;  /bin/bash /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/scripts/verify.plot.wafs.cron >/lfs/h2/emc/ptmp/yali.mao/VSDB.PLOT.log.$observation 2>&1
-02 02 2 * *  export observation=gcip; /bin/bash /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/scripts/verify.plot.wafs.cron >/lfs/h2/emc/ptmp/yali.mao/VSDB.PLOT.log.$observation 2>&1
+#02 02 2 * *  export observation=gcip; /bin/bash /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/scripts/verify.plot.wafs.cron >/lfs/h2/emc/ptmp/yali.mao/VSDB.PLOT.log.$observation 2>&1
 
 # Run GCIP operational in case a satellite is changed
 # between 2 GFS implementations.
