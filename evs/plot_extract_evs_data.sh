@@ -29,8 +29,8 @@ fi
 #########################################
 
 # this month
-YYYY=`echo $VDAY2 | cut -c1-4`
-month=`echo $VDAY2 | cut -c1-6`
+YYYY=`echo $VDATE | cut -c1-4`
+month=`echo $VDATE | cut -c1-6`
 mkdir -p $YYYY
 
 # last month
@@ -40,7 +40,7 @@ lastmonth=`echo $day | cut -c1-6`
 mkdir -p $year
 
 day=${lastmonth}01
-while [ $day -le $VDAY2 ] ; do
+while [ $day -le $VDATE ] ; do
     year=`echo $day | cut -c1-4`
     evsdir=`find /lfs/h1/ops/*/com/evs/*/stats/wafs -name wafs.$day | tr ' ' '\n' | sort -nr | head -1`
     if [ ! -z $evsdir ] ; then

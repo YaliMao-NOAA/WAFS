@@ -15,7 +15,7 @@ SHELL=/bin/bash -l
 # Monthly cronjob to plot EVS WAFS verification
 # https://www.emc.ncep.noaa.gov/users/verification/aviation/wafs/prod/
 #==================================================
-00 03 02 * * export VDAY1=20190101; sh /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/evs/plot_alljobs.sh > /lfs/h2/emc/ptmp/yali.mao/evs_plot.alljob.log 2>&1
+00 03 02 * * export long_range=yes; sh /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/evs/plot_alljobs.sh > /lfs/h2/emc/ptmp/yali.mao/evs_plot.alljob.log 2>&1
 
 # Collect icing severity data to local machine for verification
 #==================================================

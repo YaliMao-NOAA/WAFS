@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# If VDAY1 is specified, plot till the last day of the last month;
+# If long_range is yes, plot the last day of the last month back to 5 years ago;
 # otherwise plot 90 or 31 days.
 
 set -xa
@@ -21,17 +21,19 @@ rm -fr $DATAplot; mkdir -p $DATAplot; cd $DATAplot
 
 SCRIPTplot=$HOMEsave/evs
 
+# Get  the last day of the last month
+VDATE=`$NDATE | cut -c 1-6`0100
+export VDATE=`$NDATE -24 $VDATE | cut -c 1-8`
+
 ######################################
-# Step 1: if VDAY1 is specified usually when verification data is over more than 90 days,
+# Step 1: if long_range is yes, plot the last day of the last month back to 5 years ago
 ######################################
-if [ ! -z $VDAY1 ] ; then
+if [ $long_range = "yes"  ] ; then
     #==========================================
     # Job 1: prepare data
     #==========================================
     # VDAY1=20171201
-    # Get  the last day of the last month
-    VDAY2=`$NDATE | cut -c 1-6`0100
-    export VDAY2=`$NDATE -24 $VDAY2 | cut -c 1-8`
+    export VDAY1=`$NDATE -$((5*365*24)) ${VDATE}00 | cut -c 1-6`01
 
     export DATAevs=$DATAplot/data
     jobid_data=$(qsub $SCRIPTplot/plot_extract_evs_data.sh)
@@ -50,7 +52,7 @@ if [ ! -z $VDAY1 ] ; then
     #PBS -l debug=true
     #PBS -V
     export COMIN=$DATAevs
-    export DAYS_LIST=$(( ($(date +%s -d $VDAY2) - $(date +%s -d $VDAY1) )/(60*60*24) ))
+    export DAYS_LIST=$(( ($(date +%s -d $VDATE) - $(date +%s -d $VDAY1) )/(60*60*24) ))
 
     export OBSERVATIONS=GCIP
     export COMOUT=$DATAplot/tar_long.gcip
