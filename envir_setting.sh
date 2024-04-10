@@ -1,3 +1,4 @@
+#!/bin/bash
 
 # used by:
 # ~/.bashrc
@@ -35,57 +36,41 @@ if [[ `hostname` =~ ^h ]] ; then
   export NWPROD=/scratch4/NCEPDEV/rstprod/nwprod
   export COMROOT=/scratch1/NCEPDEV/rstprod/com
 
-  # run this bash before 'module load'
-  if [ ! -z $MODULESHOME ]; then
-      . $MODULESHOME/init/bash
-      . $MODULESHOME/init/profile
-  else
-      . /apps/lmod/7.7.18/init/bash
-      . /apps/lmod/7.7.18/init/profile
+#  . $MODULESHOME/init/sh
+  if [ -f /etc/bashrc ]; then
+      . /etc/bashrc
   fi
 
+  module use /scratch1/NCEPDEV/nems/role.epic/spack-stack/spack-stack-1.6.0/envs/unified-env-rocky8/install/modulefiles/Core
+  module load stack-intel/2021.5.0
+  module load stack-intel-oneapi-mpi/2021.5.1
+  module load libpng/1.6.37
+  module load jasper/2.0.32
+  module load prod_util/2.1.1
+  module load wgrib2/2.0.8
+  module load g2tmpl/1.10.2
+
+#  module use /apps/modules/modulefamilies/intel
+  module load netcdf-c/4.9.2
+
+#  module use -a /contrib/met/modulefiles/
+  module load met/11.1.0
+  module load metplus/5.1.0
+
   module use /apps/modules/modulefiles
-  module load intel/18.0.5.274
-#  module load gcc/6.2.0
-  module load grads/2.2.1
-  module load ncl
+  module load grads/2.2.3
   module load hpss
-#  module load svn
-#  module load slurm
-  module load rocoto
-
-  module use /apps/modules/modulefamilies/intel
-  module load impi/2018.0.4
-  module load netcdf
-  module load R/3.5.0
-
-  module use /scratch2/NCEPDEV/nwprod/NCEPLIBS/modulefiles
-  module load grib_util/1.1.1
-  alias wgrib2=$WGRIB2
-  module load prod_util/1.1.0
-  module load g2tmpl/1.5.0
-# load python which needs contrib and anaconda/latest
-  module load contrib
-  module use -a /contrib/anaconda/modulefiles
-  module load anaconda/latest
-
-  #For METv9.1
-#  module load intel/18.0.5.274
-#  module use -a /contrib/anaconda/modulefiles
-#  module load anaconda/latest
-  module use -a /contrib/met/modulefiles/
-  module load met/9.1
 
   # Install LD_LIBRARY_PATH to solve runtime error:  
   #   error while loading shared libraries: libiomp5.so: cannot open shared object file
   # It works for /scratch2/NCEPDEV/ovp/Yali.Mao/git/verf_g2g.v3.0.12/exec/verf_g2g_grid2grid_grib2
-  source /opt/intel/bin/compilervars.sh intel64
+#  source /opt/intel/bin/compilervars.sh intel64
 
 
 # Install LD_LIBRARY_PATH to solve runtime error:  
   #   error while loading shared libraries: libiomp5.so: cannot open shared object file
   # It works for /scratch2/NCEPDEV/ovp/Yali.Mao/git/verf_g2g.v3.0.12/exec/verf_g2g_grid2grid_grib2
-  source /opt/intel/bin/compilervars.sh intel64
+#  source /opt/intel/bin/compilervars.sh intel64
 
 #=====================================================#
 elif [[ `hostname` =~ ^O ]] ; then
