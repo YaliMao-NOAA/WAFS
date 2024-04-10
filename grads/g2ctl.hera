@@ -39,7 +39,6 @@ use Math::Trig qw(deg2rad rad2deg);
 
 # ***** if wgrib2 is not on path, add it here
 $wgrib2='wgrib2';
-$wgrib2='/scratch2/NCEPDEV/nwprod/NCEPLIBS/utils/grib_util.v1.1.1/exec/wgrib2';
 
 $wflag="";
 $tflag="-VT";
