@@ -59,7 +59,7 @@ if [ $long_range = "yes"  ] ; then
     export DATA=$DATAplot/working_long.gcip
     logfile=$DATAplot/plotting.log.gcip
     jobname=jevs_plotgcip
-    jobid=$(qsub -W depend=afterok:$jobid_data -V -q debug -A VERF-DEV -j oe -o $logfile -l walltime=00:30:00 -l place=shared,select=1:ncpus=10:mem=200GB -N $jobname $SCRIPTplot/plot_plotting.sh)
+    jobid=$(qsub -W depend=afterok:$jobid_data -V -q dev -A VERF-DEV -j oe -o $logfile -l walltime=00:30:00 -l place=shared,select=2:ncpus=110:mem=200GB -N $jobname $SCRIPTplot/plot_plotting.sh)
 
     export OBSERVATIONS=GFS
     for var in TMP WIND WIND80 ; do # TMP WIND WIND80 WDIR
@@ -89,9 +89,9 @@ export VAR_NAME_GFS=
 logfile=$DATAplot/plotting.log.short
 jobname=jevs_plot.short
 if [ -z $jobids ] ; then
-    jobid=$(qsub -V -q dev -A VERF-DEV -j oe -o $logfile -l walltime=01:00:00 -l place=shared,select=1:ncpus=40:mem=200GB -N $jobname $SCRIPTplot/plot_plotting.sh)
+    jobid=$(qsub -V -q dev -A VERF-DEV -j oe -o $logfile -l walltime=01:00:00 -l place=shared,select=1:ncpus=60:mem=200GB -N $jobname $SCRIPTplot/plot_plotting.sh)
 else
-    jobid=$(qsub -W depend=afterok:$jobids -V -q dev -A VERF-DEV -j oe -o $logfile -l walltime=01:00:00 -l place=shared,select=1:ncpus=40:mem=200GB -N $jobname $SCRIPTplot/plot_plotting.sh)
+    jobid=$(qsub -W depend=afterok:$jobids -V -q dev -A VERF-DEV -j oe -o $logfile -l walltime=01:00:00 -l place=shared,select=1:ncpus=60:mem=200GB -N $jobname $SCRIPTplot/plot_plotting.sh)
 fi
 
 ######################################
