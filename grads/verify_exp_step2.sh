@@ -150,8 +150,8 @@ for region in  $regions ; do
 # -------------------------------------------------
       export vhrlist="00 06 12 18"
       export vtype=pres
-      export vnamlist="T DIRECTION WIND WIND80"
-#      export vnamlist="T WIND WIND80"
+#      export vnamlist="T DIRECTION WIND WIND80"
+      export vnamlist="DIRECTION"
       export levlist="P850 P700 P600 P500 P400 P300 P250 P200 P150 P100"
       bsubstring=vsdbplot.$obsv.$reg1.twind
     else
@@ -196,5 +196,5 @@ for region in  $regions ; do
 done  #end of region
 done  #end of obsv
 #====================================================
-
+date
 exit
