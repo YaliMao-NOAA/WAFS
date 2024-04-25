@@ -12,7 +12,7 @@ SHELL=/bin/bash -l
 #==================================================
 00 00 02 * * qsub /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/evs/backup_stat_2hpss.sh
 
-# Monthly cronjob to plot EVS WAFS verification
+# Monthly cronjob to plot EVS WAFS verification, upload images to RZDM server
 # https://www.emc.ncep.noaa.gov/users/verification/aviation/wafs/prod/
 #==================================================
 00 03 02 * * export long_range=yes; sh /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/evs/plot_alljobs.sh > /lfs/h2/emc/ptmp/yali.mao/evs_plot.alljob.log 2>&1
@@ -64,7 +64,7 @@ SHELL=/bin/bash -l
 #35 13  * * *  export vday=20210423; /bin/bash /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/wafs_run/run_JVERF_GRID2GRID_WAFS.cron prod prod wind > /lfs/h2/emc/ptmp/yali.mao/WAFS.VRFY.log.twind.$vday 2>&1
 
 
-# Plot verification from vsdb (monthly)
+# Plot verification from vsdb (monthly), upload images to RZDM server
 #==================================================
 # observation choices: gfs gcip gcipconus cip
 #--------------------------------------------------
@@ -72,6 +72,7 @@ SHELL=/bin/bash -l
 # rsync -ravP --min-size=1. wd20ym@emc-lw-ymao:/export/emc-lw-ymao/wd20ym/vsdb/wafs/prod.prod/. $VSDBsave/wafs/prod.prod/.
 #--------------------------------------------------
 01 00 2 * *  export observation=gfs;  /bin/bash /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/scripts/verify.plot.wafs.cron >/lfs/h2/emc/ptmp/yali.mao/VSDB.PLOT.log.$observation 2>&1
+
 #02 02 2 * *  export observation=gcip; /bin/bash /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/scripts/verify.plot.wafs.cron >/lfs/h2/emc/ptmp/yali.mao/VSDB.PLOT.log.$observation 2>&1
 
 # Run GCIP operational in case a satellite is changed
