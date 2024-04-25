@@ -6,14 +6,14 @@
 #PBS -l walltime=00:30:00
 #PBS -q debug
 #PBS -A GFS-DEV
-#PBS -l place=vscatter,select=2:ncpus=36:mem=300GB
+#PBS -l place=vscatter,select=2:ncpus=96:mem=300GB
 #PBS -V
 #PBS -W umask=022
 
 cd $PBS_O_WORKDIR
 
 set -x
-ncpus=36
+ncpus=96
 ppn=$(( ncpus / 2 ))
 
 # specify computation resource

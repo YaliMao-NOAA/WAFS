@@ -40,6 +40,10 @@ alias mxterms="xterm -geometry 155x55+30+5 &
                xterm -geometry 155x55+30+5 &
                xterm -geometry 155x55+30+5 &"
 
+#dfs
+alias dread='echo /dfs/read/emc/vpppg/yali.mao'
+alias dwrite='echo /dfs/write/emc/vpppg/yali.mao'
+
 # RZDM
 alias rzdmftp='scp ymao@emcrzdm.ncep.noaa.gov:/home/ftp/emc/unaff/ymao/     ymao@emcrzdm:/home/people/emc/www/htdocs/users/verification/aviation/wafs/para/grid2grid/images/ '
 alias rzdm='ssh -X ymao@emcrzdm.ncep.noaa.gov'
