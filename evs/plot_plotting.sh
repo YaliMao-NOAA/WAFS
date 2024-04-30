@@ -27,7 +27,7 @@ evs_ver_2d=$(echo $evs_ver | cut -d'.' -f1-2)
 ############################################################
 # environment variables set
 ############################################################
-export envir=dev
+export envir=prod
 
 export NET=evs
 export STEP=plots
