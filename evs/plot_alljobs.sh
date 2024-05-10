@@ -79,14 +79,12 @@ fi
 # Step 2: Plot anyway for 90 and 31 days
 ######################################
 # In EVS workflow: 90 and 31 days
-# jobs/JEVS_WAFS_ATMOS_PLOTS:
-# in ush/wafs/evs_wafs_atmos_plots.sh: find $COMIN/*/stats/$COMPONENT -name wafs.$day
-# /lfs/h1/ops/prod/com/evs/v1.0/stats/wafs/wafs.20240429
-export COMIN=/lfs/h1/ops/prod/com/evs
+export COMIN=
 export DAYS_LIST="90 31"
 export COMOUT=$DATAplot/tar_short
 export DATA=$DATAplot/working_short
 export VAR_NAME_GFS=
+export OBSERVATIONS="GCIP GFS"
 logfile=$DATAplot/plotting.log.short
 jobname=jevs_plot.short
 if [ -z $jobids ] ; then

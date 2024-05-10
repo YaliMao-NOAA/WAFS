@@ -237,6 +237,7 @@ elif [[ `hostname` =~ ^[d|c][login|dxfer] ]]  ; then
   export VSDBsave=$HOMEnoscrub/vsdb
 
   export TMP='/lfs/h2/emc/ptmp/yali.mao'
+  alias stmp='cd /lfs/h2/emc/stmp/yali.mao'
 
   #========== dogwood/cactus ====================#
   # run this bash before 'module load'
