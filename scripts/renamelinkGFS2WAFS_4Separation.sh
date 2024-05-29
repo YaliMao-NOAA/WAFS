@@ -1,7 +1,7 @@
-PDY=20240522
-: <<'COMMENT'
+PDY=20240529
+
 source=/lfs/h1/ops/prod/com/gfs/v16.3/gfs.$PDY/00/atmos
-target=/lfs/h2/emc/vpppg/noscrub/yali.mao/separation/com.wafs/wafs/v7.0/wafs.$PDY/00
+target=/lfs/h2/emc/vpppg/noscrub/yali.mao/separation/prod/com/wafs/v7.0/wafs.$PDY/00
 
 mkdir -p $target
 
@@ -12,9 +12,9 @@ for file in $files ; do
     waffile=`echo $waffile | sed "s/gfs/wafs/g"`
     ln -s $source/$file $target/$waffile
 done
-COMMENT
 
 
+: <<'COMMENT'
 
 # change UK forecast hour to 3 digits
 source=/lfs/h1/ops/prod/dcom/$PDY/wgrbbul/ukmet_wafs
@@ -33,3 +33,5 @@ for hour in $hours ; do
         ln -s $source/$file $target/$newfile
     done
 done
+
+COMMENT
