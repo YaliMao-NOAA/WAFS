@@ -1,9 +1,9 @@
 #!/bin/sh
 
 job=$1
-# job be one of GCIP, GRIB2, GRIB2_0P25, BLENDING, BLENDING_0P25, GRIB
+# job be one of GCIP, GRIB2, GRIB2_0P25, BLENDING_0P25, GRIB
 if [ $# -lt 1 ] ; then
-    echo "Must specifiy a job to run: GCIP, GRIB2, GRIB2_0P25, BLENDING, BLENDING_0P25, GRIB"
+    echo "Must specifiy a job to run: GCIP, GRIB2, GRIB2_0P25, BLENDING_0P25, GRIB"
     exit
 fi
 
@@ -17,15 +17,15 @@ if [ $job = GRIB ] ; then
     driver="run_JGFS_WAFS.$MACHINE"
 fi
 
-PDY=${PDY:-20240315}
-HOMEgfs=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/EMC_wafs.fork
+PDY=${PDY:-20240703}
+HOMEgfs=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/fork.implement2023_v2
 #FHOURS=48
 SHOUR=
 EHOUR=
 cyc=${cyc:-00}
 ICAO2023=${ICAO2023:-yes}
 FHOUT_GFS=
-#COMPATH=/lfs/h1/ops/prod/com/gfs
+COMPATH=/lfs/h1/ops/prod/com/gfs
 COMPATHradar=/lfs/h1/ops/prod/com/radarl2
 COMIN=/lfs/h2/emc/vpppg/noscrub/yali.mao/4uk_blending/gfs.$PDY/$cyc/atmos
 COMIN=/lfs/h1/ops/prod/com/gfs/v16.3/gfs.$PDY/$cyc/atmos
@@ -83,20 +83,20 @@ if [[ ! -z $COMIN ]] ; then
     sed -e "s|COMIN=.*|COMIN=$COMIN|" -i $TMP/$driver
 fi
 if [[ ! -z $COMPATH ]] ; then
-    if [[ $job = 'GCIP' ]] ; then
+#    if [[ $job = 'GCIP' ]] ; then
 	sed -e "s|COMPATH=.*|COMPATH=$COMPATH:$COMPATHradar|" -i $TMP/$driver
-    fi
+#    fi
 fi
 if [[ ! -z $DCOMROOT ]] ; then
     sed -e "s|DCOMROOT=.*|DCOMROOT=$DCOMROOT|" -i $TMP/$driver
 fi
 
 if [[ $job = 'GRIB' ]] ; then
-    for fcsthrs in 00 03 06 09 12 15 18 21 24 27 30 33 36 42 48 54 60 66 72 78 84 90 96 102 108 114 120 ; do
+ #   for fcsthrs in 00 03 06 09 12 15 18 21 24 27 30 33 36 42 48 54 60 66 72 78 84 90 96 102 108 114 120 ; do
 #    for fcsthrs in 12 ; do
-	sed -e "s|fcsthrs=.*|fcsthrs=$fcsthrs|" -i $TMP/$driver
+#	sed -e "s|fcsthrs=.*|fcsthrs=$fcsthrs|" -i $TMP/$driver
 	qsub < $TMP/$driver
-    done
+#    done
 else
     qsub < $TMP/$driver
 fi
