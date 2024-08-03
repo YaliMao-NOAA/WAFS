@@ -1,18 +1,18 @@
 #!/bin/bash
 #set -x
 
-PDY=20240703
+PDY=20240729
+cyc=00
 
-folder2Btested=/lfs/h2/emc/vpppg/noscrub/yali.mao/before.separation/com.blending_0p25/gfs/v16.3/gfs.$PDY/00/atmos
-folder2Btested=/lfs/h2/emc/vpppg/noscrub/yali.mao/after.separation/com.grib2_0p25/wafs/v7.0/wafs.$PDY/00
-folder2Btested=/lfs/h2/emc/ptmp/yali.mao/wafs_dwn/prod/com/wafs/v7.0/wafs.$PDY/00
+folder2Btested=/lfs/h2/emc/ptmp/yali.mao/wafs_dwn/prod/com/wafs/v7.0/wafs.$PDY/00/grib2/0p25
 folderstandard=/lfs/h1/ops/prod/com/gfs/v16.3/gfs.$PDY/00/atmos
-
+#folderstandard=/lfs/h2/emc/ptmp/yali.mao/wafs_dwn/prod/com/wafs/v7.0/wafs.$PDY/00/upp
 function my_cmp() {
     cd $folder2Btested
     files=`ls * | grep -v idx`
     n=0
     for file in $files ; do
+	echo cmp $file $folderstandard/$file
 	cmp $file $folderstandard/$file
 	n=$(( n+1))
     done
@@ -21,25 +21,64 @@ function my_cmp() {
 
 function my_cmp_diffname() {
     cd $folder2Btested
-    n=0
-    hours="0 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 27 30 33 36 39 42 45 48 54 60 66 72 78 84 90 96 102 108 114 120"
-    hours="0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 27 30 33 36 39 42 45 48 54 60 66 72 78 84 90 96 102 108 114 120"
-    for hour in $hours ; do
-	hour="$(printf "%03d" $(( 10#$hour )) )"
-	files=`ls *f$hour* | grep -v idx`
-	newhour="$(printf "%02d" $(( 10#$hour )) )"
+
+    files=`ls *wafs* WAFS* | grep -v idx`
+    
+    if [ `basename $folder2Btested` = "upp" ] || [ `basename $folder2Btested` = "0p25" ] ; then
+	tmpdir=/lfs/h2/emc/ptmp/$USER/tmp_compWAFS
+	mkdir -p $tmpdir
+	rm -f $tmpdir/*
 	for file in $files ; do
+	    wgrib2 $file | egrep -v ":(EDPARM|CATEDR|MWTURB):(127|724|812|908|977)" | egrep -v "parm=37:(908|977)" | wgrib2 -i $file -grib $tmpdir/$file
+	done
+	folder2Btested=$tmpdir
+    fi
+    
+    n=0
+    hours="anl 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 27 30 33 36 39 42 45 48 54 60 66 72 78 84 90 96 102 108 114 120"
+
+    for file in $files ; do
+	for hour in $hours ; do
+
+	    if [[ $hour =~ "anl" ]] ; then
+		hour2=$hour
+	    else
+		hour="$(printf "%03d" $(( 10#$hour )) )"
+		hour2="$(printf "%02d" $(( 10#$hour )) )"
+	    fi
+
+	    if [[ ! $file =~ f$hour ]] ; then
+		continue
+	    fi
+
             gfsfile=`echo $file | sed 's/^wafs/gfs/g'`
-            gfsfile=`echo $gfsfile | sed 's/master/wafs/g'`
-            gfsfile=`echo $gfsfile | sed 's/\.0p25/\.wafs_0p25/g'`
-            gfsfile=`echo $gfsfile | sed 's/\.grd45/\.wafs_grd45/g'`
-	    gfsfile=`echo $gfsfile | sed "s/WAFS_0p25_blended_${PDY}00f${hour}./WAFS_0p25_blended_${PDY}00f${newhour}./g"`
-	    gfsfile=`echo $gfsfile | sed "s/gfs.t00z.gcip.f${hour}./gfs.t00z.gcip.f${newhour}./g"`
-	    gfsfile=`echo $gfsfile | sed "s/gfs.t03z.gcip.f${hour}./gfs.t03z.gcip.f${newhour}./g"`
-	    gfsfile=`echo $gfsfile | sed "s/gfs.t00z.wafs_grd45f${hour}./gfs.t00z.wafs_grb45f${newhour}./g"`
-	    gfsfile=`echo $gfsfile | sed "s/gfs.t00z.wafs_0p25_unblended.f${hour}./gfs.t00z.wafs_0p25_unblended.f${newhour}./g"`
-	    gfsfile=`echo $gfsfile | sed "s/gfs.t00z.awf_grd45f${hour}./gfs.t00z.awf_grb45f${newhour}./g"`
-            gfsfile=`echo $gfsfile | sed "s/f${hour}.45/f${newhour}.45/g"`
+
+	    #upp
+            gfsfile=`echo $gfsfile | sed 's/0p25.anl.grib2/wafs.0p25.anl/g'`
+            gfsfile=`echo $gfsfile | sed "s/master.f${hour}.grib2/wafs.grb2f${hour}/g"`
+
+	    #gcip
+	    gfsfile=`echo $gfsfile | sed "s/gfs.t00z.gcip.f${hour}./gfs.t00z.gcip.f${hour2}./g"`
+	    gfsfile=`echo $gfsfile | sed "s/gfs.t03z.gcip.f${hour}./gfs.t03z.gcip.f${hour2}./g"`
+	    
+	    #grib2 1p25
+#           gfsfile=`echo $gfsfile | sed "s/\.grid45.f${hour}./\.wafs_grb45f${hour2}./g"`
+            gfsfile=`echo $gfsfile | sed "s/\.wafs_grb45f${hour}./\.wafs_grb45f${hour2}./g"`
+	    gfsfile=`echo $gfsfile | sed "s/\.awf_grid45.f${hour}\./\.awf_grb45f${hour2}\./g"`
+            gfsfile=`echo $gfsfile | sed "s/grib2.wafs.t${cyc}z.awf_grid45.f${hour}/grib2.t${cyc}z.awf_grbf${hour2}.45/g"`
+            gfsfile=`echo $gfsfile | sed "s/grib2.wafs.t${cyc}z.grid45.f${hour}/grib2.t${cyc}z.wafs_grbf${hour2}.45/g"`
+
+
+	    #grib2 0p25
+#           gfsfile=`echo $gfsfile | sed "s/z.0p25.f${hour}/z.wafs_0p25.f${hour}/g"`
+            gfsfile=`echo $gfsfile | sed "s/z.wafs_0p25.f${hour}/z.wafs_0p25.f${hour}/g"`
+            gfsfile=`echo $gfsfile | sed "s/z.awf.0p25.f${hour}/z.awf_0p25.f${hour}/g"`
+#	    gfsfile=`echo $gfsfile | sed "s/z.unblended.0p25.f${hour}/z.wafs_0p25_unblended.f${hour2}/g"`
+	    gfsfile=`echo $gfsfile | sed "s/WAFS_0p25_unblended_$PDY${cyc}f$hour/gfs.t${cyc}z.wafs_0p25_unblended.f${hour2}/g"`
+
+	    # blended
+	    gfsfile=`echo $gfsfile | sed "s/WAFS_0p25_blended_$PDY${cyc}f${hour}/WAFS_0p25_blended_$PDY${cyc}f${hour2}/g"`
+	    
 	    echo cmp $folder2Btested/$file $folderstandard/$gfsfile
 	    cmp $folder2Btested/$file $folderstandard/$gfsfile
 	    n=$(( n+1))
@@ -50,7 +89,8 @@ function my_cmp_diffname() {
 
 
 my_cmp_diffname
-
+#my_cmp
+exit
 folder2Btested=$folder2Btested/wmo
 folderstandard=$folderstandard/wmo
 my_cmp_diffname
