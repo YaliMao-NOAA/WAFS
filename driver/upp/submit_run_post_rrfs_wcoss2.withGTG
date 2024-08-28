@@ -38,7 +38,7 @@ module load hdf5/1.10.6
 module load netcdf/4.7.4
 module load crtm/2.4.0
 module load prod_util/2.0.10
-module load prod_envir/2.0.8
+module load prod_envir/2.0.6
 module load libjpeg/9c
 module load grib_util/1.2.2
 module load wgrib2/2.0.8
@@ -46,37 +46,29 @@ module list
 
 # specify your UPP directory
 export gitdir=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/UPP.fork
-
 export POSTGPEXEC=${gitdir}/exec/upp.x
-#export POSTGPEXEC=/lfs/h2/emc/physics/save/hsin-mu.lin/CIRA-C/UPP/exec/upp.x
-export rundir=/lfs/h2/emc/ptmp/$USER
+
+export rundir=/lfs/h2/emc/ptmp/$USER/post_rrfs_checkfor_printouts
 
 #Input Data
 #export datain=/u/wen.meng/noscrub/ncep_post/post_regression_test_new/data_in/fv3r
 #export datain=/lfs/h2/emc/stmp/emc.lam/Shun.Liu/stmp/tmpnwprd/rrfs_a/2022120206/fcst_fv3lam_spinup
-#export datain=/u/wen.meng/noscrub/ncep_post/develop/RRFS_data
-#export datain=/u/wen.meng/noscrub/rrfs/gsl_rrfs
 #export datain=/u/wen.meng/noscrub/ncep_post/RRFS/data
-export datain=/u/wen.meng/noscrub/ncep_post/RRFS/data_NA
 #export datain=/lfs/h2/emc/vpppg/noscrub/yali.mao/rrfs
-export datain=/lfs/h2/emc/vpppg/noscrub/yali.mao/rrfs/v0.8.3/2024022011/fcst_fv3lam
+#export datain=/lfs/h2/emc/vpppg/noscrub/yali.mao/rrfs/v0.8.3/2024022011/fcst_fv3lam
+export datain=/u/wen.meng/noscrub/ncep_post/RRFS/data_NA
 
 # specify forecast start time and hour for running your post job
-export startdate=2024022011
-
-#export startdate=2023062800
-export fhr=012
+export startdate=2022022412
+export fhr=010
+export cyc=`echo $startdate |cut -c9-10`
 
 # specify your running and output directory
-export DATA=$rundir/post_rrfs_${startdate}_GTG$ncpus
+export DATA=$rundir/working_${startdate}_GTG$ncpus
 rm -rf $DATA; mkdir -p $DATA
 cd $DATA
 
-
-export tmmark=tm00
-
 export NEWDATE=`${NDATE} +${fhr} $startdate`
-
 export YY=`echo $NEWDATE | cut -c1-4`
 export MM=`echo $NEWDATE | cut -c5-6`
 export DD=`echo $NEWDATE | cut -c7-8`
@@ -97,25 +89,24 @@ KPO=47,PO=1000.,975.,950.,925.,900.,875.,850.,825.,800.,775.,750.,725.,700.,675.
 /
 EOF
 
-
 rm -f fort.*
 
-###----- copy GTG_rrfs config file ----------------------
-
-cp ${gitdir}/sorc/ncep_post.fd/post_gtg.fd/gtg.config.rrfs ./gtg.config.rrfs
-cp /lfs/h2/emc/vpppg/noscrub/yali.mao/git/GTG.v17_Yali/gtg.input.rrfs ./.
+###------------------------------------------------------
+cp ${gitdir}/parm/nam_micro_lookup.dat ./eta_micro_lookup.dat
+cp ${gitdir}/parm/params_grib2_tbl_new ./.
+#cp /lfs/h2/emc/vpppg/noscrub/andrew.benjamin/g2tmpl.git/src/params_grib2_tbl_new ./.
 
 ###------------------------------------------------------
-
-cp ${gitdir}/parm/nam_micro_lookup.dat ./eta_micro_lookup.dat
-
-# copy flat files instead
+# control flat files
 cp ${gitdir}/parm/postxconfig-NT-rrfs.txt ./postxconfig-NT.txt
 #cp ${gitdir}/parm/postxconfig-NT.txt.GTGonly4 ./postxconfig-NT.txt
 
-cp ${gitdir}/parm/params_grib2_tbl_new ./params_grib2_tbl_new
-#cp /lfs/h2/emc/vpppg/noscrub/andrew.benjamin/g2tmpl.git/src/params_grib2_tbl_new ./params_grib2_tbl_new
+###----- copy GTG_rrfs config file ----------------------
+cp ${gitdir}/sorc/ncep_post.fd/post_gtg.fd/gtg.config.rrfs ./gtg.config.rrfs
+cp ${gitdir}/sorc/ncep_post.fd/post_gtg.fd/gtg.input.rrfs ./.
 
+
+export tmmark=tm00
 #get crtm fix file
 for what in "amsre_aqua" "imgr_g11" "imgr_g12" "imgr_g13" \
     "imgr_g15" "imgr_mt1r" "imgr_mt2" "seviri_m10" \
@@ -134,7 +125,6 @@ done
 for what in  ${CRTM_FIX}/*Emis* ; do
    ln -s $what .
 done
-
 
 ${APRUN} ${POSTGPEXEC} < itag > outpost_nems_${NEWDATE}
 

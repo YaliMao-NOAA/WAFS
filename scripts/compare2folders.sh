@@ -1,15 +1,24 @@
 #!/bin/bash
 #set -x
 
-PDY=20240729
+PDY=20240824
 cyc=00
 
-folder2Btested=/lfs/h2/emc/ptmp/yali.mao/wafs_dwn/prod/com/wafs/v7.0/wafs.$PDY/00/grib2/0p25
+suffix="grib2/0p25"          # 93 files
+suffix="grib2/0p25/blending" # 27 files
+suffix="gcip"
+suffix="grib2/1p25"          # 29 files
+suffix="grib/wmo"            # 15 files
+suffix="upp"                 # 46 files
+folder2Btested=/lfs/h2/emc/ptmp/yali.mao/wafs_dwn/prod/com/wafs/v7.0/wafs.$PDY/00/$suffix
 folderstandard=/lfs/h1/ops/prod/com/gfs/v16.3/gfs.$PDY/00/atmos
 #folderstandard=/lfs/h2/emc/ptmp/yali.mao/wafs_dwn/prod/com/wafs/v7.0/wafs.$PDY/00/upp
+folder2Btested=/lfs/h2/emc/ptmp/yali.mao/wafs_dwn/prod/com/wafs/v7.0/wafs.$PDY/00/$suffix
+folderstandard=/lfs/h2/emc/ptmp/yali.mao/wafs_dwn.old/prod/com/wafs/v7.0/wafs.$PDY/00/$suffix
+
 function my_cmp() {
     cd $folder2Btested
-    files=`ls * | grep -v idx`
+    files=`ls -p *.* | grep -v idx`
     n=0
     for file in $files ; do
 	echo cmp $file $folderstandard/$file
@@ -88,12 +97,9 @@ function my_cmp_diffname() {
 }
 
 
-my_cmp_diffname
-#my_cmp
-exit
-folder2Btested=$folder2Btested/wmo
-folderstandard=$folderstandard/wmo
-my_cmp_diffname
+#my_cmp_diffname
+my_cmp
+
 
 # Check results:
 # grep "No such file"

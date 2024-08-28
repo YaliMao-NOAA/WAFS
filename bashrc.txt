@@ -115,7 +115,7 @@ alias clean='find . -type d -empty -delete'
 alias adds="echo ksh $HOMEgit/g2g_verif.v3.0.0/ush/verf_g2g_icing_convertadds.sh CIP\|FIP PRB\|SEV YYYYMMDDHH [levels]"
 alias plot="echo ksh $HOMEsave/grads/plotWafs.sh conus potential grb2file"
 
-alias output="ls -l $OUTPUT | grep -v tar.xz ; echo $OUTPUT"
+alias output="ls -l $OUTPUT | grep -v tar.xz ; cd $OUTPUT ; echo $OUTPUT"
 alias outputp="ls -l $OUTPUTP | grep -v tar.xz ; echo $OUTPUTP"
 
 alias prod="echo $COMROOT/gfs/*/gfs.`$NDATE|cut -c1-8`; ll $COMROOT/gfs/*/gfs.`$NDATE|cut -c1-8`"
