@@ -1,20 +1,28 @@
 #!/bin/bash
 #set -x
 
-PDY=20240824
+PDY=20240910
 cyc=00
 
+suffix="upp"                 # 46 files
+suffix="grib2/1p25"          # 29 files
+suffix="gcip"
+suffix="grib/wmo"            # 15 files
+suffix="grib2/1p25/wmo"      # 29 files
 suffix="grib2/0p25"          # 93 files
 suffix="grib2/0p25/blending" # 27 files
-suffix="gcip"
-suffix="grib2/1p25"          # 29 files
-suffix="grib/wmo"            # 15 files
-suffix="upp"                 # 46 files
-folder2Btested=/lfs/h2/emc/ptmp/yali.mao/wafs_dwn/prod/com/wafs/v7.0/wafs.$PDY/00/$suffix
-folderstandard=/lfs/h1/ops/prod/com/gfs/v16.3/gfs.$PDY/00/atmos
-#folderstandard=/lfs/h2/emc/ptmp/yali.mao/wafs_dwn/prod/com/wafs/v7.0/wafs.$PDY/00/upp
-folder2Btested=/lfs/h2/emc/ptmp/yali.mao/wafs_dwn/prod/com/wafs/v7.0/wafs.$PDY/00/$suffix
-folderstandard=/lfs/h2/emc/ptmp/yali.mao/wafs_dwn.old/prod/com/wafs/v7.0/wafs.$PDY/00/$suffix
+#folder2Btested=/lfs/h2/emc/ptmp/yali.mao/wafsx001/com/wafs/v7.0/wafs.$PDY/$cyc/$suffix
+folder2Btested=/lfs/h2/emc/ptmp/yali.mao/wafs_dwn/prod/com/wafs/v7.0/wafs.$PDY/$cyc/$suffix
+#folderstandard=/lfs/h2/emc/ptmp/yali.mao/wafs_dwn.testback/prod/com/wafs/v7.0/wafs.$PDY/$cyc/$suffix
+folderstandard=/lfs/h1/ops/prod/com/gfs/v16.3/gfs.$PDY/$cyc/atmos
+#folderstandard=/lfs/h2/emc/ptmp/yali.mao/wafs_dwn/prod/com/wafs/v7.0/wafs.$PDY/$cyc/$suffix
+
+echo $folder2Btested
+echo $folderstandard
+
+if [[ $suffix =~ "wmo" ]] && [[ `basename $folderstandard` = "atmos" ]] ; then
+    folderstandard=$folderstandard/wmo
+fi
 
 function my_cmp() {
     cd $folder2Btested
@@ -28,17 +36,26 @@ function my_cmp() {
     echo $n files are compared!!!
 }
 
+if [[ $suffix == "grib/wmo" ]] ; then
+    my_cmp
+    exit
+fi
+
 function my_cmp_diffname() {
     cd $folder2Btested
 
-    files=`ls *wafs* WAFS* | grep -v idx`
+    if [[ $suffix =~ "wmo" ]] ; then
+	files=`ls -p *.* | grep -v idx`
+    else
+	files=`ls *wafs* WAFS* | grep -v idx`
+    fi
     
     if [ `basename $folder2Btested` = "upp" ] || [ `basename $folder2Btested` = "0p25" ] ; then
 	tmpdir=/lfs/h2/emc/ptmp/$USER/tmp_compWAFS
 	mkdir -p $tmpdir
 	rm -f $tmpdir/*
 	for file in $files ; do
-	    wgrib2 $file | egrep -v ":(EDPARM|CATEDR|MWTURB):(127|724|812|908|977)" | egrep -v "parm=37:(908|977)" | wgrib2 -i $file -grib $tmpdir/$file
+	    wgrib2 $file | egrep -v ":(EDPARM|CATEDR|MWTURB):127" | egrep -v "parm=37:(875|908|942|977)" | wgrib2 -i $file -grib $tmpdir/$file
 	done
 	folder2Btested=$tmpdir
     fi
@@ -97,8 +114,8 @@ function my_cmp_diffname() {
 }
 
 
-#my_cmp_diffname
-my_cmp
+my_cmp_diffname
+#my_cmp
 
 
 # Check results:
