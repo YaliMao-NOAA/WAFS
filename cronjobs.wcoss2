@@ -1,5 +1,12 @@
 SHELL=/bin/bash -l
 
+#parallel wafs.v7.0.0
+10 04 * * * export cyc=00 ; sh /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/ecflow/wafs.standalone.cron > /lfs/h2/emc/ptmp/yali.mao/wafs.standalone.log.$cyc 2>&1
+10 10 * * * export cyc=06 ; sh /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/ecflow/wafs.standalone.cron > /lfs/h2/emc/ptmp/yali.mao/wafs.standalone.log.$cyc 2>&1
+10 16 * * * export cyc=12 ; sh /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/ecflow/wafs.standalone.cron > /lfs/h2/emc/ptmp/yali.mao/wafs.standalone.log.$cyc 2>&1
+10 22 * * * export cyc=18 ; sh /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/ecflow/wafs.standalone.cron > /lfs/h2/emc/ptmp/yali.mao/wafs.standalone.log.$cyc 2>&1
+
+
 #parallel unblended 0.25 hazard data to UK
 #01 05 * * * export cyc=00; /bin/bash /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/scripts/para_uk_0P25.sh > /lfs/h2/emc/ptmp/yali.mao/para_uk_0P25.log 2>&1
 #01 11 * * * export cyc=06; /bin/bash /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/scripts/para_uk_0P25.sh > /lfs/h2/emc/ptmp/yali.mao/para_uk_0P25.log 2>&1

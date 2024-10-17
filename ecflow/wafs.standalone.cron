@@ -1,0 +1,22 @@
+#!/bin/bash
+
+module load prod_envir
+day="$(cat $COMROOT/date/t${cyc}z)"
+PDYcyc=${day:6:10}
+
+# cronjob starts at T+4:10
+
+sh /lfs/h2/emc/vpppg/noscrub/yali.mao/git/wafs.v7.0.0/dev/driver/submit.run_JWAFS.sh upp $PDYcyc
+sh /lfs/h2/emc/vpppg/noscrub/yali.mao/git/wafs.v7.0.0/dev/driver/submit.run_JWAFS.sh gcip $PDYcyc
+sh /lfs/h2/emc/vpppg/noscrub/yali.mao/git/wafs.v7.0.0/dev/driver/submit.run_JWAFS.sh grib $PDYcyc
+
+# sleep 15 minutes, T+4:25
+sleep 900
+
+sh /lfs/h2/emc/vpppg/noscrub/yali.mao/git/wafs.v7.0.0/dev/driver/submit.run_JWAFS.sh grib2_0p25 $PDYcyc
+sh /lfs/h2/emc/vpppg/noscrub/yali.mao/git/wafs.v7.0.0/dev/driver/submit.run_JWAFS.sh grib2_1p25 $PDYcyc
+
+# sleep 5 minutes, T+4:30
+sleep 300
+
+sh /lfs/h2/emc/vpppg/noscrub/yali.mao/git/wafs.v7.0.0/dev/driver/submit.run_JWAFS.sh grib2_0p25_blending $PDYcyc
