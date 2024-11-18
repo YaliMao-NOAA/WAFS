@@ -129,6 +129,7 @@ alias uk="ls -l `find $DCOMROOT -name ukmet_wafs | grep -v YYYYMMDD | sort | tai
 alias cip="ls -l $dcom/`$NDATE|cut -c1-8`/wgrbbul/adds_cip/*"
 alias fip="ls -l $dcom/`$NDATE|cut -c1-8`/wgrbbul/adds_fip/*"
 alias nam="ls -l $comd/nam/*/nam.`$NDATE|cut -c1-8`/nam.t00z.awip1230.tm00"
+alias sat="ls -l $dcom/`$NDATE|cut -c1-8`/mcidas/*"
 alias radar="ls -l $comd/radar*/*/radar.`$NDATE|cut -c1-8`/refd3d.t01z*"
 alias metar="ls -l $dcom/ldmdata/obs/surface/metar/*"
 

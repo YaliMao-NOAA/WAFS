@@ -10,4 +10,5 @@
 cd $PBS_O_WORKDIR
 set -x
 
+HTAR_COMMAND=${HTAR_COMMAND:-"htar -tvf /NCEPPROD/hpssprod/runhistory/rh2024/202409/20240903/com_gfs_v16.3_gfs.20240903_00.gfs.tar"}
 $HTAR_COMMAND
