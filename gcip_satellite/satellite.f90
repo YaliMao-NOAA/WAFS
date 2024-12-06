@@ -52,7 +52,9 @@ CONTAINS
     integer(4) :: nxy,nx,ny
 
     iret = -1
-
+    ssCFG=9999
+    ssSAT=9999
+    
     call readGCIPconfig(cfgfile,numCFG,ssCFG)
     if (numCFG <= 0) then
        write(*,*) "Error in reading GCIP configruation file", numCFG
@@ -93,8 +95,9 @@ CONTAINS
     call mysort(numCFG, ssCFG(1:numCFG))
     call mysort(numSAT, ssSAT(1:numSAT))
 
-    write(*,'(a9,<numCFG>I4)') "cfg ss=",(ssCFG(i),i=1,numCFG)
-    write(*,'(a9,<numSAT>I4)') "sat ss=",(ssSAT(i),i=1,numSAT)
+    write(*,*) "numCFG=",numCFG, "numSAT=",numSAT
+    write(*,'(a9,15I4)') "cfg ss=",(ssCFG(i),i=1,numCFG)
+    write(*,'(a9,15I4)') "sat ss=",(ssSAT(i),i=1,numSAT)
 
     allocate(data(nxy,1))
     data(:,1) = brightness(:)

@@ -1,7 +1,8 @@
 SHELL=/bin/sh
 set -x
 
-moduledir=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/fork.implement2023/modulefiles
+moduledir=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/WAFS
+DIR_ROOT=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/gcip_satellite
 
 ##################################################################
 # wafs using module compile standard
@@ -36,10 +37,35 @@ elif [ $mac = O ] ; then           # For Orion
 fi
 
 if [[ $machine =~ ^(wcoss2|dell|hera|orion)$ ]]; then
-    module use ${moduledir}/wafs
-    module load wafs_v6.0.0-${machine}
+    module reset
+    source "$moduledir/versions/build.ver"
+    module use "$moduledir/modulefiles"
+    module load wafs_wcoss2.intel
 fi
 module list
+
+BUILD_TYPE=${BUILD_TYPE:-"Release"}
+CMAKE_OPTS=${CMAKE_OPTS:-}
+BUILD_DIR=${BUILD_DIR:-"${DIR_ROOT}/build"}
+INSTALL_PREFIX=${INSTALL_PREFIX:-"${DIR_ROOT}/install"}
+
+CMAKE_OPTS+=" -DCMAKE_BUILD_TYPE=${BUILD_TYPE}"
+CMAKE_OPTS+=" -DCMAKE_INSTALL_PREFIX=${INSTALL_PREFIX}"
+
+# Re-use or create a new BUILD_DIR (Default: create new BUILD_DIR)
+[[ ${BUILD_CLEAN:-"YES"} =~ [yYtT] ]] && rm -rf "${BUILD_DIR}"
+mkdir -p "${BUILD_DIR}" && cd "${BUILD_DIR}"
+
+set -x
+cmake ${CMAKE_OPTS} "${DIR_ROOT}"
+make -j "${BUILD_JOBS:-8}" VERBOSE="${BUILD_VERBOSE:-}"
+#make install
+
+mv gcip_satellite.x ../
+
+set +x
+
+exit
 
 # export INC="${G2_INC4}"
  export FC=ftn

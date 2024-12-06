@@ -190,7 +190,7 @@
        implicit none
 
        integer(4),parameter::lat1=90000000   !lat of 1st grd pt in micro-deg
-       integer(4),parameter::lon1=-180000000  !east-long of 1st grd pt in micro-deg 
+       integer(4),parameter::lon1=0          !east-long of 1st grd pt in micro-deg 
 !      integer(4),parameter::lat1=20192000   !lat of 1st grd pt in micro-deg
 !      integer(4),parameter::lon1=238446000  !east-long of 1st grd pt in micro-deg 
        integer(4),parameter::latan1=25000000 !true lat in micro-deg 
