@@ -11,7 +11,8 @@ if [[ `hostname` =~ ^[c|d|]login ]] ; then
 fi
 
 #export PS1="\u@\h \w> "
-export PS1="[\w]$ "
+#export PS1="[\w]$ "
+export PS1="[\[\e[36m\]${HOSTNAME:0:1}:\[\e[0m\]\w]$ "
 # prompt
 #if [ $?prompt ]; then          # shell is interactive.
 #    alias setprompt='set prompt="../$cwd/"'  # option cwd:t for tail
