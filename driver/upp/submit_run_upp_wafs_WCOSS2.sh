@@ -2,7 +2,7 @@
 
 #PBS -j oe
 ##PBS -o out.upp.wafs
-#PBS -N upp_wafs
+#PBS -N upp_wafs_gefs
 #PBS -l walltime=00:30:00
 #PBS -q debug
 #PBS -A GFS-DEV
@@ -10,6 +10,8 @@
 #PBS -V
 
 cd $PBS_O_WORKDIR
+
+export RUN=gefs
 
 set -x
 ncpus=96
@@ -45,26 +47,26 @@ module load wgrib2/2.0.8
 module list
 
 # specify your UPP directory
-export gitdir=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/UPP.fork
+export gitdir=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/UPP.fork.v17
 export POSTGPEXEC=${gitdir}/exec/upp.x
 
 export rundir=/lfs/h2/emc/ptmp/$USER/upp_wafs
 
-export RUN=gfs
 #Input Data
 # specify forecast start time and hour for running your post job
 if [ $RUN = 'gfs' ] ; then
     export startdate=2023042600
     export COMIN=/lfs/h2/emc/vpppg/noscrub/yali.mao/gtg4/gfs.20230426
+    export fhr=018
 else #gefs
     export startdate=2022012112
     export COMIN=/lfs/h2/emc/vpppg/noscrub/yali.mao/gefs13_c384_sample/gefs.20220121
+    export fhr=036
 fi
-export fhr=018
 export cyc=`echo $startdate |cut -c9-10`
 
 #specify your running and output directory
-export DATA=$rundir/working_${startdate}
+export DATA=$rundir/working_${RUN}_${startdate}
 rm -rf $DATA; mkdir -p $DATA
 cd $DATA
 
@@ -94,13 +96,13 @@ EOF
 rm -f fort.*
 
 ###------------------------------------------------------
-cp ${gitdir}/parm/nam_micro_lookup.dat ./eta_micro_lookup.dat
+cp ${gitdir}/fix/nam_micro_lookup.dat ./eta_micro_lookup.dat
 cp ${gitdir}/parm/params_grib2_tbl_new ./params_grib2_tbl_new
 
 ###------------------------------------------------------
 # control flat files
 if [  $fhr -le 48  ] ; then
-    cp ${gitdir}/parm/gfs/postxconfig-NT-${RUN}-wafs.txt ./postxconfig-NT.txt
+    cp ${gitdir}/parm/$RUN/postxconfig-NT-${RUN}-wafs.txt ./postxconfig-NT.txt
 else
     cp ${gitdir}/parm/gfs/postxconfig-NT-gfs-wafs-ext.txt ./postxconfig-NT.txt
 fi
