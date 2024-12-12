@@ -11,8 +11,18 @@ if [[ `hostname` =~ ^[c|d|]login ]] ; then
 fi
 
 #export PS1="\u@\h \w> "
-#export PS1="[\w]$ "
-export PS1="[\[\e[36m\]${HOSTNAME:0:1} \[\e[0m\]\w]$ "
+if [ $MACHINE = "wcoss2" ] ; then
+   if [ $MACHINE_DEV = "yes" ] ; then
+      # hostname in green
+      export PS1="[\[\e[32m\]${HOSTNAME:0:1} \[\e[0m\]\w]$ "
+   else
+      # hostname in red
+      export PS1="[\[\e[31m\]${HOSTNAME:0:1} \[\e[0m\]\w]$ "
+   fi
+else
+   export PS1="[\w]$ "
+fi
+
 # prompt
 #if [ $?prompt ]; then          # shell is interactive.
 #    alias setprompt='set prompt="../$cwd/"'  # option cwd:t for tail

@@ -11,7 +11,8 @@
 
 cd $PBS_O_WORKDIR
 
-export RUN=gefs
+export run=gefs
+export RUN=GEFS
 
 set -x
 ncpus=96
@@ -54,7 +55,7 @@ export rundir=/lfs/h2/emc/ptmp/$USER/upp_wafs
 
 #Input Data
 # specify forecast start time and hour for running your post job
-if [ $RUN = 'gfs' ] ; then
+if [ $run = 'gfs' ] ; then
     export startdate=2023042600
     export COMIN=/lfs/h2/emc/vpppg/noscrub/yali.mao/gtg4/gfs.20230426
     export fhr=018
@@ -66,7 +67,7 @@ fi
 export cyc=`echo $startdate |cut -c9-10`
 
 #specify your running and output directory
-export DATA=$rundir/working_${RUN}_${startdate}
+export DATA=$rundir/working_${run}_${startdate}
 rm -rf $DATA; mkdir -p $DATA
 cd $DATA
 
@@ -83,7 +84,7 @@ IOFORM='netcdf'
 grib='grib2'
 DateStr='${YY}-${MM}-${DD}_${HH}:00:00'
 MODELNAME='GFS'
-SUBMODELNAME='GFS'
+SUBMODELNAME="$RUN"
 fileNameFlux='$COMIN/gfs.t${cyc}z.sfcf${fhr}.nc'
 /
 &NAMPGB
@@ -102,15 +103,15 @@ cp ${gitdir}/parm/params_grib2_tbl_new ./params_grib2_tbl_new
 ###------------------------------------------------------
 # control flat files
 if [  $fhr -le 48  ] ; then
-    cp ${gitdir}/parm/$RUN/postxconfig-NT-${RUN}-wafs.txt ./postxconfig-NT.txt
+    cp ${gitdir}/parm/$run/postxconfig-NT-${run}-wafs.txt ./postxconfig-NT.txt
 else
     cp ${gitdir}/parm/gfs/postxconfig-NT-gfs-wafs-ext.txt ./postxconfig-NT.txt
 fi
 
 ###----- copy GTG config file ----------------------
-cp ${gitdir}/sorc/ncep_post.fd/post_gtg.fd/gtg.config.${RUN} ./gtg.config.${RUN}
-cp ${gitdir}/sorc/ncep_post.fd/post_gtg.fd/gtg.input.${RUN} ./.
-cp ${gitdir}/sorc/ncep_post.fd/post_gtg.fd/imprintings.gtg_${RUN}.txt .
+cp ${gitdir}/sorc/ncep_post.fd/post_gtg.fd/gtg.config.${run} ./gtg.config.${run}
+cp ${gitdir}/sorc/ncep_post.fd/post_gtg.fd/gtg.input.${run} ./.
+cp ${gitdir}/sorc/ncep_post.fd/post_gtg.fd/imprintings.gtg_${run}.txt .
 
 ${APRUN} ${POSTGPEXEC} < itag > outpost_wafs_${NEWDATE}
 
