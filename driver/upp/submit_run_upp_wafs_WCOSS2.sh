@@ -48,7 +48,7 @@ module load wgrib2/2.0.8
 module list
 
 # specify your UPP directory
-export gitdir=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/UPP.fork.v17
+export gitdir=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/UPP.fork
 export POSTGPEXEC=${gitdir}/exec/upp.x
 
 export rundir=/lfs/h2/emc/ptmp/$USER/upp_wafs
