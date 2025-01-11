@@ -3,7 +3,7 @@
 #PBS -j oe
 #PBS -o /lfs/h2/emc/ptmp/yali.mao/working_wafs/log.wafs_gcip
 #PBS -N wafs_gcip
-#PBS -l walltime=00:10:00
+#PBS -l walltime=00:15:00
 #PBS -l select=1:ncpus=1:mem=25GB
 #PBS -q debug
 #PBS -l debug=true
@@ -38,6 +38,7 @@ module list
 ############################################
 echo $DCOMROOT
 export DCOMROOT=/lfs/h1/ops/prod/dcom
+export DCOMROOTsat=/lfs/h2/emc/ptmp/yali.mao/gmgsi_testdata
 
 ############################################
 # Define envir
@@ -55,10 +56,9 @@ export RUN=wafs
 ############################################
 # user defined
 ############################################
-export PDY=20240703
-
 export cyc=${cyc:-00}
 export fhr=000
+export PDY=$(cut -c 7-14 $COMROOT/date/t${cyc}z)
 
 # wafs_gcip for generating global icing analysis for every 3 hours
 export job=wafs_gcip_${cyc}
@@ -66,7 +66,7 @@ export job=wafs_gcip_${cyc}
 export pid=${pid:-$$}
 export jobid=${job}.${pid}
 
-USER=`whoami`
+USER=$(whoami)
 
 ############################################
 # SENDCOM=YES--Copy output file to /com

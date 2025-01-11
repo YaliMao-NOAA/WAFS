@@ -15,39 +15,40 @@ function link_master_to_fhr() {
   local clean_only=${3:-"NO"} # Clean only flag to remove existing links
   local fhr3 master target
   for fhr in ${fhrs[@]}; do
-    fhr3=$(printf %03d $fhr)
-    master=${tmpl}_master.ecf
-    target=${tmpl}_f${fhr3}.ecf
-    rm -f ${target}
-    case ${clean_only} in
+    fhr3=$(printf %03d ${fhr})
+    master="${tmpl}_master.ecf"
+    target="${tmpl}_f${fhr3}.ecf"
+    rm -f "${target}"
+    case "${clean_only}" in
     "YES")
       continue
       ;;
     *)
-      ln -sf ${master} ${target}
+      ln -sf "${master}" "${target}"
       ;;
     esac
   done
 }
 
-CLEAN=${1:-${CLEAN:-"NO"}}  # Remove links only; do not create links (YES)
+CLEAN=${1:-${CLEAN:-"NO"}} # Remove links only; do not create links (YES)
 
 # JWAFS_UPP
-cd "${ECF_DIR}/scripts/upp"
+cd "${ECF_DIR}/upp"
 echo "Linking upp ..."
 # Add a link for analysis
 rm -f jwafs_upp_anl.ecf
 if [[ "${CLEAN}" != "YES" ]]; then
   ln -sf jwafs_upp_master.ecf jwafs_upp_anl.ecf
 fi
-seq1=$(seq -s ' ' 0 1 24)   # 000 -> 024; 1-hourly
+seq0="0"                    # 000
+seq1=$(seq -s ' ' 6 1 24)   # 006 -> 024; 1-hourly
 seq2=$(seq -s ' ' 27 3 48)  # 027 -> 048; 3-hourly
 seq3=$(seq -s ' ' 54 6 120) # 054 -> 120; 6-hourly
-fhrs="${seq1} ${seq2} ${seq3}"
+fhrs="${seq0} ${seq1} ${seq2} ${seq3}"
 link_master_to_fhr "jwafs_upp" "${fhrs}" "${CLEAN}"
 
 # JWAFS_GRIB2
-cd "${ECF_DIR}/scripts/grib2/1p25"
+cd "${ECF_DIR}/grib2/1p25"
 echo "Linking grib2/1p25 ..."
 seq1="0"                   # 000
 seq2=$(seq -s ' ' 6 3 36)  # 006 -> 036; 3-hourly
@@ -56,7 +57,7 @@ fhrs="${seq1} ${seq2} ${seq3}"
 link_master_to_fhr "jwafs_grib2_1p25" "${fhrs}" "${CLEAN}"
 
 # JWAFS_GRIB2_0P25
-cd "${ECF_DIR}/scripts/grib2/0p25"
+cd "${ECF_DIR}/grib2/0p25"
 echo "Linking grib2/0p25 ..."
 seq1=$(seq -s ' ' 6 1 24)   # 006 -> 024; 1-hourly
 seq2=$(seq -s ' ' 27 3 48)  # 027 -> 048; 3-hourly
@@ -65,21 +66,17 @@ fhrs="${seq1} ${seq2} ${seq3}"
 link_master_to_fhr "jwafs_grib2_0p25" "${fhrs}" "${CLEAN}"
 
 # JWAFS_BLENDING_0P25
-cd "${ECF_DIR}/scripts/grib2/0p25/blending"
-echo "Linking grib2/0p25/blending ..."
-seq1=$(seq -s ' ' 6 1 24)  # 006 -> 024; 1-hourly
-seq2=$(seq -s ' ' 27 3 48) # 027 -> 048; 3-hourly
-fhrs="${seq1} ${seq2}"
-link_master_to_fhr "jwafs_grib2_0p25_blending" "${fhrs}" "${CLEAN}"
 
 # JWAFS_GCIP
-cd "${ECF_DIR}/scripts/gcip"
+cd "${ECF_DIR}/gcip"
 echo "Linking gcip ..."
 fhrs="0 3" # 000, 003
 link_master_to_fhr "jwafs_gcip" "${fhrs}" "${CLEAN}"
 
 # JWAFS_GRIB
-cd "${ECF_DIR}/scripts/grib"
+cd "${ECF_DIR}/grib"
 echo "Linking grib ..."
-fhrs=$(seq -s ' ' 6 6 72) # 006 -> 072; 6-hourly
+seq1=$(seq -s ' ' 12 6 48) # 012 -> 048; 6-hourly
+seq2="60 72"               # 060, 072
+fhrs="${seq1} ${seq2}"
 link_master_to_fhr "jwafs_grib" "${fhrs}" "${CLEAN}"
