@@ -17,8 +17,8 @@ fi
 
 # Make the following 3 changes for different machines
 cd /lfs/h2/emc/vpppg/noscrub/yali.mao/icesev_verif
-gfsVer=`ls $COMROOT/gfs | tail -1`
-COMROOT=$COMROOT/gfs/$gfsVer
+gfsVer=`ls $COMROOT/wafs | tail -1`
+COMROOT=$COMROOT/wafs/$gfsVer
 DCOMROOT=$DCOMROOT
 
 date=`$NDATE -24`
@@ -26,23 +26,23 @@ nday=2
 while [ $nday -le 9 ] ; do
     PDY=${date:0:8}
     for cyc in 00 06 12 18 ; do
-	if [ -d $COMROOT/gfs.${PDY} ] ; then
+	if [ -d $COMROOT/wafs.${PDY} ] ; then
 	    mkdir -p gcip/gfs.${PDY}/$cyc/atmos
 	    cyc1=$(( cyc + 3 ))
 	    cyc1="$(printf "%02d" $(( 10#$cyc1 )) )"
-	    rsync -avp $COMROOT/gfs.${PDY}/$cyc/atmos/gfs.t${cyc}z.gcip.f00.grib2 ./gcip/gfs.${PDY}/$cyc/atmos/gfs.t${cyc}z.gcip.f00.grib2
-	    rsync -avp $COMROOT/gfs.${PDY}/$cyc/atmos/gfs.t${cyc1}z.gcip.f00.grib2 ./gcip/gfs.${PDY}/$cyc/atmos/gfs.t${cyc1}z.gcip.f00.grib2
+	    rsync -avp $COMROOT/wafs.${PDY}/$cyc/gcip/wafs.t${cyc}z.gcip.f000.grib2 ./gcip/gfs.${PDY}/$cyc/atmos/gfs.t${cyc}z.gcip.f00.grib2
+	    rsync -avp $COMROOT/wafs.${PDY}/$cyc/gcip/wafs.t${cyc1}z.gcip.f000.grib2 ./gcip/gfs.${PDY}/$cyc/atmos/gfs.t${cyc1}z.gcip.f00.grib2
 
 	    mkdir -p fcst/gfs.${PDY}/$cyc/atmos
-	    rsync -avp $COMROOT/gfs.${PDY}/$cyc/atmos/WAFS_0p25_blend* ./fcst/gfs.${PDY}/$cyc/atmos/.
-	    rsync -avp $COMROOT/gfs.${PDY}/$cyc/atmos/gfs.t${cyc}z.wafs_0p25_unblended.f*.grib2 ./fcst/gfs.${PDY}/$cyc/atmos/.
-	fi
-
-        if [ -d $DCOMROOT/$PDY/wgrbbul/ukmet_wafs ] ; then
-	    mkdir -p uk/$PDY/wgrbbul/ukmet_wafs
-            rsync -avp $DCOMROOT/*/wgrbbul/ukmet_wafs/EGRR_WAFS_0p25_icing_unblended_${PDY}_${cyc}z_t*.grib2 uk/$PDY/wgrbbul/ukmet_wafs/.
+	    rsync -avp $COMROOT/wafs.${PDY}/$cyc/grib2/0p25/blending/WAFS_0p25_blend* ./fcst/gfs.${PDY}/$cyc/atmos/.
+	    rsync -avp $COMROOT/wafs.${PDY}/$cyc/grib2/0p25/WAFS_0p25_unblended_${PDY}${cyc}f*.grib2 ./fcst/gfs.${PDY}/$cyc/atmos/.
 	fi
     done
+    egrr_wafshzds_unblended_ice_0p25_2025-02-05T12:00Z_t016.grib2
+    if [ -d $DCOMROOT/$PDY/wgrbbul/ukmet_wafs ] ; then
+	mkdir -p uk/$PDY/wgrbbul/ukmet_wafs
+        rsync -avp $DCOMROOT/$PDY/wgrbbul/ukmet_wafs/egrr_wafshzds_unblended_ice_0p25_*.grib2 uk/$PDY/wgrbbul/ukmet_wafs/.
+    fi
 
     hours=$(( $nday * 24 ))
     date=`$NDATE -$hours`
