@@ -11,3 +11,8 @@ cd $PBS_O_WORKDIR
 set -x
 rsync -ravP --min-size=1 ddxfer04.wcoss2.ncep.noaa.gov:/lfs/h1/ops/para/com/wafs/v7.0/wafs.20241028/06 /lfs/h2/emc/ptmp/yali.mao/.
 # cdxfer04.wcoss2.ncep.noaa.gov:
+
+
+# To Hera:
+# Terminal 1: ssh -Y -L47311:localhost:47311 Yali.Mao@hera-rsa.rdhpcs.noaa.go
+# Terminal 2: (command line, not a job card) rsync -ravP ./* Yali.Mao@dtn-hera.fairmont.rdhpcs.noaa.gov:
