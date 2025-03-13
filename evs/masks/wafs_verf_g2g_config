@@ -1,0 +1,182 @@
+////////////////////////////////////////////////////////////////////////////////
+//
+// Grid-Stat configuration file for WAFS Icing Severity.
+//
+// For additional information, see the MET_BASE/data/config/README file.
+//
+////////////////////////////////////////////////////////////////////////////////
+
+//
+// Output model name to be written
+// (MODEL is an environmental variable here, it is defined in jobs/jobname)
+//
+model = "${MODEL}";
+
+//
+// Output description to be written
+// May be set separately in each "obs.field" entry
+//
+desc = "ICESEV";
+
+//
+// Output observation type to be written
+//
+obtype = "ANALYS";
+
+////////////////////////////////////////////////////////////////////////////////
+
+//
+// Verification grid
+//
+regrid = {
+   to_grid    = NONE;
+   method     = NEAREST;
+   width      = 1;
+   vld_thresh = 0.5;
+   shape      = SQUARE;
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+//
+// Forecast and observation fields to be verified
+//
+fcst = {
+
+   field = [
+      {
+        name       = "ICESEV";
+        level      = [ "P800", "P700", "P600", "P500", "P400" ];
+        cat_thresh = [ >=1, >=2, >=3, >=4 ];
+      }
+
+   ];
+
+};
+
+// obs = fcst;
+obs = {
+
+   field = [
+      {
+        name       = "ICESEV";
+	level      = [ "P800", "P700", "P600", "P500", "P400" ];
+        cat_thresh = [ >=1, >=1, >=1, >=1 ];
+      }
+
+   ];
+
+};
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+mask_missing_flag = BOTH; 
+
+////////////////////////////////////////////////////////////////////////////////
+
+//
+// Verification masking regions
+// 
+
+mask = {
+   grid = ["FULL"] ;
+   poly = ["${HOMEparm}/lat_NHM.nc",
+           "${HOMEparm}/lat_SHM.nc",
+           "${HOMEparm}/lat_TRP.nc",
+           "${HOMEparm}/lat_AR2.nc",
+           "${HOMEparm}/lat_ASIA.nc",
+           "${HOMEparm}/lat_AUNZ.nc",
+           "${HOMEparm}/lat_EAST.nc",
+           "${HOMEparm}/lat_NAMR.nc",
+           "${HOMEparm}/lat_NPCF.nc"];
+
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+//
+// Confidence interval settings
+//
+ci_alpha  = [ 0.01 ];
+
+boot = {
+   interval = PCTILE;
+   rep_prop = 1.0;
+   n_rep    = 0;
+   rng      = "mt19937";
+   seed     = "";
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+//
+// Interpolation methods
+// Purposely removed by Binbin
+
+interp = {
+   field      = BOTH;
+   vld_thresh = 1.0;
+
+   type = [
+      {
+         method = NEAREST;
+         width  = 1;
+      }
+   ];
+};
+
+////////////////////////////////////////////////////////////////////////////////
+
+//
+// Neighborhood methods
+nbrhd = {
+   vld_thresh = 1.0;  
+   width      = [ 1 ];
+   cov_thresh = [ >=0.5 ];
+}
+
+////////////////////////////////////////////////////////////////////////////////
+
+//
+// Statistical output types
+//
+output_flag = {
+   fho    = NONE;
+   ctc    = STAT;
+   cts    = NONE;
+   mctc   = NONE;
+   mcts   = NONE;
+   cnt    = NONE;
+   sl1l2  = NONE;
+   sal1l2 = NONE;
+   vl1l2  = NONE;
+   val1l2 = NONE;
+   pct    = NONE;
+   pstd   = NONE;
+   pjc    = NONE;
+   prc    = NONE;
+   nbrctc = NONE;
+   nbrcts = NONE;
+   nbrcnt = NONE;
+   vcnt   = NONE;
+};
+
+//
+// NetCDF matched pairs output file
+//
+nc_pairs_flag = FALSE;
+
+
+// Global verification should weight near 2 polars
+grid_weight_flag = COS_LAT;
+
+
+////////////////////////////////////////////////////////////////////////////////
+
+rank_corr_flag = FALSE;
+tmp_dir        = "${DATA}";
+output_prefix  = "${MODEL}_F${fhr}";
+version        = "V9.1";
+
+////////////////////////////////////////////////////////////////////////////////
