@@ -39,14 +39,14 @@ modue load wgrib2/2.0.7
 module list
 
 # specify your UPP directory
-export gitdir=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/UPP.fork
+export gitdir=/lfs/h2/emc/ptmp/yali.mao/UPP.fork
 export POSTGPEXEC=${gitdir}/exec/upp.x
 
 export rundir=/lfs/h2/emc/ptmp/$USER/upp_hrrr
 
 #Input Data
 export datain=/u/wen.meng/noscrub/ncep_post/hrrr/hrrr_ops #on Dogwood
-export datain=/lfs/h2/emc/ptmp/yali.mao/hrrr_ops
+#export datain=/lfs/h2/emc/ptmp/yali.mao/hrrr_ops
 
 # specify forecast start time and hour for running your post job
 export startdate=2024120818
@@ -83,16 +83,18 @@ EOF
 cp /u/wen.meng/noscrub/ncep_post/post_regression_test_new/fix/fix_2.3.0/*bin .
 cp ${gitdir}/parm/params_grib2_tbl_new params_grib2_tbl_new
 #cp ${gitdir}/parm/postxconfig-NT-hrrr.txt postxconfig-NT.txt
-cp ${gitdir}/fix/rap_micro_lookup.dat eta_micro_lookup.dat
+#cp ${gitdir}/fix/rap_micro_lookup.dat eta_micro_lookup.dat
 
 # GTG
-cp /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/driver/upp/parm/postxconfig-NT-hrrr-gtg.txt postxconfig-NT.txt
+cp ${gitdir}/parm/postxconfig-NT-hrrr_dafs.txt postxconfig-NT.txt
 cp ${gitdir}/sorc/ncep_post.fd/post_gtg.fd/gtg.config.hrrr ./gtg.config.hrrr
 cp ${gitdir}/sorc/ncep_post.fd/post_gtg.fd/gtg.input.hrrr ./.
 
 ${APRUN} ${POSTGPEXEC} < itag > wrfpost2.out
 
 date
+
+exit
 
 cp $datain/hrrr_remove_duplicates.new hrrr_remove_duplicates
 fhr2=$(printf %02i $fhr)

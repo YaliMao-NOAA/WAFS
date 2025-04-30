@@ -2,27 +2,28 @@
 
 #PBS -j oe
 ##PBS -o out.upp.wafs
-#PBS -N upp_wafs_gefs
+#PBS -N upp_wafs_gfs
 #PBS -l walltime=00:30:00
 #PBS -q debug
 #PBS -A GFS-DEV
-#PBS -l place=vscatter,select=2:ncpus=96:mem=300G
+#PBS -l place=vscatter:exclhost,select=6:ompthreads=1:ncpus=24:mem=480GB
 #PBS -V
 
 cd $PBS_O_WORKDIR
 
-export run=gefs
-export RUN=GEFS
+export run=gfs
+export RUN=GFS
 
 set -x
-ncpus=96
-ppn=$(( ncpus / 2 ))
+nnodes=6
+ncpus=24
+ntasks=$(( ncpus * nnodes ))
 
 # specify computation resource
 export threads=1
 export MP_LABELIO=yes
 export OMP_NUM_THREADS=$threads
-export APRUN="mpiexec -ppn $ppn -n $ncpus"
+export APRUN="mpiexec -ppn $ncpus -n $ntasks"
 
 echo "starting time"
 date
@@ -67,7 +68,7 @@ fi
 export cyc=`echo $startdate |cut -c9-10`
 
 #specify your running and output directory
-export DATA=$rundir/working_${run}_${startdate}
+export DATA=$rundir/working_${run}_${startdate}.test
 rm -rf $DATA; mkdir -p $DATA
 cd $DATA
 
@@ -97,7 +98,7 @@ EOF
 rm -f fort.*
 
 ###------------------------------------------------------
-cp ${gitdir}/fix/nam_micro_lookup.dat ./eta_micro_lookup.dat
+#cp ${gitdir}/fix/nam_micro_lookup.dat ./eta_micro_lookup.dat
 cp ${gitdir}/parm/params_grib2_tbl_new ./params_grib2_tbl_new
 
 ###------------------------------------------------------
