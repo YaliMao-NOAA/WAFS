@@ -2,7 +2,7 @@
 #PBS -j oe
 #PBS -o /lfs/h2/emc/ptmp/yali.mao/evs_plot/extract_evs_data.log
 #PBS -N extract_evs
-#PBS -l walltime=01:30:00
+#PBS -l walltime=03:30:00
 #PBS -q dev_transfer
 #PBS -A GFS-DEV
 #PBS -l select=1:ncpus=1
@@ -10,22 +10,26 @@
 
 set -x
 
-# The first month of archived EVS stat file
-FIRSTMONTH=202312
+# DATA is composed of three parts 
+# archived vsdb files, archived stat files (started from 202312), stat files still available at COM
+
+
+# The month when EVS stat files began to be archived
+EVS_START_MONTH=202312
 
 mkdir -p $DATAevs; cd $DATAevs
 
 hpssdir=/NCEPDEV/emc-global/5year/Yali.Mao/evs
 
 ############## Step 1 ###################
-# Extract vsdb data prior to $FIRSTMONTH
+# Extract vsdb data prior to $EVS_START_MONTH
 #########################################
-if [ $VDAY1 -le 20231231 ] ; then
+if [ $VDAY1 -le ${EVS_START_MONTH}31 ] ; then
     htar -xvf $hpssdir/stats_from_vsdb.tar
 fi
 
 ############## Step 2 ###################
-# Soft link of the most recent two month data which is still available on WCOSS2
+# Soft link of the most recent two month data which is still available at COM
 #########################################
 
 # this month
@@ -50,13 +54,13 @@ while [ $day -le $VDATE ] ; do
 done
 
 ############## Step 3 ###################
-# Extract monthly stat file between $FIRSTMONTH and the month before last month
+# Extract monthly stat file between $EVS_START_MONTH and the month before last month
 #########################################
 # the month before last month
 day=`$NDATE -24 ${lastmonth}0100 | cut -c 1-8`
 lastmonth=`echo $day | cut -c1-6`
 
-month=$FIRSTMONTH
+month=$EVS_START_MONTH
 while [ $month -le $lastmonth ] ; do
     htar -xvf $hpssdir/${month}.tar
 

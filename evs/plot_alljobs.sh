@@ -35,6 +35,7 @@ if [ $long_range = "yes"  ] ; then
     # VDAY1=20171201
     export VDAY1=`$NDATE -$((5*365*24)) ${VDATE}00 | cut -c 1-6`01
 
+    #PBS -o /lfs/h2/emc/ptmp/yali.mao/evs_plot/extract_evs_data.log
     export DATAevs=$DATAplot/data
     jobid_data=$(qsub $SCRIPTplot/plot_extract_evs_data.sh)
 

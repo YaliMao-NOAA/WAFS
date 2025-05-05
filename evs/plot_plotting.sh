@@ -53,7 +53,7 @@ export DATA=$DATA
 
 export KEEPDATA=YES
 
-$HOMEevs/jobs/JEVS_WAFS_ATMOS_PLOTS
+$HOMEevs/jobs/JEVS_WAFS_PLOTS
 
 ############################################################
 ## Purpose: This job generates the grid2grid statistics stat
