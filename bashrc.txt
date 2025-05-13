@@ -140,6 +140,7 @@ alias nam="ls -l $comd/nam/*/nam.`$NDATE|cut -c1-8`/nam.t00z.awip1230.tm00"
 alias sat="ls -l $dcom/`$NDATE|cut -c1-8`/mcidas/*"
 alias radar="ls -l $comd/radar*/*/radar.`$NDATE|cut -c1-8`/refd3d.t01z*"
 alias metar="ls -l $dcom/ldmdata/obs/surface/metar/*"
+alias evs="find /lfs/h1/ops/prod/com/evs -maxdepth 3 -name wafs"
 
 alias rap="ls -l $COMROOT/rap/*/rap.`$NDATE -24|cut -c1-8`/rap.t00z.awp130bgrbf03.grib2"
 alias gtg="ls -l $COMROOT/rap/*/rap.`$NDATE -24|cut -c1-8`/rap.t00z.gtg130f06.grib2"
