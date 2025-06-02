@@ -21,8 +21,8 @@ mkdir -p $DATA
 cd $DATA
 rm $DATA/GCIP_GFIP_GTG_2_rzdm.list
 
-export DATAgrib2=$TMP/gfs_${prod}_rzdm_prod/gfs.$PDY/$cyc
-export DATAROOTplot=$TMP/gfs_${prod}_rzdm_plotting_$cyc
+export DATAgrib2=$TMP/wafs_${prod}_rzdm_prod/wafs.$PDY/$cyc
+export DATAROOTplot=$TMP/wafs_${prod}_rzdm_plotting_$cyc
 
 ############################
 # Create files
@@ -64,7 +64,7 @@ fi
 
 remoteServer=ymao@emcrzdm.ncep.noaa.gov
 
-export remoteData=/home/ftp/emc/unaff/ymao/wafs.$prod/gfs.$PDY
+export remoteData=/home/ftp/emc/unaff/ymao/wafs.$prod/wafs.$PDY
 export remotePlot=/home/www/emc/htdocs/gmb/icao/${prod}_plot
 
 ic=1

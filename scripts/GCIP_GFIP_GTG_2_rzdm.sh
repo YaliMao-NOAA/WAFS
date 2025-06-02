@@ -211,8 +211,8 @@ if [ $prod = test ] ; then
   COMIN=$COMOUT
 else
   # COMROOT is pre-defined in job for para
-  gfsVer=`ls $COMROOT/gfs | tail -1`
-  COMIN=$COMROOT/gfs/$gfsVer/gfs.$PDY/$cyc/atmos
+  wafsVer=`ls $COMROOT/wafs | tail -1`
+  COMIN=$COMROOT/wafs/$wafsVer/wafs.$PDY/$cyc
 fi
 
 ########################################################
@@ -223,27 +223,12 @@ cd $DATA
 
 if [[ $fhour = "000" ]] || [[ $fhour = "003" ]] ; then
   # GCIP
-  modelfile=$COMIN/gfs.t${cyc2}z.gcip.f00.grib2
+  modelfile=$COMIN/gcip/wafs.t${cyc2}z.gcip.f000.grib2
   cp $modelfile  $DATAgrib2/.
 else
-  # GFIP needs to be extracted from wafs file
-#  modelfile=$COMIN/gfs.t${cyc}z.awf_0p25.f$fh.grib2  # after ICAO2023
-  modelfile=$COMIN/gfs.t${cyc}z.wafs_icao.grb2f$fh   # before ICAO2023  
-  $WGRIB2 $modelfile | egrep ":ICIP:|:EDPARM:|:ICESEV:|parm=37:"| $WGRIB2 -i $modelfile -grib gfs.t${cyc}z.master.grb2f$fh
-  #Convert to 0.25 degree for blending purpose
-  opt1=' -set_grib_type same -new_grid_winds earth '
-  opt21=' -new_grid_interpolation bilinear -if'
-  opt22="(:ICESEV|parm=37):"
-  opt23=' -new_grid_interpolation neighbor -fi '
-  opt3=' -set_bitmap 1 -set_grib_max_bits 16 '
-  newgrid="latlon 0:1440:0.25 90:721:-0.25"
-
-  $WGRIB2 gfs.t${cyc}z.master.grb2f$fh \
-          $opt1 $opt21 $opt22 $opt23 $opt3 \
-          -new_grid $newgrid $DATAgrib2/gfs.t${cyc}z.wafs_0p25.grb2f$fh
-
-#  cat $COMIN/gfs.t${cyc}z.wafs_0p25.f${fh}.grib2 >> $DATAgrib2/gfs.t${cyc}z.wafs_0p25.grb2f$fh
-
+  # Extracted ICESEV and EDPARMfrom wafs file
+  modelfile=$COMIN/grib2/0p25/wafs.t${cyc}z.awf.0p25.f$fh.grib2  # after ICAO2023
+  $WGRIB2 $modelfile | egrep ":EDPARM:|:ICESEV:|parm=37:"| $WGRIB2 -i $modelfile -grib $DATAgrib2/wafs.t${cyc}z.0p25.grb2f$fh
 fi
 
 # Skip plotting if forecast hour is greater than 36
@@ -263,10 +248,10 @@ rm $DATAplot/*
 
 if [[ $fhour == "000" ]] || [[ $fhour == "003" ]] ; then
   # copy GCIP data
-  cp $DATAgrib2/*t${cyc2}z.gcip.f00.grib2 .
+  cp $DATAgrib2/*t${cyc2}z.gcip.f000.grib2 .
 else
   # copy GFIP data
-  cp $DATAgrib2/gfs.t${cyc}z.wafs_0p25.grb2f$fh .
+    cp $DATAgrib2/wafs.t${cyc}z.0p25.grb2f$fh .
 fi
 for grb2file in `ls` ; do
    severity=severity
