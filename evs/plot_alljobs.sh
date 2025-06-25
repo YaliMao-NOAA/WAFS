@@ -76,7 +76,7 @@ if [ $long_range = "yes"  ] ; then
     fi
 
     export OBSERVATIONS=GFS
-    for var in TMP WIND WIND80 ; do # TMP WIND WIND80 WDIR
+    for var in TMP WIND WIND80 ; do # TMP WIND WIND80 UGRD_VGRD
 	export COMOUT=$DATAplot/tar_long.$var
 	export DATA=$DATAplot/working_long.$var
 	export VAR_NAME_GFS=$var
