@@ -5,6 +5,8 @@
 
 set -xa
 
+extract_prepare_data="yes" # yes / no
+
 if [ -z $MACHINE ] ; then
     . ~/envir_setting.sh
 fi
@@ -17,7 +19,10 @@ fi
 date
 
 DATAplot=/lfs/h2/emc/ptmp/yali.mao/evs_plot
-rm -fr $DATAplot; mkdir -p $DATAplot; cd $DATAplot
+if [ $extract_prepare_data = "yes" ] ; then
+    rm -fr $DATAplot;
+fi
+mkdir -p $DATAplot; cd $DATAplot
 
 SCRIPTplot=$HOMEsave/evs
 
@@ -35,9 +40,12 @@ if [ $long_range = "yes"  ] ; then
     # VDAY1=20171201
     export VDAY1=`$NDATE -$((5*365*24)) ${VDATE}00 | cut -c 1-6`01
 
-    #PBS -o /lfs/h2/emc/ptmp/yali.mao/evs_plot/extract_evs_data.log
     export DATAevs=$DATAplot/data
-    jobid_data=$(qsub $SCRIPTplot/plot_extract_evs_data.sh)
+    
+    if [ $extract_prepare_data = "yes" ] ; then
+	#PBS -o /lfs/h2/emc/ptmp/yali.mao/evs_plot/extract_evs_data.log
+	jobid_data=$(qsub $SCRIPTplot/plot_extract_evs_data.sh)
+    fi
 
     #==========================================
     # job 2: plot (rely on job 1)
@@ -60,7 +68,12 @@ if [ $long_range = "yes"  ] ; then
     export DATA=$DATAplot/working_long.gcip
     logfile=$DATAplot/plotting.log.gcip
     jobname=jevs_plotgcip
-    jobid=$(qsub -W depend=afterok:$jobid_data -V -q dev -A VERF-DEV -j oe -o $logfile -l walltime=00:30:00 -l place=shared,select=2:ncpus=110:mem=200GB -N $jobname $SCRIPTplot/plot_plotting.sh)
+
+    if [ $extract_prepare_data = "yes" ] ; then
+	jobid=$(qsub -W depend=afterok:$jobid_data -V -q dev -A VERF-DEV -j oe -o $logfile -l walltime=00:30:00 -l place=shared,select=2:ncpus=110:mem=200GB -N $jobname $SCRIPTplot/plot_plotting.sh)
+    else
+	jobid=$(qsub -V -q dev -A VERF-DEV -j oe -o $logfile -l walltime=00:30:00 -l place=shared,select=2:ncpus=110:mem=200GB -N $jobname $SCRIPTplot/plot_plotting.sh)
+    fi
 
     export OBSERVATIONS=GFS
     for var in TMP WIND WIND80 ; do # TMP WIND WIND80 WDIR
@@ -69,7 +82,11 @@ if [ $long_range = "yes"  ] ; then
 	export VAR_NAME_GFS=$var
 	logfile=$DATAplot/plotting.log.$var
 	jobname=jevs_plot$var
-	jobid=$(qsub -W depend=afterok:$jobid_data -V -q dev -A VERF-DEV -j oe -o $logfile -l walltime=03:00:00 -l place=shared,select=1:ncpus=60:mem=200GB -N $jobname $SCRIPTplot/plot_plotting.sh)
+	if [ $extract_prepare_data = "yes" ] ; then
+	    jobid=$(qsub -W depend=afterok:$jobid_data -V -q dev -A VERF-DEV -j oe -o $logfile -l walltime=03:00:00 -l place=shared,select=1:ncpus=60:mem=200GB -N $jobname $SCRIPTplot/plot_plotting.sh)
+	else
+	    jobid=$(qsub -V -q dev -A VERF-DEV -j oe -o $logfile -l walltime=03:00:00 -l place=shared,select=1:ncpus=60:mem=200GB -N $jobname $SCRIPTplot/plot_plotting.sh)
+	fi
 	#jobid=${jobid//.*/}
 	jobids="$jobid:$jobids"
     done
