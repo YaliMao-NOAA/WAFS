@@ -21,6 +21,9 @@ date
 DATAplot=/lfs/h2/emc/ptmp/yali.mao/evs_plot
 if [ $extract_prepare_data = "yes" ] ; then
     rm -fr $DATAplot;
+else
+    cd $DATAplot
+    rm -r plot* tar* working*
 fi
 mkdir -p $DATAplot; cd $DATAplot
 
