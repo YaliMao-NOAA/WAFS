@@ -13,7 +13,7 @@ date
 
 RUN=${RUN:-"prod"}
 
-plotdir=$COMROOT
+plotdir=$COMOUT
 
 remoteTar=/home/people/emc/www/htdocs/users/verification/aviation/wafs/$RUN/tar_files
 

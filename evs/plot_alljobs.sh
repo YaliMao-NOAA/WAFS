@@ -5,7 +5,7 @@
 
 set -xa
 
-extract_prepare_data="yes" # yes / no
+extract_prepare_data="yes" # yes / no, embedded in [ $long_range = "yes"  ] 
 
 if [ -z $MACHINE ] ; then
     . ~/envir_setting.sh
@@ -86,9 +86,9 @@ if [ $long_range = "yes"  ] ; then
 	logfile=$DATAplot/plotting.log.$var
 	jobname=jevs_plot$var
 	if [ $extract_prepare_data = "yes" ] ; then
-	    jobid=$(qsub -W depend=afterok:$jobid_data -V -q dev -A VERF-DEV -j oe -o $logfile -l walltime=03:00:00 -l place=shared,select=1:ncpus=60:mem=200GB -N $jobname $SCRIPTplot/plot_plotting.sh)
+	    jobid=$(qsub -W depend=afterok:$jobid_data -V -q dev -A VERF-DEV -j oe -o $logfile -l walltime=03:00:00 -l place=shared,select=1:ncpus=40:mem=200GB -N $jobname $SCRIPTplot/plot_plotting.sh)
 	else
-	    jobid=$(qsub -V -q dev -A VERF-DEV -j oe -o $logfile -l walltime=03:00:00 -l place=shared,select=1:ncpus=60:mem=200GB -N $jobname $SCRIPTplot/plot_plotting.sh)
+	    jobid=$(qsub -V -q dev -A VERF-DEV -j oe -o $logfile -l walltime=03:00:00 -l place=shared,select=1:ncpus=40:mem=200GB -N $jobname $SCRIPTplot/plot_plotting.sh)
 	fi
 	#jobid=${jobid//.*/}
 	jobids="$jobid:$jobids"
@@ -102,22 +102,29 @@ fi
 # In EVS workflow: 90 and 31 days
 export COMIN=
 export VDATE=
-export DAYS_LIST="90 31"
 export COMOUT=$DATAplot/tar_short
-export DATA=$DATAplot/working_short
 export VAR_NAME_GFS=
 export OBSERVATIONS="GCIP GFS"
 logfile=$DATAplot/plotting.log.short
 jobname=jevs_plot.short
+export DAYS_LIST="90"
+export DATA=$DATAplot/working_short.$DAYS_LIST
 if [ -z $jobids ] ; then
-    jobid=$(qsub -V -q dev -A VERF-DEV -j oe -o $logfile -l walltime=01:00:00 -l place=shared,select=1:ncpus=60:mem=200GB -N $jobname $SCRIPTplot/plot_plotting.sh)
+    jobid1=$(qsub -V -q dev -A VERF-DEV -j oe -o $logfile -l walltime=01:00:00 -l place=shared,select=1:ncpus=40:mem=200GB -N $jobname $SCRIPTplot/plot_plotting.sh)
 else
-    jobid=$(qsub -W depend=afterok:$jobids -V -q dev -A VERF-DEV -j oe -o $logfile -l walltime=01:00:00 -l place=shared,select=1:ncpus=60:mem=200GB -N $jobname $SCRIPTplot/plot_plotting.sh)
+    jobid1=$(qsub -W depend=afterok:$jobids -V -q dev -A VERF-DEV -j oe -o $logfile -l walltime=01:00:00 -l place=shared,select=1:ncpus=40:mem=200GB -N $jobname $SCRIPTplot/plot_plotting.sh)
+fi
+export DAYS_LIST="31"
+export DATA=$DATAplot/working_short.$DAYS_LIST
+if [ -z $jobids ] ; then
+    jobid2=$(qsub -V -q dev -A VERF-DEV -j oe -o $logfile -l walltime=01:00:00 -l place=shared,select=1:ncpus=40:mem=200GB -N $jobname $SCRIPTplot/plot_plotting.sh)
+else
+    jobid2=$(qsub -W depend=afterok:$jobids -V -q dev -A VERF-DEV -j oe -o $logfile -l walltime=01:00:00 -l place=shared,select=1:ncpus=40:mem=200GB -N $jobname $SCRIPTplot/plot_plotting.sh)
 fi
 
 ######################################
 # Step 3: transfer to RZDM (rely on job 2)
 ######################################
 export RUN='prod'
-export COMROOT=$DATAplot
-qsub -W depend=afterok:$jobid $SCRIPTplot/plot_transfer2rzdm.sh
+export COMOUT=$DATAplot
+qsub -W depend=afterok:$jobid1:$jobid2 $SCRIPTplot/plot_transfer2rzdm.sh
