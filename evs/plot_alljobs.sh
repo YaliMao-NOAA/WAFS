@@ -101,6 +101,7 @@ fi
 ######################################
 # In EVS workflow: 90 and 31 days
 export COMIN=
+export VDATE=
 export DAYS_LIST="90 31"
 export COMOUT=$DATAplot/tar_short
 export DATA=$DATAplot/working_short
