@@ -67,28 +67,30 @@ if [ $long_range = "yes"  ] ; then
     export DAYS_LIST=$(( ($(date +%s -d $VDATE) - $(date +%s -d $VDAY1) )/(60*60*24) ))
 
     export OBSERVATIONS=GCIP
-    export COMOUT=$DATAplot/tar_long.gcip
-    export DATA=$DATAplot/working_long.gcip
-    logfile=$DATAplot/plotting.log.gcip
-    jobname=jevs_plotgcip
+    export VAR_NAMES_GCIP=ICESEV
+    var=$VAR_NAMES_GCIP
+    export COMOUT=$DATAplot/tar_long.$var
+    export DATA=$DATAplot/working_long.$var
+    logfile=$DATAplot/plotting.log.$var
+    jobname=jevs_plot$var
 
     if [ $extract_prepare_data = "yes" ] ; then
-	jobid=$(qsub -W depend=afterok:$jobid_data -V -q dev -A VERF-DEV -j oe -o $logfile -l walltime=00:30:00 -l place=shared,select=2:ncpus=110:mem=200GB -N $jobname $SCRIPTplot/plot_plotting.sh)
+	jobid=$(qsub -W depend=afterok:$jobid_data -V -q dev -A VERF-DEV -j oe -o $logfile -l walltime=01:30:00 -l place=shared,select=2:ncpus=110:mem=200GB -N $jobname $SCRIPTplot/plot_plotting.sh)
     else
-	jobid=$(qsub -V -q dev -A VERF-DEV -j oe -o $logfile -l walltime=00:30:00 -l place=shared,select=2:ncpus=110:mem=200GB -N $jobname $SCRIPTplot/plot_plotting.sh)
+	jobid=$(qsub -V -q dev -A VERF-DEV -j oe -o $logfile -l walltime=01:30:00 -l place=shared,select=2:ncpus=110:mem=200GB -N $jobname $SCRIPTplot/plot_plotting.sh)
     fi
 
     export OBSERVATIONS=GFS
     for var in TMP WIND WIND80 ; do # TMP WIND WIND80 UGRD_VGRD
+	export VAR_NAMES_GFS=$var
 	export COMOUT=$DATAplot/tar_long.$var
 	export DATA=$DATAplot/working_long.$var
-	export VAR_NAME_GFS=$var
 	logfile=$DATAplot/plotting.log.$var
 	jobname=jevs_plot$var
 	if [ $extract_prepare_data = "yes" ] ; then
-	    jobid=$(qsub -W depend=afterok:$jobid_data -V -q dev -A VERF-DEV -j oe -o $logfile -l walltime=03:00:00 -l place=shared,select=1:ncpus=40:mem=200GB -N $jobname $SCRIPTplot/plot_plotting.sh)
+	    jobid=$(qsub -W depend=afterok:$jobid_data -V -q dev -A VERF-DEV -j oe -o $logfile -l walltime=03:30:00 -l place=shared,select=2:ncpus=120:mem=200GB -N $jobname $SCRIPTplot/plot_plotting.sh)
 	else
-	    jobid=$(qsub -V -q dev -A VERF-DEV -j oe -o $logfile -l walltime=03:00:00 -l place=shared,select=1:ncpus=40:mem=200GB -N $jobname $SCRIPTplot/plot_plotting.sh)
+	    jobid=$(qsub -V -q dev -A VERF-DEV -j oe -o $logfile -l walltime=03:30:00 -l place=shared,select=2:ncpus=120:mem=200GB -N $jobname $SCRIPTplot/plot_plotting.sh)
 	fi
 	#jobid=${jobid//.*/}
 	jobids="$jobid:$jobids"
@@ -97,29 +99,23 @@ if [ $long_range = "yes"  ] ; then
 fi
 
 ######################################
-# Step 2: Plot anyway for 90 and 31 days
+# Step 2: Plot anyway for 90
 ######################################
-# In EVS workflow: 90 and 31 days
+# In EVS workflow: 90 days
 export COMIN=
 export VDATE=
 export COMOUT=$DATAplot/tar_short
-export VAR_NAME_GFS=
+export VAR_NAMES_GCIP=
+export VAR_NAMES_GFS=
 export OBSERVATIONS="GCIP GFS"
 logfile=$DATAplot/plotting.log.short
 jobname=jevs_plot.short
 export DAYS_LIST="90"
 export DATA=$DATAplot/working_short.$DAYS_LIST
 if [ -z $jobids ] ; then
-    jobid1=$(qsub -V -q dev -A VERF-DEV -j oe -o $logfile -l walltime=01:00:00 -l place=shared,select=1:ncpus=40:mem=200GB -N $jobname $SCRIPTplot/plot_plotting.sh)
+    jobid1=$(qsub -V -q dev -A VERF-DEV -j oe -o $logfile -l walltime=01:00:00 -l place=shared,select=1:ncpus=60:mem=200GB -N $jobname $SCRIPTplot/plot_plotting.sh)
 else
-    jobid1=$(qsub -W depend=afterok:$jobids -V -q dev -A VERF-DEV -j oe -o $logfile -l walltime=01:00:00 -l place=shared,select=1:ncpus=40:mem=200GB -N $jobname $SCRIPTplot/plot_plotting.sh)
-fi
-export DAYS_LIST="31"
-export DATA=$DATAplot/working_short.$DAYS_LIST
-if [ -z $jobids ] ; then
-    jobid2=$(qsub -V -q dev -A VERF-DEV -j oe -o $logfile -l walltime=01:00:00 -l place=shared,select=1:ncpus=40:mem=200GB -N $jobname $SCRIPTplot/plot_plotting.sh)
-else
-    jobid2=$(qsub -W depend=afterok:$jobids -V -q dev -A VERF-DEV -j oe -o $logfile -l walltime=01:00:00 -l place=shared,select=1:ncpus=40:mem=200GB -N $jobname $SCRIPTplot/plot_plotting.sh)
+    jobid1=$(qsub -W depend=afterok:$jobids -V -q dev -A VERF-DEV -j oe -o $logfile -l walltime=01:00:00 -l place=shared,select=1:ncpus=60:mem=200GB -N $jobname $SCRIPTplot/plot_plotting.sh)
 fi
 
 ######################################
@@ -127,4 +123,4 @@ fi
 ######################################
 export RUN='prod'
 export COMOUT=$DATAplot
-qsub -W depend=afterok:$jobid1:$jobid2 $SCRIPTplot/plot_transfer2rzdm.sh
+qsub -W depend=afterok:$jobid1 $SCRIPTplot/plot_transfer2rzdm.sh

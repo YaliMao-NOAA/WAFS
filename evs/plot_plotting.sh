@@ -39,7 +39,7 @@ export COMIN=$COMIN
 export COMOUT=$COMOUT
 
 export USH_DIR=$HOMEevs/ush/$COMPONENT
-export DAYS_LIST=${DAYS_LIST:-"90 31"}
+export DAYS_LIST=${DAYS_LIST:-"90"}
 
 
 ############################################################
@@ -53,7 +53,7 @@ export DATA=$DATA
 
 export KEEPDATA=YES
 
-$HOMEevs/jobs/JEVS_WAFS_PLOTS
+$HOMEevs/jobs/JEVS_PLOTS_WAFS
 
 ############################################################
 ## Purpose: This job generates the grid2grid statistics stat
