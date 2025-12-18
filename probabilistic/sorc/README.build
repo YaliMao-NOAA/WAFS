@@ -1,0 +1,6 @@
+To build codes:
+
+     1) ./build.sh >& naefs.compile.log
+     2) ./install.sh
+
+

@@ -1,0 +1,59 @@
+#!/bin/bash
+#PBS -N wafs_gefs_prob_avgspr
+#PBS -j oe                  
+#PBS -q dev  
+#PBS -l walltime=00:30:00
+#PBS -A WAFS-DEV                
+#PBS -l select=1:ncpus=96:mpiprocs=96:mem=100GB
+#PBS -l debug=true
+
+# versions file for wafs sets $wafs_ver and $code_ver
+model=wafs
+
+## HOMEwafs will de defined by the eclfow apps
+
+export HOMEwafs=/lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/probabilistic
+source ${HOMEwafs}/versions/run.ver
+
+cd $PBS_O_WORKDIR
+
+set -x
+
+module purge
+module load envvar/${envvar_ver}
+module load PrgEnv-intel/${PrgEnv_intel_ver}
+module load craype/${craype_ver}
+module load intel/${intel_ver}
+module load cray-mpich/${cray_mpich_ver}
+module load cray-pals/${cray_pals_ver}
+module load cfp/${cfp_ver}
+module load prod_envir/${prod_envir_ver}
+module load prod_util/${prod_util_ver}
+module load libjpeg/${libjpeg_ver}
+module load grib_util/${grib_util_ver}
+module load wgrib2/${wgrib2_ver}
+module load iobuf/${iobuf_ver}
+module load craype-hugepages2M
+module list
+
+##
+
+export PDY=20251113
+export cyc=12
+export job=wafs_gefs_prob_gtg_$PDY$cyc
+
+#export HOMEgefs=$HOMEwafs
+export DATAROOT=/lfs/h2/emc/ptmp/$LOGNAME/icing_probability
+
+# EXPORT list here
+
+export APRUN="mpiexec -np 96 --cpu-bind core cfp "         
+export IOBUF_PARAMS='*:sync,%%stdout:sync'
+
+#export COMPATH=/lfs/h2/emc/ptmp/$LOGNAME/com/wafs
+export COMROOT=/lfs/h2/emc/ptmp/$LOGNAME/com
+export KEEPDATA=YES
+export SENDDBN=NO
+
+# CALL executable job script here
+${HOMEwafs}/jobs/JWAFS_GEFS_PROB

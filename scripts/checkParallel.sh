@@ -2,6 +2,7 @@
 
 module load prod_envir
 module load prod_util
+set -x
 
 COMROOT=/lfs/h1/ops/para/com
 DATA=/lfs/h2/emc/ptmp/$(whoami)
@@ -9,7 +10,7 @@ cd $DATA
 
 run='dafs'
 
-PDY=$( $NDATE -24 )
+PDY=${1:-$( $NDATE -24 )}
 PDY=${PDY:0:8}
 
 mailto="yali.mao@noaa.gov"
