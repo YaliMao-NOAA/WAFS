@@ -4,7 +4,7 @@ module load prod_envir
 module load prod_util
 set -x
 
-COMROOT=/lfs/h1/ops/para/com
+COMROOT=/lfs/h1/ops/prod/com
 DATA=/lfs/h2/emc/ptmp/$(whoami)
 cd $DATA
 

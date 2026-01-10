@@ -1,7 +1,7 @@
 SHELL=/bin/bash -l
 
-# check NCO parallel run of DAFS
- 42 22 * * * sh  /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/scripts/checkParallel.sh >  /lfs/h2/emc/ptmp/yali.mao/dafs.parallelrun.check 2>&1
+# check NCO run of DAFS
+42 22 * * * sh  /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/scripts/checkDAFSrun.sh >  /lfs/h2/emc/ptmp/yali.mao/dafs.run.check 2>&1
 
 #parallel wafs.v7.0.0
 #10 04 * * * export cyc=00 ; sh /lfs/h2/emc/vpppg/noscrub/yali.mao/git/save/ecflow/wafs.standalone.cron > /lfs/h2/emc/ptmp/yali.mao/wafs.standalone.log.$cyc 2>&1
