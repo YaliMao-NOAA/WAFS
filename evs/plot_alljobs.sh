@@ -33,6 +33,9 @@ SCRIPTplot=$HOMEsave/evs
 VDATE=`$NDATE | cut -c 1-6`0100
 export VDATE=`$NDATE -24 $VDATE | cut -c 1-8`
 
+###### for one year plotting
+###### export VDATE=20251231
+
 ######################################
 # Step 1: if long_range is yes, plot the last day of the last month back to 5 years ago
 ######################################
@@ -42,7 +45,9 @@ if [ $long_range = "yes"  ] ; then
     #==========================================
     # VDAY1=20171201
     export VDAY1=`$NDATE -$((5*365*24)) ${VDATE}00 | cut -c 1-6`01
-
+###### for one year plotting
+######    export VDAY1=`$NDATE -$((365*24)) ${VDATE}00 | cut -c 1-6`31
+######    export VDAY1=20250101
     export DATAevs=$DATAplot/data
     
     if [ $extract_prepare_data = "yes" ] ; then
@@ -117,6 +122,9 @@ if [ -z $jobids ] ; then
 else
     jobid1=$(qsub -W depend=afterok:$jobids -V -q dev -A VERF-DEV -j oe -o $logfile -l walltime=01:00:00 -l place=shared,select=1:ncpus=60:mem=200GB -N $jobname $SCRIPTplot/plot_plotting.sh)
 fi
+
+###### for one year plotting
+###### exit
 
 ######################################
 # Step 3: transfer to RZDM (rely on job 2)

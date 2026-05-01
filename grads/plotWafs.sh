@@ -39,7 +39,7 @@ elif [[ $prd =~ severity ]] ; then
    field=ICESEV
    ##########################################
    #### start: For new ICESEV grib2 table ####
-   if [ ! -f $dataFileTmp ] ; then
+   if [ ! -s $dataFileTmp ] ; then
        field=var01937prs
        $WGRIB2 $dataFile | grep "parmcat=19 parm=37:" | $WGRIB2 -i $dataFile -grib $dataFileTmp
    fi

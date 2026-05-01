@@ -256,13 +256,13 @@ fi
 for grb2file in `ls` ; do
    severity=severity
 
-   sh $HOMEsave/grads/plotWafs.sh original potential $grb2file
+#   sh $HOMEsave/grads/plotWafs.sh original potential $grb2file
    sh $HOMEsave/grads/plotWafs.sh original $severity  $grb2file
-   sh $HOMEsave/grads/plotWafs.sh conus  potential $grb2file
+#   sh $HOMEsave/grads/plotWafs.sh conus  potential $grb2file
    sh $HOMEsave/grads/plotWafs.sh conus  $severity  $grb2file
-   sh $HOMEsave/grads/plotWafs.sh hawaii  potential $grb2file
+#   sh $HOMEsave/grads/plotWafs.sh hawaii  potential $grb2file
    sh $HOMEsave/grads/plotWafs.sh hawaii  $severity  $grb2file
-   sh $HOMEsave/grads/plotWafs.sh alaska  potential $grb2file
+#   sh $HOMEsave/grads/plotWafs.sh alaska  potential $grb2file
    sh $HOMEsave/grads/plotWafs.sh alaska  $severity  $grb2file
 
    if [[ $grb2file =~ "wafs" ]] ; then
