@@ -86,7 +86,11 @@ if [ $long_range = "yes"  ] ; then
     fi
 
     export OBSERVATIONS=GFS
-    for var in TMP WIND WIND80 ; do # TMP WIND WIND80 UGRD_VGRD
+    for var in TMP WIND WIND80 UGRD_VGRD ; do # TMP WIND WIND80 UGRD_VGRD
+	if [ $var = "UGRD_VGRD" ] ; then
+	    VDAY1="20260201" # wind direction verification starts from 20260201
+	    export DAYS_LIST=$(( ($(date +%s -d $VDATE) - $(date +%s -d $VDAY1) )/(60*60*24) ))
+	fi
 	export VAR_NAMES_GFS=$var
 	export COMOUT=$DATAplot/tar_long.$var
 	export DATA=$DATAplot/working_long.$var
