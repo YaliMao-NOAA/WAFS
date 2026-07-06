@@ -18,18 +18,18 @@ rm -rf $DATA
 mkdir -p $DATA
 cd $DATA
 
-wafsfolder=fork.implement2023
+wafsfolder=wafs.fork
 
 PDY=`$NDATE | cut -c1-8`
-PDY=20230929
-CC=06
+PDY=20260630
+CC=00
 inputfile=GLOBCOMPSSR.$PDY$CC
 #cp $DCOMROOT/$PDY/mcidas/GLOBCOMPSSR.${PDY}00 GLOBCOMPSSR.${PDY}00
-cp /lfs/h2/emc/vpppg/noscrub/yali.mao/satellite_test_2023sep/dcom/$PDY/mcidas/GLOBCOMPSSR.${PDY}$CC GLOBCOMPSSR.$PDY$CC
+cp /lfs/h2/emc/vpppg/noscrub/yali.mao/satellite_20260630/GLOBCOMPSSR_v3r0_blend_s$PDY$CC*.area  GLOBCOMPSSR.$PDY$CC
 # cp `ls -t /gpfs/dell1/nco/ops/nw*/gfs.v*/parm/wafs/wafs_gcip_gfs.cfg | head -1` wafs_gcip_gfs.cfg
 cp $HOMEgit/$wafsfolder/parm/wafs/wafs_gcip_gfs.cfg wafs_gcip_gfs.cfg
 
-pgm=$HOMEsave/gcip_satellite/gcip_satellite
+pgm=$HOMEsave/gcip_satellite/gcip_satellite.x
 
 $pgm GLOBCOMPSSR.$PDY$CC wafs_gcip_gfs.cfg > out.txt
 
