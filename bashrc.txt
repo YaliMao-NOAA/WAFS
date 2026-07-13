@@ -1,14 +1,13 @@
 export LANG=en_US.UTF-8
 
 # check whether the verification cronjob is turned on yet
-if [[ `hostname` =~ ^[c|d|]login ]] ; then
-  a="`ls /lfs/h2/emc/ptmp/yali.mao/wafs.vrfy.prod_prod.vsdb/wafs/twind_gfs*.vsdb`"
-  a=`echo $a | cut -d' ' -f1`
-  if [[ ! -s $a ]] ; then
-    echo "The verification cronjob may not be turned on yet. Please check."
-    echo "The verification cronjob may not be turned on yet" | mailx -s "VSDB verification failed!!!" yali.mao@noaa.gov
-  fi
-fi
+#if [[ `hostname` =~ ^[c|d|]login ]] ; then
+#  a="`ls /lfs/h2/emc/ptmp/yali.mao/wafs.vrfy.prod_prod.vsdb/wafs/twind_gfs*.vsdb`"
+#  a=`echo $a | cut -d' ' -f1`
+#  if [[ ! -s $a ]] ; then
+#    echo "The verification cronjob may not be turned on yet" | mailx -s "VSDB verification failed!!!" yali.mao@noaa.gov
+#  fi
+#fi
 
 #export PS1="\u@\h \w> "
 if [ $MACHINE = "wcoss2" ] ; then
