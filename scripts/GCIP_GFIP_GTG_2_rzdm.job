@@ -21,12 +21,6 @@ fi
 cd $DATA
 
 
-if [ $MACHINE = "wcoss2" ] ; then
-    script=GCIP_GFIP_GTG_2_rzdm.data.sh
-elif [ $MACHINE = "hera" ] ; then
-    script=GCIP_GFIP_GTG_2_rzdm.plot.sh
-    rm -r $DATAROOTplot
-fi
 script=GCIP_GFIP_GTG_2_rzdm.sh
 
 # Use MPMD to speed up the processing
@@ -34,9 +28,10 @@ mpmdCMDfile=$TMP/GCIP_GFIP_GTG_2_rzdm.working/gfipgcipgtg2rzdm.cmdfile
 rm $mpmdCMDfile
 
 i=0
-for fh in $fhours ; do
-  echo $i $HOMEsave/scripts/$script $fh >> $mpmdCMDfile
-  i=$(( i + 1 ))
+for fhr in ${fhours[@]}; do
+    fhr3="$(printf %03d $(( 10#$fhr )) )"
+    echo $i $HOMEsave/scripts/$script $fhr3 >> $mpmdCMDfile
+    i=$(( i + 1 ))
 done
 if [ ! `echo $MPIRUN | cut -d " " -f1` = 'srun' ] ; then
     # If not 'srun' MPMD, do not need CPU number at the beginning of each line of gfipgcipgtg2rzdm.cmdfile

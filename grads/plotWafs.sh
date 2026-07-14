@@ -12,7 +12,7 @@ usage="Usage: $HOMEsave/grads/plotWafs.sh domain prod  a_WAFS_grib2_file"
 ICSEVconvert=$HOMEgit/verf_g2g.v3.0.12/exec/verf_g2g_icing_convert.$MACHINE
 
 domain=`echo $1 | tr 'A-Z' 'a-z'`	# original | conus | hawaii | alaska
-prd=`echo $2 | tr 'A-Z' 'a-z'` 		# potential | severity/iseverity/rseverity | probability | turbulence
+prd=`echo $2 | tr 'A-Z' 'a-z'` 		# potential | severity/iseverity/rseverity | probability | turbulence | mwt | cat
 #  severity : category severity (new sensible)
 # iseverity : category severity (old disorder)
 # rseverity : continous severity
@@ -24,9 +24,6 @@ if [[ -z $dataFile ]] ; then
 fi
 
 # Use the newer version of wgrib2 before it's installed for RRFS
-if [ -f /u/hui-ya.chuang/bin/wgrib2 ] ; then
-    WGRIB2=/u/hui-ya.chuang/bin/wgrib2
-fi
 
 prefix=${domain}.
 
@@ -117,14 +114,14 @@ leveltype=`grep ",102\ \ 0,19," $ctlFile`
 if [[ -n $leveltype ]] ; then  # on hybrid level
   if [[ $prd == potential || $prd =~ severity || $prd == probability ]] ; then
       levels="1828 3048 4267 5486"
-  elif [[  $prd == turbulence ]] ; then
+  elif [[ $prd = turbulence ||  $prd = mwt || $prd = cat ]] ; then
       levels="7315 9144 10363 11887 13411"
   fi
 else # on pressure level
   if [[ $prd == potential || $prd =~ severity || $prd == probability ]] ; then
       levels="400 500 600 700 800"
-  elif [[ $prd == turbulence ]] ; then
-      levels="100 150 200 250 300 400"
+  elif [[ $prd = turbulence ||  $prd = mwt || $prd = cat ]] ; then
+      levels="125 150 200 250 300 400 500"
   fi
 fi
 if [[ -n $4 ]] ; then
@@ -169,11 +166,19 @@ elif [ $prd = rseverity ] ; then
    field=ICESEV
    ccols="99 110 120 130 140 "
    prdname="Icing Severity"
-elif [ $prd = turbulence ] ; then
+elif [[ $prd = turbulence ||  $prd = mwt || $prd = cat ]] ; then
    clevs="0 .02 .05 .07 .1 .12 .14 .16 .18 .2 .22 .24 .26 .28 .3 .32 .34 .36 .38 .4 .42 .44 .46 .48 .5 .52 .54 .56 .58 .6 .62 .64 .66 .68 .7 .72 .74 .76 .78 .8 .82 .84 .86 .88 .9 .92 .94 .96 .98"
-   field="EDPARM"
    ccols="21 22 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67 68 69 70"
-   prdname="Graphical Turbulence Guidance"
+   if [ $prd = turbulence ] ; then
+       field="EDPARM"
+       prdname="Graphical Turbulence Guidance"
+   elif [ $prd = mwt ] ; then
+       field="MWTURB"
+       prdname="Mountain Wave Turbulence"
+   elif [ $prd = cat ] ; then
+       field="CATEDR"
+       prdname="Clear Air Turbulence"
+   fi
 else
    echo "Warning!!!!!!! No plot for $prd"
    exit
@@ -188,14 +193,14 @@ fi
 #=========================================================
 # which colors.gs and cbar.gs to copy
 #=========================================================
-if [ $prd = turbulence ] ; then
+if [[ $prd = turbulence ||  $prd = mwt || $prd = cat ]] ; then
     cp $HOMEsave/grads/gtgColors.gs colors.gs
 else
     cp $HOMEsave/grads/icingColors.gs colors.gs
 fi
 if [[ $prd =~ severity ]] ; then
    cp $HOMEsave/grads/cbarCategory.gs cbar.gs
-elif [ $prd = turbulence ] ; then
+elif [[ $prd = turbulence ||  $prd = mwt || $prd = cat ]] ; then
    cp $HOMEsave/grads/cbarGTG.gs cbar.gs
 else
    cp $HOMEsave/grads/cbar.gs .
@@ -249,7 +254,7 @@ if [[ -n $leveltype ]] ; then # hybrid level
   clvl=$( echo "$lvl*3.28 + 20" | bc )
   clvl=$( echo " $clvl  * 100 / 100 / 100" | bc )
   clvl=`echo $clvl | cut -c1-3`
-  clvl"$(printf "%03d\n" $(( 10#$clvl )) )"
+  clvl="$(printf "%03d\n" $(( 10#$clvl )) )"
   clvl="FL$clvl"
 else                          # pressure level
   clvl="${lvl}hPa"

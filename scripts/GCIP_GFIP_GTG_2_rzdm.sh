@@ -14,11 +14,6 @@ if [[ $fh = "000" ]] || [[ $fh = "003" ]] ; then
   cyc2=`printf "%02d" $cyc2`
 fi
 
-fhour=$fh
-if [ $prod = para ] ; then
-  fh="$(printf "%02d" $(( 10#$fh )) )"
-fi
-
 #%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%#
 # Experimental needs to run own job card
 if [ $prod = test ] ; then
@@ -221,18 +216,17 @@ fi
 mkdir -p $DATAgrib2
 cd $DATA
 
-if [[ $fhour = "000" ]] || [[ $fhour = "003" ]] ; then
+if [[ $fh = "000" ]] || [[ $fh = "003" ]] ; then
   # GCIP
   modelfile=$COMIN/gcip/wafs.t${cyc2}z.gcip.f000.grib2
-  cp $modelfile  $DATAgrib2/.
+  cpreq $modelfile  $DATAgrib2/.
 else
-  # Extracted ICESEV and EDPARMfrom wafs file
-  modelfile=$COMIN/grib2/0p25/wafs.t${cyc}z.awf.0p25.f$fh.grib2  # after ICAO2023
-  $WGRIB2 $modelfile | egrep ":EDPARM:|:ICESEV:|parm=37:"| $WGRIB2 -i $modelfile -grib $DATAgrib2/wafs.t${cyc}z.0p25.grb2f$fh
+  modelfile=$COMIN/grib2/0p25/wafs.t${cyc}z.awf.0p25.f$fh.grib2
+  cpreq $modelfile $DATAgrib2/wafs.t${cyc}z.0p25.grb2f$fh
 fi
 
-# Skip plotting if forecast hour is greater than 36
-if [[ $fhour > 036 ]] ; then
+# Skip plotting if forecast hour is greater than 48
+if [[ $fh > 048 ]] ; then
   exit 0 
 fi
 
@@ -246,12 +240,12 @@ mkdir -p $DATAplot
 cd $DATAplot
 rm $DATAplot/*
 
-if [[ $fhour == "000" ]] || [[ $fhour == "003" ]] ; then
+if [[ $fh == "000" ]] || [[ $fh == "003" ]] ; then
   # copy GCIP data
-  cp $DATAgrib2/*t${cyc2}z.gcip.f000.grib2 .
+  cpreq $DATAgrib2/*t${cyc2}z.gcip.f000.grib2 .
 else
   # copy GFIP data
-    cp $DATAgrib2/wafs.t${cyc}z.0p25.grb2f$fh .
+    cpreq $DATAgrib2/wafs.t${cyc}z.0p25.grb2f$fh .
 fi
 for grb2file in `ls` ; do
    severity=severity
@@ -265,17 +259,23 @@ for grb2file in `ls` ; do
 #   sh $HOMEsave/grads/plotWafs.sh alaska  potential $grb2file
    sh $HOMEsave/grads/plotWafs.sh alaska  $severity  $grb2file
 
-   if [[ $grb2file =~ "wafs" ]] ; then
+   if [[ ! $grb2file =~ "gcip" ]] ; then
        sh $HOMEsave/grads/plotWafs.sh original turbulence $grb2file
        sh $HOMEsave/grads/plotWafs.sh conus turbulence $grb2file
        sh $HOMEsave/grads/plotWafs.sh hawaii turbulence $grb2file
        sh $HOMEsave/grads/plotWafs.sh alaska turbulence $grb2file
+
+       sh $HOMEsave/grads/plotWafs.sh original mwt $grb2file
+       sh $HOMEsave/grads/plotWafs.sh conus mwt $grb2file
+       sh $HOMEsave/grads/plotWafs.sh hawaii mwt $grb2file
+       sh $HOMEsave/grads/plotWafs.sh alaska mwt $grb2file
+
+       sh $HOMEsave/grads/plotWafs.sh original cat $grb2file
+       sh $HOMEsave/grads/plotWafs.sh conus cat $grb2file
+       sh $HOMEsave/grads/plotWafs.sh hawaii cat $grb2file
+       sh $HOMEsave/grads/plotWafs.sh alaska cat $grb2file
    fi
 done
-
-# Don't upload CAT MWT to rzdm web site
-rm *cat.png
-rm *mwt.png
 
 # Mark this job for $fh is finished 
 echo $PDY $cyc $fh >> $TMP/GCIP_GFIP_GTG_2_rzdm.working/GCIP_GFIP_GTG_2_rzdm.list

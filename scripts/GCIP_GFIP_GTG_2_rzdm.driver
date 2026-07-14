@@ -33,9 +33,10 @@ logfile=$TMP/GCIP_GFIP_GTG_2_rzdm.working/gfipgcipgtg2rzdm.$cyc
 rm $logfile
 script=$HOMEsave/scripts/GCIP_GFIP_GTG_2_rzdm.job
 
-export fhours="003 006 009 012 015 018 021 024 027 030 033 036 000"
-# 000 and 003 needs more time than others because of GCIP.
-# Put 000 at the last of the list to be 'waited'
+seq0="0"
+seq1=$(seq -s ' ' 6 1 24)
+seq2=$(seq -s ' ' 27 3 48)
+fhours="${seq0} ${seq1} ${seq2}"
 nfhours=`echo $fhours | wc -w`
 
 if [ $MACHINE = "wcoss2" ] ; then
@@ -45,7 +46,7 @@ if [ $MACHINE = "wcoss2" ] ; then
     set -x
     export MPIRUN="mpiexec -np $nfhours -cpu-bind verbose,core cfp"
     SUB=qsub
-    $SUB -V -q debug -A GFS-DEV -j oe -o $logfile -l walltime=00:15:00 -l select=1:ncpus=$nfhours:mem=80GB -N $jobname $script
+    jobid=$($SUB -V -q debug -A GFS-DEV -j oe -o $logfile -l walltime=00:15:00 -l select=1:ncpus=$nfhours:mem=80GB -N $jobname $script)
 elif [ $MACHINE = "hera" ] ; then
     export MPIRUN="srun"
     SUB=sbatch
@@ -67,41 +68,40 @@ remoteServer=ymao@emcrzdm.ncep.noaa.gov
 export remoteData=/home/ftp/emc/unaff/ymao/wafs.$prod/wafs.$PDY
 export remotePlot=/home/www/emc/htdocs/gmb/icao/${prod}_plot
 
+ssh ymao@emcrzdm.ncep.noaa.gov "mkdir -p $remoteData"
+export localfiles="$DATAgrib2/*"
+export remoteDir=$remoteData
+qsub -W depend=afterok:$jobid $HOMEsave/scripts/transfer2rzdm.sh
+
+ssh ymao@emcrzdm.ncep.noaa.gov "mkdir -p $remotePlot"
+export localfiles="$DATAROOTplot/*/*png"
+export remoteDir=$remotePlot
+jobid=$(qsub -W depend=afterok:$jobid $HOMEsave/scripts/transfer2rzdm.sh)
+
+########################################################
+####        cleanup grib data and plottings if      ####
+####        older than 'endDate', keep up to 3 days ####
+########################################################                                                                                                             
+dates=$PDY
+dates="$dates `$NDATE -1 ${PDY}00 | cut -c1-8`"
+echo "cyc=$cyc"
+if [[ $cyc <  18 ]] ; then
+    dates="$dates `$NDATE -25 ${PDY}00 | cut -c1-8`"
+fi
 ic=1
 while [ $ic -le 180 ] ; do
-    lines=`cat $TMP/GCIP_GFIP_GTG_2_rzdm.working/GCIP_GFIP_GTG_2_rzdm.list | wc -l`
-
-    if [ $lines -eq $nfhours ] ; then
-	ssh ymao@emcrzdm.ncep.noaa.gov "mkdir -p $remoteData"
-	export localfiles="$DATAgrib2/*"
-	export remoteDir=$remoteData
-	qsub $HOMEsave/scripts/transfer2rzdm.sh
-
-	ssh ymao@emcrzdm.ncep.noaa.gov "mkdir -p $remotePlot"
-	export localfiles="$DATAROOTplot/*/*png"
-	export remoteDir=$remotePlot
-	qsub $HOMEsave/scripts/transfer2rzdm.sh
-
-	########################################################
-	####        cleanup grib data and plottings if      ####
-	####        older than 'endDate', keep up to 3 days ####
-	########################################################                                                                                                             
-	dates=$PDY
-	dates="$dates `$NDATE -1 ${PDY}00 | cut -c1-8`"
-	echo "cyc=$cyc"
-	if [[ $cyc <  18 ]] ; then
-	    dates="$dates `$NDATE -25 ${PDY}00 | cut -c1-8`"
-	fi
+    jobstatus="$(qstat $jobid 2>&1)"
+    if [[ $jobstatus =~ "finished" ]] ; then
 	ssh ymao@emcrzdm.ncep.noaa.gov "sh ~/scripts/wafs_web.ftp_maintenance.sh $prod $cyc $dates"
-
-        break
+	break
     else
-        ic=`expr $ic + 1`
-        sleep 60
+	ic=`expr $ic + 1`
+	sleep 60
     fi
 
     if [ $ic -eq  180 ] ; then
-        echo " Time out: No data transferred to RZDM after 3-hour waiting"
+	echo " Time out: No data transferred to RZDM after 3-hour waiting"
     fi
 done
+
 date
