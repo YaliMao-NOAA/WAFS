@@ -121,7 +121,7 @@ else # on pressure level
   if [[ $prd == potential || $prd =~ severity || $prd == probability ]] ; then
       levels="400 500 600 700 800"
   elif [[ $prd = turbulence ||  $prd = mwt || $prd = cat ]] ; then
-      levels="125 150 200 250 300 400 500"
+      levels="150 200 250 300 400 500"
   fi
 fi
 if [[ -n $4 ]] ; then

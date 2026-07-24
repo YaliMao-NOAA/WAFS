@@ -9,20 +9,40 @@
 !
 ! REVISION HISTORY:
 ! March 2019
-!
+! July 2026: add adaptation to satellite data in netcdf format
 !------------------------------------------------------------------------------
 MODULE Satellite
 
   IMPLICIT NONE
 
   PRIVATE
-  PUBLIC match
+  PUBLIC match,testNetCDF
 
   integer, parameter :: BYTE16=16, BYTE8=8, BYTE4=4, BYTE2=2, BYTE1=1
   real, parameter :: PI=3.14159265358979
   real, parameter :: R2D=180./PI, D2R=PI/180.
 
 CONTAINS
+
+
+  subroutine testNetCDF(satfile, iret)
+    character(len=*), intent(in) :: satfile
+    integer, intent(out) :: iret
+
+    real, allocatable :: brightness(:,:)
+    real, allocatable :: slat(:,:), slon(:,:) ! satellite latitude and longitude from NetCDF file
+    integer :: nx, ny
+
+    call decodeNetCDF(trim(satfile), nx, ny, brightness, slat, slon, iret)
+
+    write(*,*) "brightness=",brightness(1:nx,ny/2)
+    write(*,*) "slat=", slat(nx/2,1:ny)
+    write(*,*) "slon=", slon(1:nx,ny/2)
+    
+    deallocate(brightness)
+    deallocate(slat,slon)
+
+  end subroutine testNetCDF
 
   ! to check whether satellite sensor matches GCIP configration file, iret=-2 if no match
   ! to write out data in grib2
@@ -436,7 +456,78 @@ CONTAINS
 
     return
   end subroutine decodeMcIDAS
- 
+
+
+!&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+!&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+  subroutine decodeNetCDF(filename, nx, ny, brightness, slat, slon,iret)
+    use netcdf
+    implicit none
+    character(len=*), intent(in) :: filename
+    integer, intent(out) :: nx, ny
+    real, allocatable, intent(out) :: brightness(:,:)
+    real, allocatable, intent(inout) :: slat(:,:), slon(:,:)
+    integer, intent(out) :: iret
+
+    integer :: ncid, varid
+    logical :: readingLatLon
+
+    iret = -1
+
+    iret = nf90_open(trim(filename),NF90_NOWRITE,ncid)
+    if ( iret /= 0 ) then
+       print*,'error opening satellite file ',filename, ' iret = ', iret
+       stop
+    end if
+    !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
+    ! Step 1/2: read in dimension then allocate the related arrays
+    !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
+
+    iret = nf90_inq_dimid(ncid,'xc',varid)
+    if ( iret /= 0 ) then
+       print*,iret,varid
+       stop 1
+    end if
+    iret = nf90_inquire_dimension(ncid,varid,len=nx)
+    if ( iret /= 0 ) then
+       print*,iret
+       stop 1
+    end if
+    iret = nf90_inq_dimid(ncid,'yc',varid)
+    if ( iret /= 0 ) then
+       print*,iret,varid
+       stop 1
+    end if
+    iret = nf90_inquire_dimension(ncid,varid,len=ny)
+    if ( iret /= 0 ) then
+       print*,iret
+       stop 1
+    end if
+
+    allocate(brightness(nx,ny))
+    if(.not. allocated(slat)) then
+       readingLatLon = .true.
+       allocate(slat(nx,ny),slon(nx,ny))
+    end if
+    
+    !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
+    ! Step 2/2: Read data
+    !~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~!
+    iret = nf90_inq_varid(ncid,'data',varid)
+    ! iret = nf90_inquire_variable(ncid,varid,ndims = numDims)
+    iret = nf90_get_var(ncid,varid,brightness)
+
+    if(readingLatLon) then
+       iret = nf90_inq_varid(ncid,'lon',varid)
+       iret = nf90_get_var(ncid,varid,slon)
+       iret = nf90_inq_varid(ncid,'lat',varid)
+       iret = nf90_get_var(ncid,varid,slat)
+    end if
+    return
+  end subroutine decodeNetCDF
+!&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+!&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&
+  
 
   !----------------------------------------------------------------------------
   ! DESCRIPTION:
@@ -620,7 +711,8 @@ program main
   integer :: iret
 
   call GET_COMMAND_ARGUMENT(1, satfile)
-  call GET_COMMAND_ARGUMENT(2, cfgfile)
+!  call GET_COMMAND_ARGUMENT(2, cfgfile)
 
-  call match(satfile, cfgfile, iret)
+  call testNetCDF(satfile,iret)
+!  call match(satfile, cfgfile, iret)
 end program main
