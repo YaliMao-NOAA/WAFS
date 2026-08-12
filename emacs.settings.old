@@ -1,0 +1,114 @@
+;;https://www.gnu.org/software/emacs/manual/html_node/emacs/Text_002dOnly-Mouse.html
+;;
+;;Some text terminals support mouse clicks in the terminal window.
+;;
+;;In a terminal emulator which is compatible with xterm, you can use M-x xterm-mouse-mode to
+;;give Emacs control over simple uses of the mousebasically, only non-modified single clicks
+;;are supported. The normal xterm mouse functionality for such clicks is still available by 
+;;holding down the SHIFT key when you press the mouse button. Xterm Mouse mode is a global
+;;minor mode (see Minor Modes). Repeating the command turns the mode off again.
+;;
+;;In the console on GNU/Linux, you can use M-x gpm-mouse-mode to enable mouse support. You 
+;;must have the gpm server installed and running on your system in order for this to work.
+
+(unless window-system
+  (require 'mouse)
+  (xterm-mouse-mode t)
+  (global-set-key [mouse-4] '(lambda ()
+                              (interactive)
+                              (scroll-down 5)))
+  (global-set-key [mouse-5] '(lambda ()
+                              (interactive)
+                              (scroll-up 5)))
+  (defun track-mouse (e))
+  (setq mouse-sel-mode t)
+)
+
+(setq lazy-highlight-cleanup nil)
+(setq lazy-highlight-max-at-a-time nil)
+(setq lazy-highlight-initial-delay 0)
+
+(global-set-key [delete] 'delete-char)
+;;(add-to-list 'default-frame-alist '(foreground-color . "black"))
+;;(add-to-list 'default-frame-alist '(cursor-color . "LightCoral"))
+;;(add-to-list 'default-frame-alist '(background-color . "honeydew3"))
+;;(add-to-list 'default-frame-alist '(background-color . "grey"))
+;;(add-to-list 'default-frame-alist '(background-mode . dark))
+
+(global-font-lock-mode 1)
+
+(custom-set-variables
+  '(focus-follows-mouse t)
+  '(mouse-autoselect-window t)
+  ;; custom-set-variables was added by Custom -- don't edit or cut/paste it!
+  ;; Your init file should contain only one such instance.
+ )
+
+(custom-set-faces
+  ;; custom-set-faces was added by Custom -- don't edit or cut/paste it!
+  ;; Your init file should contain only one such instance.
+ '(bold-italic ((t (:bold t))))
+ '(custom-documentation-face ((t (:foreground "red"))))
+ '(font-lock-builtin-face ((((class color) (background light)) (:bold t :foreground "brightmagenta"))))
+ '(font-lock-comment-face ((t (:foreground "brightblack"))))
+ '(font-lock-constant-face ((((class color) (background light)) (:foreground "brightred"))))
+ '(font-lock-function-name-face ((((class color) (background light)) (:foreground "brightblue"))))
+ '(font-lock-keyword-face ((((class color) (background light)) (:foreground "magenta"))))
+ '(font-lock-string-face ((t (:foreground "blue"))))
+ '(font-lock-type-face ((((class color) (background light)) (:foreground "green"))))
+ '(font-lock-variable-name-face ((((class color) (background light)) (:foreground "black"))))
+ '(font-lock-warning-face ((((class color) (background light)) (:bold t :foreground "red"))))
+ '(region ((t (:background "paleturquoise"))))
+ '(vhdl-font-lock-directive-face ((((class color) (background light)) (:bold nil :underline t :background "lightgray"))))
+ '(vhdl-font-lock-enumvalue-face ((((class color) (background light)) (:foreground "Red"))))
+ '(vhdl-font-lock-function-face ((((class color) (background light)) (:bold nil :foreground "blue"))))
+ '(vhdl-font-lock-prompt-face ((((class color) (background light)) (:bold t :foreground "sienna4"))))
+ '(vhdl-font-lock-reserved-words-face ((((class color) (background light)) (:bold t :foreground "darkorchid4"))))
+ '(vhdl-font-lock-translate-off-face ((((class color) (background light)) (:foreground "blue"))))
+ '(vhdl-speedbar-configuration-face ((((class color) (background light)) (:foreground "navy"))))
+ '(vhdl-speedbar-package-face ((((class color) (background light)) (:foreground "yellow"))))
+ '(woman-addition-face ((t (:foreground "darkcyan")))))
+
+;; Matlab mode
+;;
+;;(autoload 'matlab-mode "matlab" "Enter MATLAB mode." t)
+;;(setq auto-mode-alist (cons '("\\.m\\'" . matlab-mode) auto-mode-alist))
+;;(autoload 'matlab-shell "matlab" "Interactive MATLAB mode." t)
+
+
+;; Prepend several pattern pairs to auto-mode-alist 
+(setq auto-mode-alist 
+      (append 
+       '(("\\.F90\\'" . f90-mode) 
+      ("\\.ff90\\'" .   f90-mode)
+      ("\\.l\\'" .   c-mode))
+      auto-mode-alist))
+
+;; Setup printer
+;;require 'ps-print)
+;;(setq lpr-switches '("lpr -P_152_2_152_35 -o Duplex=DuplexNoTumble"))
+
+
+;;================change the terminal title bar===============
+;; http://www.macosxhints.com/article.php?story=20041008195252133
+;;      --Yali
+;;You must load xterm-frobs first!
+;;(load "~/emacs_scripts/xterm-frobs.el")
+;;(load "~/emacs_scripts/xterm-title.el")
+;;It displays the word "Emacs" followed by the current file ("buffer" in emacs parlance) you're editing.
+(defun format-mode-line (dummy)
+   (concat
+     (if buffer-read-only " %% "
+     t (if (buffer-modified-p) " ** "))
+     "Emacs" " - " (buffer-name)) )
+;;Turn it on! To enable this functionality, you also need to add the following snippet of code to your .emacs file...
+  (when (and (not window-system)
+         (string-match "^xterm" (getenv "TERM")))
+;;    (require 'xterm-title)
+;;    (xterm-title-mode 1)
+  )
+;;=============================================================
+
+(setq mouse-autoselect-window t)
+;;(mouse-autoselect-window t)
+
