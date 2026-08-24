@@ -32,8 +32,8 @@ module load util_shared/${util_shared_ver}
 module load cray-pals/${craypals_ver}
 module load cfp/${cfp_ver}
 
-module list
 set -x
+module list
 
 #############################################################
 # WCOSS environment settings

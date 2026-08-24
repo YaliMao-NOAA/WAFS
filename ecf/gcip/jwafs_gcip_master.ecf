@@ -33,8 +33,8 @@ module load grib_util/${grib_util_ver}
 module load bufr_dump/${bufr_dump_ver}
 module load wgrib2/${wgrib2_ver}
 
-module list
 set -x
+module list
 
 #############################################################
 # WCOSS environment settings
